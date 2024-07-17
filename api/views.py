@@ -11,6 +11,7 @@ from django.shortcuts import render, redirect
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from api.models import User, ODT, Analisis, OT, Elementos, LecturasElementos
+from api.forms import FormODT
 from django.views.decorators.csrf import csrf_exempt
 from .decorators import is_administrador, is_supervisor, is_quimico, is_cliente
 from Setup.settings import DEBUG, CORS_ALLOWED_ORIGINS
@@ -51,4 +52,16 @@ def ODT_Module(request):
     }
 
     return render(request, 'ODT-Site.html', context)
+
+def AddODT(request):
+
+    form = FormODT()
+    if request.method == 'POST':
+        form = FormODT(request.POST)
+        if form.is_valid():
+            form = form.save()
+            return redirect("/api/ODT")
+    data = {'form':form}
+    return render(request, 'Form.html', data)
+
     
