@@ -1,8 +1,168 @@
-<html>
-<header>
-
-<header>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Display</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        .redirect-button {
+            display: inline-block;
+            margin: 20px 0;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
 <body>
-    <h1>hola mundo</h1>
+    <h1>ODT</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nro OT</th>
+                <th>Fec Recep</th>
+                <th>Cant Muestra</th>
+                <th>Cliente</th>
+                <th>Proyecto</th>
+                <th>Despacho</th>
+                <th>Envio</th>
+                <th>Muestra</th>
+                <th>Referencia</th>
+                <th>Comentarios</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for odt in odts %}
+                <tr>
+                    <td>{{ odt.id }}</td>
+                    <td>{{ odt.Nro_OT }}</td>
+                    <td>{{ odt.Fec_Recep }}</td>
+                    <td>{{ odt.Cant_Muestra }}</td>
+                    <td>{{ odt.Cliente }}</td>
+                    <td>{{ odt.Proyecto }}</td>
+                    <td>{{ odt.Despacho }}</td>
+                    <td>{{ odt.Envio }}</td>
+                    <td>{{ odt.Muestra }}</td>
+                    <td>{{ odt.Referencia }}</td>
+                    <td>{{ odt.Comentarios }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <br/>
+    <a href="/api/ODT/" class="redirect-button">ODT</a>
+    <br/>
+
+    <h1>Análisis</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Método de Análisis</th>
+                <th>Descripción</th>
+                <th>Fórmula</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for analisis in analisis_list %}
+                <tr>
+                    <td>{{ analisis.id }}</td>
+                    <td>{{ analisis.Analisis_metodo }}</td>
+                    <td>{{ analisis.descripcion }}</td>
+                    <td>{{ analisis.Formula }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h1>OT</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>ID Muestra</th>
+                <th>Peso Muestra</th>
+                <th>Volumen</th>
+                <th>Duración</th>
+                <th>ODT</th>
+                <th>Análisis</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ot in ots %}
+                <tr>
+                    <td>{{ ot.id }}</td>
+                    <td>{{ ot.id_muestra }}</td>
+                    <td>{{ ot.peso_muestra }}</td>
+                    <td>{{ ot.volumen }}</td>
+                    <td>{{ ot.dilucion }}</td>
+                    <td>{{ ot.odt.Nro_OT }}</td>
+                    <td>{{ ot.analisis.Analisis_metodo }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h1>Elementos</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Tipo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for elemento in elementos %}
+                <tr>
+                    <td>{{ elemento.id }}</td>
+                    <td>{{ elemento.nombre }}</td>
+                    <td>{{ elemento.descripcion }}</td>
+                    <td>{{ elemento.tipo }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h1>Lecturas de Elementos</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Lectura</th>
+                <th>Análisis</th>
+                <th>OT</th>
+                <th>Elemento</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lectura in lecturas_elementos %}
+                <tr>
+                    <td>{{ lectura.id }}</td>
+                    <td>{{ lectura.lectura }}</td>
+                    <td>{{ lectura.analisis.Analisis_metodo }}</td>
+                    <td>{{ lectura.ot.id_muestra }}</td>
+                    <td>{{ lectura.elementos.nombre }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </body>
 </html>

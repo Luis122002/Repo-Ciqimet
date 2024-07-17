@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Display</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        .redirect-button {
+            display: inline-block;
+            margin: 20px 0;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Registros de ordenes de trabajo (ODT)</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nro OT</th>
+                <th>Fec Recep</th>
+                <th>Cant Muestra</th>
+                <th>Cliente</th>
+                <th>Proyecto</th>
+                <th>Despacho</th>
+                <th>Envio</th>
+                <th>Muestra</th>
+                <th>Referencia</th>
+                <th>Comentarios</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for odt in odts %}
+                <tr>
+                    <td>{{ odt.id }}</td>
+                    <td>{{ odt.Nro_OT }}</td>
+                    <td>{{ odt.Fec_Recep }}</td>
+                    <td>{{ odt.Cant_Muestra }}</td>
+                    <td>{{ odt.Cliente }}</td>
+                    <td>{{ odt.Proyecto }}</td>
+                    <td>{{ odt.Despacho }}</td>
+                    <td>{{ odt.Envio }}</td>
+                    <td>{{ odt.Muestra }}</td>
+                    <td>{{ odt.Referencia }}</td>
+                    <td>{{ odt.Comentarios }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="/api/index/" class="redirect-button">Menú</a>
+</body>
+</html>

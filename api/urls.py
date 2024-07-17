@@ -4,5 +4,6 @@ from . import views
 
 urlpatterns = [
     path('register/', views.login),
-    path('index/',views.Main)
+    path('index/',views.Main),
+    path('ODT/',views.ODT_Module)
 ]
