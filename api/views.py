@@ -108,7 +108,7 @@ def ODT_Info(request):
             "ots":ots
         }
         # Puedes hacer más con el ID, como consultas a la base de datos
-        return render(request, 'ODT-info.html', context)
+        return render(request, 'ODT-Info.html', context)
     else:
         # Manejar otros métodos aquí si es necesario
         return HttpResponse(status=405)  # Método no permitido si no es POST
