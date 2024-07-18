@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+{% include 'header.html'%}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ODT Info</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Detalles de Orden de Trabajo (Nro OT: {{ odt.Nro_OT }})</h1>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Información de ODT</h5>
+                <p><strong>Fecha de Recepción:</strong> {{ odt.Fec_Recep }}</p>
+                <p><strong>Cantidad de Muestra:</strong> {{ odt.Cant_Muestra }}</p>
+                <p><strong>Cliente:</strong> {{ odt.Cliente }}</p>
+                <p><strong>Proyecto:</strong> {{ odt.Proyecto }}</p>
+                <p><strong>Despacho:</strong> {{ odt.Despacho }}</p>
+                <p><strong>Envío:</strong> {{ odt.Envio }}</p>
+                <p><strong>Muestra:</strong> {{ odt.Muestra }}</p>
+                <p><strong>Referencia:</strong> {{ odt.Referencia }}</p>
+                <p><strong>Comentarios:</strong> {{ odt.Comentarios }}</p>
+            </div>
+        </div>
+        <br/>
+        <h5 class="mb-3">Análisis Realizados</h5>
+        <br/>
+        {% for ot in ots %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Muestra: {% if ot.id_muestra %}{{ ot.id_muestra }}{% else %}Vacio{% endif %}</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <th scope="row">Peso Muestra:</th>
+                                <td>{{ ot.peso_muestra }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Volumen:</th>
+                                <td>{{ ot.volumen }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Dilución:</th>
+                                <td>{{ ot.dilucion }}</td>
+                            </tr>
+                            <!-- Agrega más detalles de OT según sea necesario -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <a href="/ODT/" class="btn btn-primary">Atras</a>
+        <a href="#" class="btn btn-success">Añadir muestra</a>
+    </div>
+</body>
+</html>

@@ -1,71 +1,97 @@
+{% load static %}
 <!DOCTYPE html>
+{% include 'header.html'%}
+{% csrf_token %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Display</title>
+    <title>ODT Display</title>
     <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        table, th, td {
-            border: 1px solid black;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-        }
         .redirect-button {
-            display: inline-block;
-            margin: 20px 0;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            text-align: center;
+            margin: 10px;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        @media (max-width: 768px) {
+            .redirect-button {
+                display: block;
+                width: 100%;
+                margin: 10px 0;
+            }
         }
     </style>
 </head>
 <body>
     <h1>Registros de ordenes de trabajo (ODT)</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nro OT</th>
-                <th>Fec Recep</th>
-                <th>Cant Muestra</th>
-                <th>Cliente</th>
-                <th>Proyecto</th>
-                <th>Despacho</th>
-                <th>Envio</th>
-                <th>Muestra</th>
-                <th>Referencia</th>
-                <th>Comentarios</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for odt in odts %}
-                <tr>
-                    <td>{{ odt.id }}</td>
-                    <td>{{ odt.Nro_OT }}</td>
-                    <td>{{ odt.Fec_Recep }}</td>
-                    <td>{{ odt.Cant_Muestra }}</td>
-                    <td>{{ odt.Cliente }}</td>
-                    <td>{{ odt.Proyecto }}</td>
-                    <td>{{ odt.Despacho }}</td>
-                    <td>{{ odt.Envio }}</td>
-                    <td>{{ odt.Muestra }}</td>
-                    <td>{{ odt.Referencia }}</td>
-                    <td>{{ odt.Comentarios }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <a href="/api/index/" class="redirect-button">Menú</a>
-    <a href="/api/AddODT/" class="redirect-button">Añadir</a>
+    <br/>
+    <div class="container my-5">
+        <div class="table-container">
+            <table class="table table-bordered table-hover table-responsive-md">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nro OT</th>
+                        <th>Fec Recep</th>
+                        <th>Cant Muestra</th>
+                        <th>Cliente</th>
+                        <th>Proyecto</th>
+                        <th>Despacho</th>
+                        <th>Envio</th>
+                        <th>Muestra</th>
+                        <th>Referencia</th>
+                        <th>Comentarios</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for odt in odts %}
+                    <tr data-odt-id="{{ odt.id }}">
+                        <td>{{ odt.id }}</td>
+                        <td>{{ odt.Nro_OT }}</td>
+                        <td>{{ odt.Fec_Recep }}</td>
+                        <td>{{ odt.Cant_Muestra }}</td>
+                        <td>{{ odt.Cliente }}</td>
+                        <td>{{ odt.Proyecto }}</td>
+                        <td>{{ odt.Despacho }}</td>
+                        <td>{{ odt.Envio }}</td>
+                        <td>{{ odt.Muestra }}</td>
+                        <td>{{ odt.Referencia }}</td>
+                        <td>{{ odt.Comentarios }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="d-flex justify-content-center">
+            <a href="/index/" class="btn btn-primary redirect-button">Menú</a>
+            <a href="/AddODT/" class="btn btn-success redirect-button">Añadir</a>
+        </div>
+    </div>
+    <script>
+        // Script para manejar clic en filas de la tabla
+
+        var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // Script para manejar clic en filas de la tabla
+        document.addEventListener('DOMContentLoaded', function () {
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                row.addEventListener('click', function () {
+                    const odtId = this.getAttribute('data-odt-id');
+                    if (odtId) {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '/ODT-info/';
+                        form.style.display = 'none'; // Para evitar que el formulario se vea
+                        form.innerHTML = `<input type="hidden" name="odt_id" value="${odtId}">
+                                            <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">`;
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

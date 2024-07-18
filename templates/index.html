@@ -1,168 +1,117 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+{% include 'header.html'%}
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Display</title>
     <style>
-        table {
+        .module-card {
+            border-radius: 15px;
+            overflow: hidden;
+            height: 100%;
+        }
+        
+        .module-card .card-img {
+            border-radius: 0 0 15px 15px; /* Rounded corners only at the bottom */
+            height: 500px;
+            object-fit: cover;
             width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
         }
-        table, th, td {
-            border: 1px solid black;
+        
+        .module-card .card-img-overlay {
+            padding: 0;
+            display: flex;
+            align-items: flex-end;
         }
-        th, td {
-            padding: 8px;
-            text-align: left;
-        }
-        .redirect-button {
-            display: inline-block;
-            margin: 20px 0;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
+        
+        .module-link {
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #000;
+            font-weight: bold;
             text-align: center;
+            width: 100%;
+            padding: 10px;
+            border-radius: 0 0 15px 15px;
+        }
+        
+        .module-title {
+            font-size: 1.5em;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            font-family: 'Courier New', Courier, monospace; /* Scientific-style font */
+        }
+        
+        .module-link:hover {
+            background-color: rgba(255, 255, 255, 1);
+            text-decoration: none;
+            color: #000;
+        }
+        
+        .card-header {
+            font-family: 'Courier New', Courier, monospace; /* Scientific-style font */
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 15px 15px 0 0;
+            min-height: 90px;
+        }
+        
+        .bg-secondary.rounded.p-3 {
+            border: 3px solid #17a2b8; /* Celeste border */
+            border-radius: 15px;
+        }
+        
+        .shadow-sm {
+            box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075)!important;
         }
     </style>
 </head>
-<body>
-    <h1>ODT</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nro OT</th>
-                <th>Fec Recep</th>
-                <th>Cant Muestra</th>
-                <th>Cliente</th>
-                <th>Proyecto</th>
-                <th>Despacho</th>
-                <th>Envio</th>
-                <th>Muestra</th>
-                <th>Referencia</th>
-                <th>Comentarios</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for odt in odts %}
-                <tr>
-                    <td>{{ odt.id }}</td>
-                    <td>{{ odt.Nro_OT }}</td>
-                    <td>{{ odt.Fec_Recep }}</td>
-                    <td>{{ odt.Cant_Muestra }}</td>
-                    <td>{{ odt.Cliente }}</td>
-                    <td>{{ odt.Proyecto }}</td>
-                    <td>{{ odt.Despacho }}</td>
-                    <td>{{ odt.Envio }}</td>
-                    <td>{{ odt.Muestra }}</td>
-                    <td>{{ odt.Referencia }}</td>
-                    <td>{{ odt.Comentarios }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<body>    
+    <div class="container-fluid my-5">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card module-card bg-info text-white rounded shadow-sm container-fluid">
+                    <div class="card-header bg-light text-dark text-center rounded-top">
+                        <span class="module-title">Orden de Trabajo</span>
+                    </div>
+                    <img src="{% static 'rest_framework/img/ODT_module.png' %}" class="card-img">
+                    <br/><br/>
+                    <div class="card-img-overlay d-flex flex-column justify-content-end">
+                        <a href="/ODT" class="btn module-link text-black">Ingresar</a>
+                    </div>
+                    <br/>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card module-card bg-success text-white rounded shadow-sm container-fluid">
+                    <div class="card-header bg-light text-dark text-center rounded-top">
+                        <span class="module-title">Puesto de Trabajo Normal</span>
+                    </div>
+                    <img src="{% static 'rest_framework/img/Puesto_trabajo.png' %}" class="card-img">
+                    <br/><br/>
+                    <div class="card-img-overlay d-flex flex-column justify-content-end">
+                        <a href="/puesto-de-trabajo-normal" class="btn module-link text-black">Ingresar</a>
+                    </div>
+                    <br/>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card module-card bg-danger text-white rounded shadow-sm container-fluid">
+                    <div class="card-header bg-light text-dark text-center rounded-top">
+                        <span class="module-title">Puesto de Trabajo Instrumental</span>
+                    </div>
+                    <img src="{% static 'rest_framework/img/Puesto_instrumental.png' %}" class="card-img">
+                    <br/><br/>
+                    <div class="card-img-overlay d-flex flex-column justify-content-end">
+                        <a href="/puesto-de-trabajo-instrumental" class="btn module-link text-black">Ingresar</a>
+                    </div>
+                    <br/>
+                </div>
+            </div>
+        </div>
+    </div>
     <br/>
-    <a href="/api/ODT/" class="redirect-button">ODT</a>
-    <br/>
-
-    <h1>Análisis</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Método de Análisis</th>
-                <th>Descripción</th>
-                <th>Fórmula</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for analisis in analisis_list %}
-                <tr>
-                    <td>{{ analisis.id }}</td>
-                    <td>{{ analisis.Analisis_metodo }}</td>
-                    <td>{{ analisis.descripcion }}</td>
-                    <td>{{ analisis.Formula }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <h1>OT</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>ID Muestra</th>
-                <th>Peso Muestra</th>
-                <th>Volumen</th>
-                <th>Duración</th>
-                <th>ODT</th>
-                <th>Análisis</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for ot in ots %}
-                <tr>
-                    <td>{{ ot.id }}</td>
-                    <td>{{ ot.id_muestra }}</td>
-                    <td>{{ ot.peso_muestra }}</td>
-                    <td>{{ ot.volumen }}</td>
-                    <td>{{ ot.dilucion }}</td>
-                    <td>{{ ot.odt.Nro_OT }}</td>
-                    <td>{{ ot.analisis.Analisis_metodo }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <h1>Elementos</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Descripción</th>
-                <th>Tipo</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for elemento in elementos %}
-                <tr>
-                    <td>{{ elemento.id }}</td>
-                    <td>{{ elemento.nombre }}</td>
-                    <td>{{ elemento.descripcion }}</td>
-                    <td>{{ elemento.tipo }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <h1>Lecturas de Elementos</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Lectura</th>
-                <th>Análisis</th>
-                <th>OT</th>
-                <th>Elemento</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for lectura in lecturas_elementos %}
-                <tr>
-                    <td>{{ lectura.id }}</td>
-                    <td>{{ lectura.lectura }}</td>
-                    <td>{{ lectura.analisis.Analisis_metodo }}</td>
-                    <td>{{ lectura.ot.id_muestra }}</td>
-                    <td>{{ lectura.elementos.nombre }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 </body>
 </html>

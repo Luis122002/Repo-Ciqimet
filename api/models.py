@@ -48,7 +48,7 @@ class OT(models.Model):
     volumen = models.FloatField(_("Volumen"))
     dilucion = models.FloatField(_("Dilución"))
     odt = models.ForeignKey(ODT, on_delete=models.CASCADE, related_name="ots")
-    analisis = models.ForeignKey(Analisis, on_delete=models.CASCADE, related_name="ots")
+    analisis = models.ForeignKey(Analisis, on_delete=models.CASCADE, related_name="ots",null=True)
 
     def __str__(self):
         return self.id_muestra

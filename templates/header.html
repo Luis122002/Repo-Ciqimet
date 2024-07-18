@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{% static 'rest_framework/css/bootstrap.min.css' %}">
+</head>
+<body>
+    <div class="container-fluid">
+        <h1>Ciquimet</h1>
+        <br/>
+    </div>
+    <!-- Uso de codigos JS de estilos de pagina web, peticiones y mensajes"-->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="{% static 'rest_framework/js/bootstrap.min.js' %}"></script>
+
+    {% if messages %}
+    <!-- Constructor de mensajes de plataforma ante acciones de usuarios"-->
+        <ul class="messages">
+            {% for m in messages %}
+                    {% if m.tags == 'warning' %}
+                        <script>
+                            Swal.fire({
+                                "title":"¡Nuevo mensaje de la aplicación!",
+                                "text":"{{m}}",
+                                "icon":"{{m.tags}}",
+                                "showCancelButton":true,
+                                "cancelButtonText":"No, Cancelar",
+                                "confirmButtonText":"Si, Eliminar",
+                                "reverseButtons":true,
+                                "confirmButtonColor":"#dc3545"
+                            })
+                        </script>
+                    {% else %}
+                        <script>
+                            Swal.fire({
+                                "title":"¡Nuevo mensaje de la aplicación! ",
+                                "text":"{{m}}",
+                                "icon":"{{m.tags}}"
+                            })
+
+
+                        </script>
+                    {% endif %}
+
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+    {% block content %}
+    {% endblock %}
+    </body>
+</html>
