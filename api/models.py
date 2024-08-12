@@ -59,10 +59,13 @@ class Elementos(models.Model):
     nombre = models.CharField(_("Nombre"), max_length=200)
     descripcion = models.CharField(max_length=255, blank=True)
     tipo = models.CharField(max_length=200)
-
+    enabled = models.BooleanField(_("Activo"),default=True)
+    simbolo = models.CharField(max_length=5, blank=True, null=True)
+    numero_atomico = models.IntegerField(blank=True, null=True) 
+    masa_atomica = models.FloatField(blank=True, null=True)
+ 
     def __str__(self):
         return self.nombre
-
 
 class LecturasElementos(models.Model):
     id = models.AutoField(primary_key=True)

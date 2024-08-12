@@ -1,0 +1,203 @@
+{% load static %}
+<!DOCTYPE html>
+{% include 'header.html' %}
+{% csrf_token %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabla Periódica</title>
+    <style>
+        .inactive {
+            background-color: #e2e3e5; /* Fondo gris claro para elementos inactivos */
+            color: #6c757d; /* Texto gris oscuro para elementos inactivos */
+        }
+        .active {
+            background-color: #a1e3a1; /* Verde intenso para elementos activos */
+            color: #155724; /* Texto verde oscuro para elementos activos */
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <!-- Filtros -->
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label for="search-box">Buscar:</label>
+                <input id="search-box" type="text" class="form-control" placeholder="Buscar elementos...">
+            </div>
+            <div class="col-md-4">
+                <label for="filter-type">Tipos de elementos:</label>
+                <select id="filter-type" class="form-control">
+                    <option value="">Todos los tipos</option>
+                    {% for tipo in tipos_unicos %}
+                        <option value="{{ tipo }}" {% if request.GET.tipo == tipo %}selected{% endif %}>{{ tipo }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="filter-enabled">Estado:</label>
+                <select id="filter-enabled" class="form-control">
+                    <option value="">Todos los estados</option>
+                    <option value="true" {% if request.GET.enabled == 'true' %}selected{% endif %}>Activos</option>
+                    <option value="false" {% if request.GET.enabled == 'false' %}selected{% endif %}>Inactivos</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Verificar si hay elementos -->
+        {% if elementos %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Simbolo</th>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Descripción</th>
+                        <th scope="col">Tipo</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="element-table-body">
+                    {% for item in elementos %}
+                        <tr class="{{ item.enabled|yesno:"active,inactive" }}">
+                            <td>{{ item.simbolo }}</td>
+                            <td>{{ item.nombre }}</td>
+                            <td>{{ item.descripcion }}</td>
+                            <td>{{ item.tipo }}</td>
+                            <td>{{ item.enabled|yesno:"Activo,Inactivo" }}</td>
+                            <td>
+                                <button class="btn btn-primary action-btn" data-id="{{ item.id }}">Acción</button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="alert alert-warning" role="alert">
+                Sin elementos asignados al sistema.
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        $(document).ready(function() {
+            $('#filter-type').on('change', function() {
+                filterElements();
+            });
+        
+            $('#filter-enabled').on('change', function() {
+                filterElements();
+            });
+        
+            $('#search-box').on('input', function() {
+                searchElements();
+            });
+        
+            $('.action-btn').on('click', function() {
+                const elementIdTARGET = $(this).data('id');
+                Swal.fire({
+                    title: '¿Qué acción quieres aplicar?',
+                    text: 'Elige una acción para el elemento seleccionado. Puedes cerrar este mensaje haciendo clic fuera de él o presionando el botón de cancelar.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Activar',
+                    cancelButtonText: 'Desactivar',
+                    footer: `
+                        <button id="modify-btn" class="btn btn-secondary">Modificar</button>
+                    `,
+                    customClass: {
+                        confirmButton: 'btn-success',
+                        cancelButton: 'btn-danger'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        performAction(elementIdTARGET, 'Activar');
+                    } else if (result.dismiss === Swal.DismissReason.cancel) {
+                        performAction(elementIdTARGET, 'Desactivar');
+                    }
+                });
+        
+                $(document).off('click', '#modify-btn').on('click', '#modify-btn', function() {
+                    const elementId = elementIdTARGET;
+                    const urlDat = '/MasterData/';
+                    const Token = csrfToken;
+                    const context = 'element'; 
+                    const action = 'mod'; 
+                    const stade = "acces"; 
+                    $.ajax({
+                        url: urlDat,
+                        type: 'POST',
+                        headers: {
+                            'X-CSRFToken': Token
+                        },
+                        data: {
+                            'id': elementId,
+                            'context': context,
+                            'action': action,
+                            'stade': stade
+                        },
+                        success: function(response) {
+                            if (response.redirect_url) {
+                                window.location.href = response.redirect_url; 
+                            } else {
+                                console.log(response.message);
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error('Error al enviar datos:', xhr.responseText);
+                        }
+                    });
+                
+
+
+                });
+            });
+        });
+
+        function filterElements() {
+            const typeFilter = $('#filter-type').val();
+            const enabledFilter = $('#filter-enabled').val();
+
+            const url = new URL(window.location.href);
+            url.searchParams.set('tipo', typeFilter);
+            url.searchParams.set('enabled', enabledFilter);
+            window.location.href = url.toString();
+        }
+
+        function searchElements() {
+            const searchTerm = $('#search-box').val().toLowerCase();
+            $('#element-table-body tr').each(function() {
+                const cells = $(this).find('td');
+                const matches = cells.toArray().some(cell => $(cell).text().toLowerCase().includes(searchTerm));
+                $(this).toggle(matches);
+            });
+        }
+
+        function performAction(elementId, action) {
+            $.ajax({
+                url: '/Elements-Manager/',
+                type: 'POST',
+                data: {
+                    id: elementId,
+                    action: action,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire('Éxito', 'Acción realizada correctamente.', 'success').then(() => {
+                            window.location.reload(); 
+                        });
+                    } else {
+                        Swal.fire('Error', 'No se pudo aplicar la acción.', 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error', 'Error en la solicitud.', 'error');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
