@@ -19,7 +19,7 @@ from .decorators import is_administrador, is_supervisor, is_quimico, is_cliente
 from Setup.settings import DEBUG, CORS_ALLOWED_ORIGINS
 
 
-def requestAcces():
+def requestAcces(request):
     
     return redirect("/index")
 
@@ -190,10 +190,8 @@ def general_form(request, token):
             return HttpResponseForbidden("Contexto no válido.")
         if action not in ['add', 'mod', 'del']:
             return HttpResponseForbidden("Acción no válida.")
-        print("Acess")
         # Procesar según el contexto y la acción
         if context == 'element':
-            print("------")
             print(action)
             # Procesar operaciones para 'element'
             if action == 'add':

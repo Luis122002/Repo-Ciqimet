@@ -3,6 +3,7 @@ from . import views
 
 
 urlpatterns = [
+    path('', views.requestAcces, name="Acces"),
     path('register/', views.login),
     path('index/', views.Main, name='index'),  # Asegúrate de definir 'index'
     path('AddODT/', views.AddODT),
