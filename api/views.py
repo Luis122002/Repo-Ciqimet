@@ -189,21 +189,20 @@ def general_form(request, token):
         # Procesar según el contexto y la acción
         if context == 'element':
             
-            model = models.Elementos.objects.get(id=target_ID)
-            form = forms.FormElements(instance = model)
-            if request.method == 'POST':
-                form = forms.FormElements(request.POST, instance=model)
-                if form.is_valid():
-                    form = form.save()
-                    return redirect("../Elements-Manager")
-
             # Procesar operaciones para 'element'
             if action == 'add':
                 # Lógica para agregar un elemento
                 result_message = f'Elemento {target_ID} agregado con éxito.'
             elif action == 'mod':
                 # Lógica para modificar un elemento
-                result_message = f'Elemento {target_ID} modificado con éxito.'
+                model = models.Elementos.objects.get(id=target_ID)
+                form = forms.FormElements(instance = model)
+                if request.method == 'POST':
+                    form = forms.FormElements(request.POST, instance=model)
+                    if form.is_valid():
+                        form = form.save()
+                        return redirect("../Elements-Manager")
+                        
             elif action == 'del':
                 # Lógica para eliminar un elemento
                 result_message = f'Elemento {target_ID} eliminado con éxito.'

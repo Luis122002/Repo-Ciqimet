@@ -63,5 +63,74 @@
             </div>
         {% endif %}
     </div>
+    <button id="open-alert">Crear Fórmula Química</button>
 </body>
+<script>
+    document.getElementById('open-alert')?.addEventListener('click', function() {
+        Swal.fire({
+            title: 'Añadir Símbolo',
+            html: `
+                <div class="formula-editor">
+                    <div class="editor-buttons">
+                        <button onclick="addToFormula('¹')">¹</button>
+                        <button onclick="addToFormula('²')">²</button>
+                        <button onclick="addToFormula('³')">³</button>
+                        <button onclick="addToFormula('⁴')">⁴</button>
+                        <button onclick="addToFormula('⁵')">⁵</button>
+                        <button onclick="addToFormula('⁶')">⁶</button>
+                        <button onclick="addToFormula('⁷')">⁷</button>
+                        <button onclick="addToFormula('⁸')">⁸</button>
+                        <button onclick="addToFormula('⁹')">⁹</button>
+                        <br/>
+                        <button onclick="addToFormula('₁')">₁</button>
+                        <button onclick="addToFormula('₂')">₂</button>
+                        <button onclick="addToFormula('₃')">₃</button>
+                        <button onclick="addToFormula('₄')">₄</button>
+                        <button onclick="addToFormula('₅')">₅</button>
+                        <button onclick="addToFormula('₆')">₆</button>
+                        <button onclick="addToFormula('₇')">₇</button>
+                        <button onclick="addToFormula('₈')">₈</button>
+                        <button onclick="addToFormula('₉')">₉</button>
+                    </div>
+                    <div class="textarea-wrapper">
+                        <textarea id="formula" class="swal2-textarea" placeholder="Ej. CO₂, H₂SO₄" rows="4"></textarea>
+                    </div>
+                </div>
+            `,
+            focusConfirm: false,
+            preConfirm: () => {
+                const formula = Swal.getPopup().querySelector('#formula').value;
+                
+                if (!formula) {
+                    Swal.showValidationMessage('Por favor ingrese la fórmula');
+                    return false;
+                }
+                
+                return {
+                    formula: formula
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const { formula } = result.value;
+                const numeroElementoField = document.querySelector('input[name="numero_elemento"]');
+                if (numeroElementoField) {
+                    numeroElementoField.value = formula;
+                }
+                Swal.fire(`Fórmula química creada: ${formula}`);
+            }
+        });
+    });
+
+    function addToFormula(char) {
+        const textarea = document.getElementById('formula');
+        const cursorPos = textarea.selectionStart;
+        const textBefore = textarea.value.substring(0, cursorPos);
+        const textAfter = textarea.value.substring(cursorPos, textarea.value.length);
+        
+        textarea.value = textBefore + char + textAfter;
+        textarea.focus();  // Opcional: enfoca el área de texto
+        textarea.setSelectionRange(cursorPos + char.length, cursorPos + char.length); // Mueve el cursor
+    }
+</script>
 </html>

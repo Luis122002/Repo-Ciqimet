@@ -57,7 +57,7 @@ class OT(models.Model):
 class Elementos(models.Model):
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(_("Nombre"), max_length=200)
-    descripcion = models.CharField(max_length=255, blank=True)
+    descripcion = models.TextField(max_length=255, blank=True)
     tipo = models.CharField(max_length=200)
     enabled = models.BooleanField(_("Activo"),default=True)
     simbolo = models.CharField(max_length=5, blank=True, null=True)

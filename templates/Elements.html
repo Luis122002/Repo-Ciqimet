@@ -198,6 +198,41 @@
                 }
             });
         }
+
+
+        function addElement()
+        {
+            const elementId = -1;
+            const urlDat = '/MasterData/';
+            const Token = csrfToken;
+            const context = 'element'; 
+            const action = 'mod'; 
+            const stade = "acces"; 
+            $.ajax({
+                url: urlDat,
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': Token
+                },
+                data: {
+                    'id': elementId,
+                    'context': context,
+                    'action': action,
+                    'stade': stade
+                },
+                success: function(response) {
+                    if (response.redirect_url) {
+                        window.location.href = response.redirect_url; 
+                    } else {
+                        console.log(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Error al enviar datos:', xhr.responseText);
+                }
+            });
+        }
+
     </script>
 </body>
 </html>
