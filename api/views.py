@@ -18,6 +18,11 @@ from django.views.decorators.csrf import csrf_exempt
 from .decorators import is_administrador, is_supervisor, is_quimico, is_cliente
 from Setup.settings import DEBUG, CORS_ALLOWED_ORIGINS
 
+
+def requestAcces():
+    
+    return redirect("/index")
+
 def login(request):
 
     if DEBUG == True:
@@ -185,14 +190,20 @@ def general_form(request, token):
             return HttpResponseForbidden("Contexto no válido.")
         if action not in ['add', 'mod', 'del']:
             return HttpResponseForbidden("Acción no válida.")
-
+        print("Acess")
         # Procesar según el contexto y la acción
         if context == 'element':
-            
+            print("------")
+            print(action)
             # Procesar operaciones para 'element'
             if action == 'add':
-                # Lógica para agregar un elemento
-                result_message = f'Elemento {target_ID} agregado con éxito.'
+                print(",,,,,,,,,,,,,")
+                form = forms.FormElements()
+                if request.method == 'POST':
+                    form = forms.FormElements(request.POST)
+                    if form.is_valid():
+                        form = form.save()
+                        return redirect("../Elements-Manager")
             elif action == 'mod':
                 # Lógica para modificar un elemento
                 model = models.Elementos.objects.get(id=target_ID)

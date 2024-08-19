@@ -42,6 +42,10 @@
                     <option value="true" {% if request.GET.enabled == 'true' %}selected{% endif %}>Activos</option>
                     <option value="false" {% if request.GET.enabled == 'false' %}selected{% endif %}>Inactivos</option>
                 </select>
+                <button class="btn btn-success" onclick="addElement()">
+                    Añadir elementos
+                </button>
+                <br/>
             </div>
         </div>
 
@@ -206,7 +210,7 @@
             const urlDat = '/MasterData/';
             const Token = csrfToken;
             const context = 'element'; 
-            const action = 'mod'; 
+            const action = 'add'; 
             const stade = "acces"; 
             $.ajax({
                 url: urlDat,
