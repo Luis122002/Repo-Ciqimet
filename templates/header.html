@@ -3,47 +3,53 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <link rel="icon" href="{% static 'rest_framework/img/favicon.ico' %}" type="image/x-icon">
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="icon" href="{% static 'rest_framework/img/favicon.ico' %}" type="image/x-icon">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{% static 'rest_framework/css/bootstrap.min.css' %}">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;800&display=swap');
+        /* Estilos generales del header */
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Nunito', sans-serif;
-            font-size: 20px;
-        }
+        @media (min-width: 998px) {
+            .header .menu-toggle {
+                display: none;
 
-        body {
-            background-color: #c7c7c7;
+            }
         }
+        @media (min-width: 998px) {
+            .extra-card {
+                display: none !important;
+            }
+        }
+        
 
         .header {
             background-color: #4b4441;
+            padding: 5px 10%;
+            position: relative;
+        }
+
+        .header .container {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 85px;
-            padding: 5px 10%;
-        }
-
-        .header .logo {
-            cursor: pointer;
+            flex-wrap: wrap;
         }
 
         .header .logo img {
             height: 80px;
-            width: auto;
             transition: all 0.3s;
         }
 
         .header .logo img:hover {
-            transform: scale(1.2);
+            transform: scale(1.1);
+        }
+
+        /* Menú de navegación */
+        .header .nav {
+            display: flex;
+            align-items: center;
         }
 
         .header .nav-links {
@@ -57,11 +63,9 @@
         }
 
         .header .nav-links .dropdown-toggle {
-            font-weight: 500;
             color: #eceff1;
             text-decoration: none;
-            transition: color 0.3s;
-            padding: 20px;
+            padding: 15px;
         }
 
         .header .nav-links .dropdown-toggle:hover {
@@ -84,21 +88,16 @@
 
         .header .nav-links .dropdown-menu.show {
             display: block;
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
         }
 
         .header .nav-links .dropdown-menu li {
             padding: 10px;
-            border-bottom: 1px solid #adadad;
         }
 
         .header .nav-links .dropdown-menu a {
             color: #eceff1;
             text-decoration: none;
             display: block;
-            font-size: 16px; /* Ajusta el tamaño del texto */
             transition: color 0.3s, background-color 0.3s;
         }
 
@@ -107,10 +106,7 @@
             background-color: #4b4441;
         }
 
-        .header .nav-links .dropdown:hover .dropdown-menu {
-            display: block;
-        }
-
+        /* Botón de contacto */
         .header .btn button {
             font-weight: 700;
             color: #1b3039;
@@ -119,7 +115,7 @@
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            transition: all 0.3s ease 0s;
+            transition: all 0.3s;
         }
 
         .header .btn button:hover {
@@ -127,102 +123,393 @@
             color: #ffffff;
             transform: scale(1.1);
         }
+
+        /* Estilos para el modo responsive */
+        @media (max-width: 990px) {
+            .header .menu-toggle {
+                display: block; /* Mostrar en pantallas pequeñas */
+                background: none;
+                border: none;
+                cursor: pointer;
+                z-index: 2;
+                position: absolute; /* Posicionar correctamente en móviles */
+                top: 25px; /* Ajusta la posición según tus necesidades */
+                right: 15px; /* Ajusta la posición según tus necesidades */
+            }
+
+            .header .menu-icon {
+                width: 30px;
+                height: 3px;
+                background-color: #eceff1;
+                display: block;
+                position: relative;
+                margin: 6px 0;
+            }
+
+            .header .menu-icon::before,
+            .header .menu-icon::after {
+                content: '';
+                width: 30px;
+                height: 3px;
+                background-color: #eceff1;
+                display: block;
+                position: absolute;
+                left: 0;
+            }
+
+            .header .menu-icon::before {
+                top: -8px;
+            }
+
+            .header .menu-icon::after {
+                top: 8px;
+            }
+
+            .header .logo img {
+                height: 60px;
+                transition: none;
+            }
+
+            .header .nav {
+                display: none; /* Ocultar el menú por defecto en móviles */
+                flex-direction: column;
+                background-color: #4b4441;
+                padding: 0;
+                position: absolute; /* Posicionar el menú desplegable */
+                top: 60px; /* Ajusta según la altura del logo y botón */
+                left: 0;
+                width: 100%;
+                z-index: 1;
+            }
+
+            .header .nav.show {
+                display: flex; /* Mostrar el menú cuando se haga clic en el botón */
+            }
+
+            .header .nav-links .dropdown-menu {
+                position: static;
+                box-shadow: none;
+                border-radius: 0;
+            }
+        }
+
+        .StyleCard-style {
+            background-color: #f5f5f5;
+            color: #333;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Arial', sans-serif;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            flex: 1; /* Para permitir que el contenido ocupe el espacio disponible */
+        }
+
+        .StyleCard-style h3 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .StyleCard-style p {
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .sticky-btn {
+            position: absolute; /* Posiciona el botón de manera absoluta */
+            bottom: 0; /* Alinea el botón en la parte inferior del contenedor */
+            left: 50%; /* Opcional: Centra el botón horizontalmente en el contenedor */
+            transform: translateX(-50%); /* Ajusta el botón horizontalmente para centrarlo */
+            padding: 15px; /* Espaciado interno, opcional */
+            cursor: pointer;
+        }
+        
+        
+        /* Estilos generales para el extra-card */
+        .extra-card {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1050;
+            background-color: #4b4441;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            overflow-y: auto;
+            display: none; /* Ocultar por defecto */
+        }
+        
+        /* Mostrar el extra-card cuando se activa */
+        .extra-card.show {
+            display: flex;
+        }
+        
+        .extra-card .nav-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .extra-card .nav-links .dropdown-menu {
+            position: static;
+            box-shadow: none;
+            border-radius: 0;
+            width: 100%; /* Asegura que el dropdown ocupe todo el ancho */
+        }
+        
+        .extra-card .nav-links .dropdown-toggle {
+            color: #eceff1;
+            text-decoration: none;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .extra-card .nav-links .dropdown-toggle:hover {
+            color: #faa550;
+        }
+        
+        .extra-card .nav-links .dropdown-menu {
+            display: none;
+            background-color: #4b4441;
+            padding: 0; /* Ajusta el padding si es necesario */
+            margin: 0;
+            border-radius: 5px;
+        }
+        
+        .extra-card .nav-links .dropdown-menu.show {
+            display: block;
+        }
+        
+        .extra-card .nav-links .dropdown-menu a {
+            color: #eceff1;
+            text-decoration: none;
+            display: block;
+            width: 100%; /* Asegura que cada ítem ocupe todo el ancho del dropdown */
+            padding: 10px;
+            transition: color 0.3s, background-color 0.3s;
+        }
+        
+        .extra-card .nav-links .dropdown-menu a:hover {
+            color: #faa550;
+            background-color: #4b4441;
+        }
+        
+        .extra-card .dropdown-arrow {
+            display: inline-block;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 10px solid #eceff1;
+            margin-left: 5px;
+            transition: transform 0.3s ease;
+        }
+        
+        /* Flecha rotada de forma independiente para cuando se agrega la clase rotate */
+        .extra-card .dropdown-arrow.rotate {
+            transform: rotate(180deg);
+        }
+        @media (min-width: 768px) {
+            .extra-card {
+                width: 45%; /* 1/6 del ancho */
+            }
+        }
+
+        .header .dropdown-arrow {
+            display: inline-block;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 10px solid #eceff1;
+            margin-left: 5px;
+            transition: transform 0.3s ease;
+        }
+        
+        /* Aplicar rotación a la flecha cuando el dropdown está abierto */
+        .header .dropdown-menu.show + .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+        
+        /* Flecha rotada de forma independiente para cuando se agrega la clase rotate */
+        .header .dropdown-arrow.rotate {
+            transform: rotate(180deg);
+        }
+        
+
     </style>
 </head>
 <body>
     <header class="header">
-        <div class="logo">
-            <img src="{% static 'rest_framework/img/Logocapture-removebg-preview.png' %}" alt="Logo de la marca">
+        <div class="container">
+            <button class="menu-toggle" aria-label="Toggle navigation"  onclick="EnabledInfo()">
+                <span class="menu-icon"></span>
+            </button>
+            <div class="logo">
+                <img src="{% static 'rest_framework/img/Logocapture-removebg-preview.png' %}" alt="Logo de la marca">
+            </div>
+            <nav class="nav">
+                <ul class="nav-links">
+                    <!-- Menú desplegable Órdenes de Trabajo -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="ordersDropdown" role="button" aria-expanded="false">
+                            Órdenes de Trabajo
+                            <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="ordersDropdown">
+                            <li><a class="dropdown-item" href="#">Crear Orden de Trabajo</a></li>
+                            <li><a class="dropdown-item" href="#">Búsqueda y Filtro</a></li>
+                            <li><a class="dropdown-item" href="#">Exportación y Visualización de ODT</a></li>
+                            <li><a class="dropdown-item" href="#">Modificar Orden de Trabajo</a></li>
+                            <li><a class="dropdown-item" href="#">Asignación Órdenes de Trabajo</a></li>
+                        </ul>
+                    </li>
+                    <!-- Menú desplegable Puesto de Trabajo Instrumental -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="instrumentalDropdown" role="button" aria-expanded="false">
+                            Puesto de Trabajo Instrumental
+                            <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="instrumentalDropdown">
+                            <li><a class="dropdown-item" href="#">Cálculo de Operaciones</a></li>
+                            <li><a class="dropdown-item" href="#">Búsqueda de ODT</a></li>
+                            <li><a class="dropdown-item" href="#">Exportación de Resultados</a></li>
+                            <li><a class="dropdown-item" href="#">Asignación de Fechas de Registros</a></li>
+                            <li><a class="dropdown-item" href="#">Importar Procedimientos de Análisis de Balanza</a></li>
+                            <li><a class="dropdown-item" href="#">Asignación de Valores de Balanzas</a></li>
+                        </ul>
+                    </li>
+                    <!-- Menú desplegable Puesto de Trabajo (Balanza de Muestras) -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="balanzaDropdown" role="button" aria-expanded="false">
+                            Puesto de Trabajo (Balanza de Muestras)
+                            <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="balanzaDropdown">
+                            <li><a class="dropdown-item" href="#">Búsqueda de ODT Asignada</a></li>
+                            <li><a class="dropdown-item" href="#">Asignar Código de Despacho</a></li>
+                            <li><a class="dropdown-item" href="#">Creación de Actualización de Fechas de Registros</a></li>
+                            <li><a class="dropdown-item" href="#">Asignación de Valores de Balanza</a></li>
+                            <li><a class="dropdown-item" href="#">Actualización de Registros</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
         </div>
-        <nav>
-            <ul class="nav-links">
-                <!-- Menú desplegable Órdenes de Trabajo -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="ordersDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Órdenes de Trabajo
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="ordersDropdown">
-                        <li><a class="dropdown-item" href="#">Crear Orden de Trabajo</a></li>
-                        <li><a class="dropdown-item" href="#">Búsqueda y Filtro</a></li>
-                        <li><a class="dropdown-item" href="#">Exportación y Visualización de ODT</a></li>
-                        <li><a class="dropdown-item" href="#">Modificar Orden de Trabajo</a></li>
-                        <li><a class="dropdown-item" href="#">Asignación Órdenes de Trabajo</a></li>
-                    </ul>
-                </li>
-                <!-- Menú desplegable Puesto de Trabajo Instrumental -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="instrumentalDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Puesto de Trabajo Instrumental
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="instrumentalDropdown">
-                        <li><a class="dropdown-item" href="#">Cálculo de Operaciones</a></li>
-                        <li><a class="dropdown-item" href="#">Búsqueda de ODT</a></li>
-                        <li><a class="dropdown-item" href="#">Exportación de Resultados</a></li>
-                        <li><a class="dropdown-item" href="#">Asignación de Fechas de Registros</a></li>
-                        <li><a class="dropdown-item" href="#">Importar Procedimientos de Análisis de Balanza</a></li>
-                        <li><a class="dropdown-item" href="#">Asignación de Valores de Balanzas</a></li>
-                    </ul>
-                </li>
-                <!-- Menú desplegable Puesto de Trabajo (Balanza de Muestras) -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="balanzaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Puesto de Trabajo (Balanza de Muestras)
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="balanzaDropdown">
-                        <li><a class="dropdown-item" href="#">Búsqueda de ODT Asignada</a></li>
-                        <li><a class="dropdown-item" href="#">Asignar Código de Despacho</a></li>
-                        <li><a class="dropdown-item" href="#">Creación de Actualización de Fechas de Registros</a></li>
-                        <li><a class="dropdown-item" href="#">Asignación de Valores de Balanza</a></li>
-                        <li><a class="dropdown-item" href="#">Actualización de Registros</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
-        <a class="btn" href="#"><button>Contact</button></a>
     </header>
+    <body>
+
+        <!-- Tarjeta adicional oculta -->
+        <div id="extra-card" class="col-md-2 extra-card StyleCard-style">
+            <div>
+            <nav class="nav">
+                <ul class="nav-links">
+                    <!-- Menú desplegable Órdenes de Trabajo -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="ordersDropdownMobile" role="button" aria-expanded="false">
+                            Órdenes de Trabajo
+                            <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="ordersDropdownMobile">
+                            <li><a class="dropdown-item" href="#">Crear Orden de Trabajo</a></li>
+                            <li><a class="dropdown-item" href="#">Búsqueda y Filtro</a></li>
+                            <li><a class="dropdown-item" href="#">Exportación y Visualización de ODT</a></li>
+                            <li><a class="dropdown-item" href="#">Modificar Orden de Trabajo</a></li>
+                            <li><a class="dropdown-item" href="#">Asignación Órdenes de Trabajo</a></li>
+                        </ul>
+                    </li>
+                    <br/><br/>
+                    <!-- Menú desplegable Puesto de Trabajo Instrumental -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="instrumentalDropdownMobile" role="button" aria-expanded="false">
+                            Puesto de Trabajo Instrumental
+                            <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="instrumentalDropdownMobile">
+                            <li><a class="dropdown-item" href="#">Cálculo de Operaciones</a></li>
+                            <li><a class="dropdown-item" href="#">Búsqueda de ODT</a></li>
+                            <li><a class="dropdown-item" href="#">Exportación de Resultados</a></li>
+                            <li><a class="dropdown-item" href="#">Asignación de Fechas de Registros</a></li>
+                            <li><a class="dropdown-item" href="#">Importar Procedimientos de Análisis de Balanza</a></li>
+                            <li><a class="dropdown-item" href="#">Asignación de Valores de Balanzas</a></li>
+                        </ul>
+                    </li>
+                    <br/><br/>
+                    <!-- Menú desplegable Puesto de Trabajo (Balanza de Muestras) -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="balanzaDropdownMobile" role="button" aria-expanded="false">
+                            Puesto de Trabajo (Balanza de Muestras)
+                            <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="balanzaDropdownMobile">
+                            <li><a class="dropdown-item" href="#">Búsqueda de ODT Asignada</a></li>
+                            <li><a class="dropdown-item" href="#">Asignar Código de Despacho</a></li>
+                            <li><a class="dropdown-item" href="#">Creación de Actualización de Fechas de Registros</a></li>
+                            <li><a class="dropdown-item" href="#">Asignación de Valores de Balanza</a></li>
+                            <li><a class="dropdown-item" href="#">Actualización de Registros</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+            <div class="sticky-btn">
+                <button class="btn btn-primary" onclick="EnabledInfo()">Regresar</button>
+            </div>
+        </div>
+    </body>
+
     <br/>
-</body>
-    <!-- Uso de codigos JS de estilos de pagina web, peticiones y mensajes"-->
+
+    <!-- Uso de códigos JS de estilos de página web, peticiones y mensajes -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-0q4D8HpohF3oBuKTVBSCgA0AKuqNf4+K5B5XtO/DdqtH5KzvZbKb1dfU+lj7RQc4" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz4fnFO9O2md6zPzEjjr4cO/Y28HhNR83Xf8Dd8YwNY2j1fTZjK5s5T1vB" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="{% static 'rest_framework/js/bootstrap.min.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dropdownToggles = document.querySelectorAll('.nav-link.dropdown-toggle');
+        
+            dropdownToggles.forEach(toggle => {
+                toggle.addEventListener('click', function () {
+                    const dropdownMenu = this.nextElementSibling;
+                    const dropdownArrow = this.querySelector('.dropdown-arrow');
+                    const isOpen = dropdownMenu.classList.contains('show');
+        
+                    // Cierra todos los dropdowns abiertos
+                    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                        menu.classList.remove('show');
+                        menu.previousElementSibling.querySelector('.dropdown-arrow').classList.remove('rotate');
+                    });
+        
+                    // Abre el dropdown clicado si estaba cerrado
+                    if (!isOpen) {
+                        dropdownMenu.classList.add('show');
+                        dropdownArrow.classList.add('rotate');
+                    }
+                });
+            });
+        });
+        
+        function EnabledInfo() {
+            var extraCard = document.getElementById('extra-card');
+            if (extraCard.classList.contains('hidden')) {
+                extraCard.classList.remove('hidden', 'slide-out');
+                extraCard.classList.add('slide-in');
+                extraCard.classList.add('show');
+            } else {
+                extraCard.classList.remove('slide-in');
+                extraCard.classList.add('slide-out');
+                setTimeout(function() {
+                    extraCard.classList.add('hidden');
+                    extraCard.classList.remove('show');
+                }, 500);  // Espera a que la animación termine antes de ocultar la tarjeta
+            }
+        }
 
-    {% if messages %}
-    <!-- Constructor de mensajes de plataforma ante acciones de usuarios"-->
-        <ul class="messages">
-            {% for m in messages %}
-                    {% if m.tags == 'warning' %}
-                        <script>
-                            Swal.fire({
-                                "title":"¡Nuevo mensaje de la aplicación!",
-                                "text":"{{m}}",
-                                "icon":"{{m.tags}}",
-                                "showCancelButton":true,
-                                "cancelButtonText":"No, Cancelar",
-                                "confirmButtonText":"Si, Eliminar",
-                                "reverseButtons":true,
-                                "confirmButtonColor":"#dc3545"
-                            })
-                        </script>
-                    {% else %}
-                        <script>
-                            Swal.fire({
-                                "title":"¡Nuevo mensaje de la aplicación! ",
-                                "text":"{{m}}",
-                                "icon":"{{m.tags}}"
-                            })
-
-
-                        </script>
-                    {% endif %}
-
-            {% endfor %}
-        </ul>
-        {% endif %}
-
-    {% block content %}
-    {% endblock %}
-
+    </script>
+</body>
 </html>

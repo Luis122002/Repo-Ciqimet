@@ -6,112 +6,232 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Display</title>
+    <link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
-        .module-card {
-            border-radius: 15px;
-            overflow: hidden;
-            height: 100%;
-        }
-        
-        .module-card .card-img {
-            border-radius: 0 0 15px 15px; /* Rounded corners only at the bottom */
-            height: 500px;
-            object-fit: cover;
-            width: 100%;
-        }
-        
-        .module-card .card-img-overlay {
+        @import url('https://fonts.googleapis.com/css?family=Montserrat&display=swap');
+        * {
+            margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        /* Contenedor Principal */
+        .content-wrapper {
             display: flex;
-            align-items: flex-end;
-        }
-        
-        .module-link {
-            background-color: rgba(255, 255, 255, 0.9);
-            color: #000;
-            font-weight: bold;
-            text-align: center;
+            align-items: flex-start;
+            justify-content: flex-start;
             width: 100%;
-            padding: 10px;
-            border-radius: 0 0 15px 15px;
         }
-        
-        .module-title {
-            font-size: 1.5em;
+
+        /* Sidebar (Perfil) */
+        .sidebar {
+            width: 350px;
+            background-color: #9c9c9c;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            height: 100vh;
+            overflow: auto;
+            flex-shrink: 0;
+        }
+
+        /* Main content */
+        .main-content {
+            flex-grow: 1;
+            padding: 0; /* Asegúrate de que no haya padding en la parte superior */
+            margin: 0;  /* Elimina cualquier margen */
+        }
+
+        /* Cards */
+        .container-card {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin: auto;
+        }
+
+        .title-cards {
+            width: 100%;
             text-align: center;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-            font-family: 'Courier New', Courier, monospace; /* Scientific-style font */
+            color: #7a7a7a;
         }
-        
-        .module-link:hover {
-            background-color: rgba(255, 255, 255, 1);
-            text-decoration: none;
-            color: #000;
+
+        .card {
+            width: 100%;
+            max-width: 350px;
+            margin: 20px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0px 1px 10px rgba(0, 0, 0, 0.2);
+            transition: all 400ms ease-out;
+            cursor: default;
         }
-        
-        .card-header {
-            font-family: 'Courier New', Courier, monospace; /* Scientific-style font */
-            font-size: 1.2em;
-            font-weight: bold;
+
+        .card:hover {
+            box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.4);
+            transform: translateY(-3%);
+        }
+
+        .card img {
+            width: 100%;
+            height: 210px;
+        }
+
+        .card .contenido-card {
+            padding: 15px;
+            text-align: center;
+        }
+
+        .card .contenido-card h3 {
+            margin-bottom: 15px;
+            color: #7a7a7a;
+        }
+
+        .card .contenido-card p {
+            line-height: 1.8;
+            color: #6a6a6a;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .card .contenido-card a {
+            display: inline-block;
             padding: 10px;
-            border-radius: 15px 15px 0 0;
-            min-height: 90px;
+            margin-top: 10px;
+            text-decoration: none;
+            color: #2fb4cc;
+            border: 1px solid #2fb4cc;
+            border-radius: 4px;
+            transition: all 400ms ease;
+            margin-bottom: 5px;
         }
-        
-        .bg-secondary.rounded.p-3 {
-            border: 3px solid #17a2b8; /* Celeste border */
-            border-radius: 15px;
+
+        .card .contenido-card a:hover {
+            background: #2fb4cc;
+            color: #fff;
         }
-        
-        .shadow-sm {
-            box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075)!important;
+
+        /* Responsive Design */
+        @media only screen and (max-width: 768px) {
+            .content-wrapper {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                margin-bottom: 20px;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 10px;
+            }
+
+            .container-card {
+                flex-direction: column;
+                max-width: 100%;
+            }
+
+            .card {
+                margin: 10px 0;
+            }
         }
     </style>
 </head>
-<body>    
-    <div class="container-fluid my-5">
-        <div class="row">
-            <div class="col-md-4 mb-4">
-                <div class="card module-card bg-info text-white rounded shadow-sm container-fluid">
-                    <div class="card-header bg-light text-dark text-center rounded-top">
-                        <span class="module-title">Orden de Trabajo</span>
-                    </div>
-                    <img src="{% static 'rest_framework/img/ODT_module.png' %}" class="card-img">
-                    <br/><br/>
-                    <div class="card-img-overlay d-flex flex-column justify-content-end">
-                        <a href="/ODT" class="btn module-link text-black">Ingresar</a>
-                    </div>
-                    <br/>
-                </div>
+<body>
+    <div class="content-wrapper">
+        <!-- Sidebar (Perfil) -->
+        <div class="sidebar">
+            <h2>Perfil del Usuario</h2>
+            <p>Nombre del Usuario</p>
+            <hr>
+            <p>Información adicional del perfil</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="title-cards">
+                <h2>Órden de Trabajo</h2>
             </div>
-            <div class="col-md-4 mb-4">
-                <div class="card module-card bg-success text-white rounded shadow-sm container-fluid">
-                    <div class="card-header bg-light text-dark text-center rounded-top">
-                        <span class="module-title">Puesto de Trabajo Normal</span>
+            <div class="container-card">
+                <div class="card">
+                    <figure>
+                        <img src="{% static 'rest_framework/img/ODT_module.png' %}" alt="Orden de Trabajo">
+                    </figure>
+                    <div class="contenido-card">
+                        <h3>Órden de Trabajo</h3>
+                        <p>Podemos crear la identidad corporativa de tu empresa. Diseño, Maquetación de folletos, Catálogos, Papelería y mucho más.</p>
+                        <button class="btn btn-info" onclick="ShowInfo(1)">Leer Más</a>
                     </div>
-                    <img src="{% static 'rest_framework/img/Puesto_trabajo.png' %}" class="card-img">
-                    <br/><br/>
-                    <div class="card-img-overlay d-flex flex-column justify-content-end">
-                        <a href="/puesto-de-trabajo-normal" class="btn module-link text-black">Ingresar</a>
-                    </div>
-                    <br/>
                 </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card module-card bg-danger text-white rounded shadow-sm container-fluid">
-                    <div class="card-header bg-light text-dark text-center rounded-top">
-                        <span class="module-title">Puesto de Trabajo Instrumental</span>
+                <div class="card">
+                    <figure>
+                        <img src="{% static 'rest_framework/img/Puesto_trabajo.png' %}" alt="Puesto de Trabajo Normal">
+                    </figure>
+                    <div class="contenido-card">
+                        <h3>Puesto de Trabajo Normal</h3>
+                        <p>Nosotros creamos y optimizamos tus perfiles en las Redes Sociales. Importantes para que tu presencia online sea completa.</p>
+                        <button class="btn btn-info" onclick="ShowInfo(2)">Leer Más</a>
                     </div>
-                    <img src="{% static 'rest_framework/img/Puesto_instrumental.png' %}" class="card-img">
-                    <br/><br/>
-                    <div class="card-img-overlay d-flex flex-column justify-content-end">
-                        <a href="/puesto-de-trabajo-instrumental" class="btn module-link text-black">Ingresar</a>
+                </div>
+                <div class="card">
+                    <figure>
+                        <img src="{% static 'rest_framework/img/Puesto_instrumental.png' %}" alt="Puesto de Trabajo Instrumental">
+                    </figure>
+                    <div class="contenido-card">
+                        <h3>Puesto de Trabajo Instrumental</h3>
+                        <p>Creamos tu página web utilizando las últimas tecnologías disponibles. Una Web adaptativa a tu móvil o Tablet y con un gestor de contenido fácil.</p>
+                        <button class="btn btn-info" onclick="ShowInfo(3)">Leer Más</a>
                     </div>
-                    <br/>
                 </div>
             </div>
         </div>
     </div>
-    <br/>
 </body>
+<script>
+
+function ShowInfo(value)
+{
+
+    console.log("Hola" + value.toString())
+    Contex = ""
+    if (value == "1")
+    {
+        Contex = "Modulo orden de trabajo"
+
+    }
+    if (value == "2")
+    {
+
+        Contex = "Modulo puesto de trabajo"
+    }
+    if (value == "3")
+    {
+        Contex = "Modulo puesto de trabajo instrumental"
+
+    }
+    Swal.fire({
+        title: Contex,
+        showClass: {
+          popup: `
+            animate__animated
+            animate__fadeInUp
+            animate__faster
+          `
+        },
+        hideClass: {
+          popup: `
+            animate__animated
+            animate__fadeOutDown
+            animate__faster
+          `
+        }
+      });
+}
+
+</script>
 </html>

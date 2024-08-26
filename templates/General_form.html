@@ -47,6 +47,10 @@
                 {% endfor %}
                 <button type="submit" class="btn btn-primary btn-submit">Submit</button>
             </form>
+            <br/>
+            {% if id != "-1" %}
+                <button class="btn btn-primary btn-alert" onclick='OnDeleteRegister()'>Borrar</button>
+            {% endif %}
         {% else %}
             <div class="alert alert-warning" role="alert">
                 No hay formulario disponible.
@@ -66,6 +70,8 @@
     <button id="open-alert">Crear Fórmula Química</button>
 </body>
 <script>
+    var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
     document.getElementById('open-alert')?.addEventListener('click', function() {
         Swal.fire({
             title: 'Añadir Símbolo',
@@ -121,6 +127,64 @@
             }
         });
     });
+
+    function OnDeleteRegister() {
+        Swal.fire({
+            title: '¿Estás seguro que quieres eliminar este registro?',
+            text: "Esta acción no se puede deshacer.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Eliminar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#d33', 
+            cancelButtonColor: '#3085d6',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const elementId = "{{ id }}";
+                const urlDat = '/MasterData/';
+                const Token = csrfToken;
+                const context = "{{ contexModel }}"; 
+                const action = 'del'; 
+                const stade = "acces"; 
+                $.ajax({
+                    url: urlDat,
+                    type: 'POST',
+                    headers: {
+                        'X-CSRFToken': Token
+                    },
+                    data: {
+                        'id': elementId,
+                        'context': context,
+                        'action': action,
+                        'stade': stade
+                    },
+                    success: function(response) {
+                        if (response.redirect_url) {
+                            window.location.href = response.redirect_url; 
+                        } else {
+                            console.log(response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Error al enviar datos:', xhr.responseText);
+                    }
+                });
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                Swal.fire(
+                    'Cancelado',
+                    'La eliminación ha sido cancelada.',
+                    'info'
+                );
+            }
+        }).catch(error => {
+            Swal.fire(
+                'Error',
+                'Ocurrió un problema con la eliminación del registro.',
+                'error'
+            );
+        });
+    }
+    
 
     function addToFormula(char) {
         const textarea = document.getElementById('formula');

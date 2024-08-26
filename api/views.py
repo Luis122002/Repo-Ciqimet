@@ -17,7 +17,7 @@ from api import models, forms
 from django.views.decorators.csrf import csrf_exempt
 from .decorators import is_administrador, is_supervisor, is_quimico, is_cliente
 from Setup.settings import DEBUG, CORS_ALLOWED_ORIGINS
-
+from django.urls import reverse
 
 def requestAcces(request):
     
@@ -180,7 +180,6 @@ def general_form(request, token):
         form = None
         model = None
 
-
         # Verificar el estado
         if stade != "acces":
             return HttpResponseForbidden("Acceso no autorizado.")
@@ -192,16 +191,14 @@ def general_form(request, token):
             return HttpResponseForbidden("Acción no válida.")
         # Procesar según el contexto y la acción
         if context == 'element':
-            print(action)
-            # Procesar operaciones para 'element'
             if action == 'add':
-                print(",,,,,,,,,,,,,")
+                print(f"Current URL: {request.build_absolute_uri()}")
                 form = forms.FormElements()
                 if request.method == 'POST':
                     form = forms.FormElements(request.POST)
                     if form.is_valid():
-                        form = form.save()
-                        return redirect("../Elements-Manager")
+                        form.save()
+                        return redirect(reverse('elements_manager'))
             elif action == 'mod':
                 # Lógica para modificar un elemento
                 model = models.Elementos.objects.get(id=target_ID)
@@ -210,25 +207,66 @@ def general_form(request, token):
                     form = forms.FormElements(request.POST, instance=model)
                     if form.is_valid():
                         form = form.save()
-                        return redirect("../Elements-Manager")
+                        return redirect(reverse('elements_manager'))
                         
             elif action == 'del':
-                # Lógica para eliminar un elemento
-                result_message = f'Elemento {target_ID} eliminado con éxito.'
+                model = models.Elementos.objects.get(id=target_ID)
+                print(model)
+                print(request.method)
+                if request.method == "GET":
+                    model.delete()
+                    print("Deleted")
+                    return redirect(reverse('elements_manager'))
         
         elif context == 'analytic':
             # Lógica para 'analytic'
             result_message = f'Análisis {target_ID} procesado con éxito.'
         
         elif context == 'ODT':
-            # Lógica para 'ODT'
-            result_message = f'Orden de trabajo {target_ID} procesada con éxito.'
+            if action == 'add':
+                print(f"Current URL: {request.build_absolute_uri()}")
+                form = forms.FormODT()
+                if request.method == 'POST':
+                    form = forms.FormODT(request.POST)
+                    if form.is_valid():
+                        odt_instance = form.save()  # Guardar el ODT y obtener la instancia creada
+                        cant_muestra = form.cleaned_data['Cant_Muestra']
+                        
+                        # Crear OTs basados en Cant_Muestra y asociarlos al ODT recién creado
+                        for _ in range(cant_muestra):
+                            models.OT.objects.create(
+                                odt=odt_instance,
+                                peso_muestra=0.0,  # Valor inicial para peso_muestra
+                                volumen=0.0,       # Valor inicial para volumen
+                                dilucion=0.0       # Valor inicial para dilucion
+                            )
+                        return redirect(reverse('Main_ODT'))
+            elif action == 'mod':
+                # Lógica para modificar un elemento
+                model = models.Elementos.objects.get(id=target_ID)
+                form = forms.FormElements(instance = model)
+                if request.method == 'POST':
+                    form = forms.FormElements(request.POST, instance=model)
+                    if form.is_valid():
+                        form = form.save()
+                        return redirect(reverse('Main_ODT'))
+                        
+            elif action == 'del':
+                model = models.Elementos.objects.get(id=target_ID)
+                print(model)
+                print(request.method)
+                if request.method == "GET":
+                    model.delete()
+                    print("Deleted")
+                    return redirect(reverse('Main_ODT'))
         
         elif context == 'Read':
             # Lógica para 'Read'
             result_message = f'Lectura {target_ID} procesada con éxito.'
 
-        data = {'form':form}
+
+       
+        data = {'form':form, 'id':target_ID, "contexModel": context}
         return render(request, "General_form.html", data)
 
     except Exception as e:
@@ -266,5 +304,5 @@ def Master_def(request):
 
     # Crear la URL de redirección
     redirect_url = f'/Action-Resource/{token}/'
-    
+
     return JsonResponse({'redirect_url': redirect_url, 'message': 'Datos recibidos correctamente'})
