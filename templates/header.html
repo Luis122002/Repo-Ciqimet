@@ -224,7 +224,6 @@
         }
         
         
-        /* Estilos generales para el extra-card */
         .extra-card {
             position: fixed;
             top: 0;
@@ -238,27 +237,37 @@
             padding: 15px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             overflow-y: auto;
-            display: none; /* Ocultar por defecto */
+            transform: translateX(-100%);
+            opacity: 0;
+            visibility: hidden;
+            transition: transform 0.4s ease, opacity 0.4s ease, visibility 0s ease 0.4s;
         }
         
-        /* Mostrar el extra-card cuando se activa */
         .extra-card.show {
-            display: flex;
+            transform: translateX(0);
+            opacity: 1;
+            visibility: visible;
+            transition: transform 0.4s ease, opacity 0.4s ease;
         }
         
+        .extra-card:not(.show) {
+            visibility: hidden; /* Asegura que no se pueda interactuar cuando está oculto */
+            transition: transform 0.4s ease, opacity 0.4s ease, visibility 0s ease 0.4s; /* Sincroniza visibilidad con animación */
+        }
+
         .extra-card .nav-links {
             list-style: none;
             padding: 0;
             margin: 0;
         }
-        
+
         .extra-card .nav-links .dropdown-menu {
             position: static;
             box-shadow: none;
             border-radius: 0;
             width: 100%; /* Asegura que el dropdown ocupe todo el ancho */
         }
-        
+
         .extra-card .nav-links .dropdown-toggle {
             color: #eceff1;
             text-decoration: none;
@@ -267,11 +276,11 @@
             align-items: center;
             justify-content: space-between;
         }
-        
+
         .extra-card .nav-links .dropdown-toggle:hover {
             color: #faa550;
         }
-        
+
         .extra-card .nav-links .dropdown-menu {
             display: none;
             background-color: #4b4441;
@@ -279,11 +288,11 @@
             margin: 0;
             border-radius: 5px;
         }
-        
+
         .extra-card .nav-links .dropdown-menu.show {
             display: block;
         }
-        
+
         .extra-card .nav-links .dropdown-menu a {
             color: #eceff1;
             text-decoration: none;
@@ -292,12 +301,12 @@
             padding: 10px;
             transition: color 0.3s, background-color 0.3s;
         }
-        
+
         .extra-card .nav-links .dropdown-menu a:hover {
             color: #faa550;
             background-color: #4b4441;
         }
-        
+
         .extra-card .dropdown-arrow {
             display: inline-block;
             width: 0;
@@ -308,11 +317,12 @@
             margin-left: 5px;
             transition: transform 0.3s ease;
         }
-        
+
         /* Flecha rotada de forma independiente para cuando se agrega la clase rotate */
         .extra-card .dropdown-arrow.rotate {
             transform: rotate(180deg);
         }
+
         @media (min-width: 768px) {
             .extra-card {
                 width: 45%; /* 1/6 del ancho */
@@ -346,11 +356,11 @@
 <body>
     <header class="header">
         <div class="container">
-            <button class="menu-toggle" aria-label="Toggle navigation"  onclick="EnabledInfo()">
+            <button class="menu-toggle" aria-label="Toggle navigation"  onclick="toggleExtraCard()">
                 <span class="menu-icon"></span>
             </button>
             <div class="logo">
-                <img src="{% static 'rest_framework/img/Logocapture-removebg-preview.png' %}" alt="Logo de la marca">
+                <img src="{% static 'rest_framework/img/Logocapture-removebg-preview.png' %}" alt="Logo de la marca" onclick="returnMenu()">
             </div>
             <nav class="nav">
                 <ul class="nav-links">
@@ -457,7 +467,7 @@
             </nav>
         </div>
             <div class="sticky-btn">
-                <button class="btn btn-primary" onclick="EnabledInfo()">Regresar</button>
+                <button class="btn btn-primary" onclick="toggleExtraCard()">Regresar</button>
             </div>
         </div>
     </body>
@@ -492,24 +502,31 @@
                     }
                 });
             });
-        });
         
-        function EnabledInfo() {
-            var extraCard = document.getElementById('extra-card');
-            if (extraCard.classList.contains('hidden')) {
-                extraCard.classList.remove('hidden', 'slide-out');
-                extraCard.classList.add('slide-in');
-                extraCard.classList.add('show');
-            } else {
-                extraCard.classList.remove('slide-in');
-                extraCard.classList.add('slide-out');
-                setTimeout(function() {
-                    extraCard.classList.add('hidden');
+            // Código para mostrar y ocultar la extra-card
+            document.addEventListener('click', function(event) {
+                var extraCard = document.getElementById('extra-card');
+                var menuToggle = document.querySelector('.menu-toggle');
+                
+                if (!extraCard.contains(event.target) && !menuToggle.contains(event.target)) {
                     extraCard.classList.remove('show');
-                }, 500);  // Espera a que la animación termine antes de ocultar la tarjeta
+                }
+            });
+        });
+
+        function toggleExtraCard() {
+            var extraCard = document.getElementById('extra-card');
+            if (extraCard.classList.contains('show')) {
+                extraCard.classList.remove('show');
+            } else {
+                extraCard.classList.add('show');
             }
         }
-
+    
+    
+        function returnMenu() {
+            window.location.href = "/index/";
+        }
     </script>
 </body>
 </html>
