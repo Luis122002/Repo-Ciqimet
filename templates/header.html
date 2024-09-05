@@ -16,14 +16,35 @@
                 display: none;
 
             }
+
+            .perfil-Button{
+                position: absolute; 
+                bottom: 2.5%%;
+                right: 2.5%;
+                cursor: pointer;   
+            }
+
         }
         @media (min-width: 998px) {
             .extra-card {
                 display: none !important;
             }
         }
-        
 
+        @media (min-width: 990px) and (max-width: 1200px) {
+            .header .nav-links .dropdown {
+                position: relative !important;
+                right: 0% !important;
+            }
+            .header .logo img {
+                height: 80px;
+                transition: all 0.3s;
+                position: relative !important;
+                right: 150% !important; 
+            }
+        }
+
+        
         .header {
             background-color: #4b4441;
             padding: 5px 10%;
@@ -40,6 +61,9 @@
         .header .logo img {
             height: 80px;
             transition: all 0.3s;
+            position: relative;
+            right: 50%;
+            
         }
 
         .header .logo img:hover {
@@ -60,6 +84,7 @@
 
         .header .nav-links .dropdown {
             position: relative;
+            right: 17.5%;
         }
 
         .header .nav-links .dropdown-toggle {
@@ -84,6 +109,7 @@
             z-index: 1;
             top: 100%;
             left: 0;
+            border-left: 3px solid #eceff1;
         }
 
         .header .nav-links .dropdown-menu.show {
@@ -92,6 +118,7 @@
 
         .header .nav-links .dropdown-menu li {
             padding: 10px;
+            border-bottom: 1px solid #eceff1;
         }
 
         .header .nav-links .dropdown-menu a {
@@ -168,6 +195,8 @@
             .header .logo img {
                 height: 60px;
                 transition: none;
+                position: relative;
+                right: 20%;
             }
 
             .header .nav {
@@ -187,10 +216,35 @@
             }
 
             .header .nav-links .dropdown-menu {
-                position: static;
-                box-shadow: none;
-                border-radius: 0;
+                display: none;
+                position: absolute;
+                background-color: #4b4441;
+                list-style: none;
+                padding: 10px;
+                margin: 0;
+                border-radius: 5px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                z-index: 1;
+                top: 100%;
+                left: 0;
+                border-left: 3px solid #eceff1;
             }
+            .header .nav-links .dropdown-menu.show {
+                display: block;
+            }
+    
+            .header .nav-links .dropdown-menu li {
+                padding: 10px;
+                border-bottom: 1px solid #eceff1;
+            }
+
+            .perfil-Button{
+                position: absolute; 
+                bottom: 2.5%%;
+                right: 15%;
+                cursor: pointer;   
+            }
+
         }
 
         .StyleCard-style {
@@ -231,7 +285,7 @@
             width: 100%;
             height: 100%;
             z-index: 1050;
-            background-color: #4b4441;
+            background-color: #3d3735;
             display: flex;
             flex-direction: column;
             padding: 15px;
@@ -263,10 +317,19 @@
 
         .extra-card .nav-links .dropdown-menu {
             position: static;
-            box-shadow: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             border-radius: 0;
-            width: 100%; /* Asegura que el dropdown ocupe todo el ancho */
+            list-style: none;
+            width: 100%;
+            border-left: 3px solid #eceff1;
         }
+
+        .extra-card .nav-links .dropdown-menu li {
+            padding: 10px;
+            border-bottom: 1px solid #eceff1;
+            font-size: 80%;
+        }
+
 
         .extra-card .nav-links .dropdown-toggle {
             color: #eceff1;
@@ -351,6 +414,22 @@
         }
         
 
+        .user-card {
+            width: 300px;
+            position: fixed;
+            top: -100%;
+            right: 20px;
+            transition: top 1s ease-in-out;
+            z-index: 1000;
+            display: none;
+            background: #e5e5e5;
+        }
+        
+        .user-card.visible {
+            top: 0px;
+            display: block; /* Aparece cuando se hace visible */
+        }
+
     </style>
 </head>
 <body>
@@ -409,6 +488,9 @@
                     </li>
                 </ul>
             </nav>
+            <div class="perfil-Button">
+                <button = class="btn btn-info" onclick="ShowUser()">Perfil</button>
+            </div>
         </div>
     </header>
     <body>
@@ -470,6 +552,21 @@
                 <button class="btn btn-primary" onclick="toggleExtraCard()">Regresar</button>
             </div>
         </div>
+
+        <div class="user-card shadow-lg p-4 rounded container">
+            <div class="d-flex align-items-center">
+                <br/>
+                <img src="https://via.placeholder.com/50" class="rounded-circle me-3" alt="User Image">
+                <div>
+                    <h5 class="mb-1">John Doe</h5>
+                    <p class="mb-0 text-muted">johndoe@example.com</p>
+                    <p class="mb-0 text-muted">Trabajador quimico</p>
+                </div>
+            </div>
+            <button class="btn btn-danger mt-3" onclick="ShowUser()">Cerrar</button>
+            <br/><br/>
+        </div>
+    </div>
     </body>
 
     <br/>
@@ -489,13 +586,11 @@
                     const dropdownArrow = this.querySelector('.dropdown-arrow');
                     const isOpen = dropdownMenu.classList.contains('show');
         
-                    // Cierra todos los dropdowns abiertos
                     document.querySelectorAll('.dropdown-menu').forEach(menu => {
                         menu.classList.remove('show');
                         menu.previousElementSibling.querySelector('.dropdown-arrow').classList.remove('rotate');
                     });
         
-                    // Abre el dropdown clicado si estaba cerrado
                     if (!isOpen) {
                         dropdownMenu.classList.add('show');
                         dropdownArrow.classList.add('rotate');
@@ -503,17 +598,17 @@
                 });
             });
         
-            // Código para mostrar y ocultar la extra-card
             document.addEventListener('click', function(event) {
                 var extraCard = document.getElementById('extra-card');
                 var menuToggle = document.querySelector('.menu-toggle');
                 
-                if (!extraCard.contains(event.target) && !menuToggle.contains(event.target)) {
+                if (extraCard && !extraCard.contains(event.target) && menuToggle && !menuToggle.contains(event.target)) {
                     extraCard.classList.remove('show');
                 }
             });
+    
         });
-
+    
         function toggleExtraCard() {
             var extraCard = document.getElementById('extra-card');
             if (extraCard.classList.contains('show')) {
@@ -523,6 +618,25 @@
             }
         }
     
+        function ShowUser() {
+            var userCard = document.querySelector(".user-card");
+    
+            if (userCard) {
+                if (userCard.classList.contains("visible")) {
+                    userCard.classList.remove("visible");
+                    setTimeout(function() {
+                        userCard.style.display = "none";
+                    }, 1000);
+                } else {
+                    userCard.style.display = "block";
+                    setTimeout(function() {
+                        userCard.classList.add("visible");
+                    }, 10);
+                }
+            } else {
+                console.error("El elemento con id 'user-card' no existe.");
+            }
+        }
     
         function returnMenu() {
             window.location.href = "/index/";
