@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext as _
 
@@ -13,23 +14,51 @@ class User(AbstractUser):
     def __str__(self):
         return self.rolname
 
-
 class ODT(models.Model):
     id = models.AutoField(primary_key=True)
-    Nro_OT = models.CharField(max_length=200)
+    Nro_OT = models.CharField(max_length=200, unique=True)
     Fec_Recep = models.DateField()
-    Cant_Muestra = models.IntegerField(_("Cantidad Muestra"))
     Cliente = models.CharField(max_length=200)
     Proyecto = models.CharField(max_length=200)
     Despacho = models.CharField(max_length=200)
     Envio = models.CharField(max_length=200)
-    Muestra = models.CharField(_("Codigo de muestras"),max_length=200)
+    Muestra = models.CharField(_("Código de muestras"), max_length=200)
     Referencia = models.CharField(max_length=200)
     Comentarios = models.CharField(max_length=255, blank=True)
+    InicioCodigo = models.PositiveIntegerField(_("Inicio Código"), blank=True, null=True)
+    FinCodigo = models.PositiveIntegerField(_("Fin Código"), blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)  # Fecha de actualización automática
 
     def __str__(self):
         return self.Nro_OT
 
+    @property
+    def Cant_Muestra(self):
+        if self.InicioCodigo is not None and self.FinCodigo is not None:
+            return self.FinCodigo - self.InicioCodigo + 1
+        return None
+
+    def clean(self):
+        super().clean()
+
+        # Verificar que FinCodigo sea mayor o igual a InicioCodigo
+        if self.InicioCodigo is not None and self.FinCodigo is not None:
+            if self.FinCodigo < self.InicioCodigo:
+                raise ValidationError('El número final del código debe ser mayor o igual al número inicial.')
+
+        # Verificar la unicidad del código dentro del rango
+        if self.Muestra and self.InicioCodigo is not None and self.FinCodigo is not None:
+            overlapping_records = ODT.objects.exclude(id=self.id).filter(
+                Muestra=self.Muestra,
+                InicioCodigo__lte=self.FinCodigo,
+                FinCodigo__gte=self.InicioCodigo
+            )
+            if overlapping_records.exists():
+                raise ValidationError(
+                    'El rango de códigos de muestra ({0}-{1}) se solapa con un rango existente para el código de muestra {2}.'.format(
+                        self.InicioCodigo, self.FinCodigo, self.Muestra
+                    )
+                )
 
 class Analisis(models.Model):
     id = models.AutoField(primary_key=True)

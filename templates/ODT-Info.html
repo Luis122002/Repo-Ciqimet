@@ -1,62 +1,178 @@
 {% load static %}
 <!DOCTYPE html>
-{% include 'header.html'%}
+{% include 'header.html' %}
+{% csrf_token %}
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ODT Info</title>
+    <style>
+        #OdtInfoPanel {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            background-color: #333;
+            color: white;
+            transition: 0.3s ease;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
+        
+        .content-container {
+            flex: 1; /* Toma el espacio disponible */
+            overflow-y: auto; /* Permite el desplazamiento vertical si es necesario */
+            padding: 20px;
+            padding-bottom: 60px; /* Espacio para el botón en la parte inferior */
+            box-sizing: border-box;
+        }
+        
+        .OdtInfoPanel-Button {
+            margin-top: auto; 
+            align-self: center;
+            margin-bottom: 10px; 
+            cursor: pointer;
+        }
+        
+        @media (min-width: 770px) {
+            #OdtInfoPanel {
+                width: 50%; /* Ocupa el 50% del ancho de la pantalla */
+            }
+        }
+        
+        @media (max-width: 769px) {
+            #OdtInfoPanel {
+                width: 100%; /* Ocupa el 100% del ancho de la pantalla */
+            }
+        }
+
+        /* Añadir scroll horizontal para la tabla en pantallas pequeñas */
+        .table-container {
+            overflow-x: auto; /* Permite el desplazamiento horizontal */
+            overflow-y: auto; /* Permite el desplazamiento vertical */
+            max-height: calc(100vh - 10%); /* Ajusta la altura máxima dejando un espacio del 10% en la parte inferior */
+            margin-bottom: 10px; /* Espacio inferior para el botón de añadir muestra */
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="mb-4">Detalles de Orden de Trabajo (Nro OT: {{ odt.Nro_OT }})</h1>
-        
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title">Información de ODT</h5>
-                <p><strong>Fecha de Recepción:</strong> {{ odt.Fec_Recep }}</p>
-                <p><strong>Cantidad de Muestra:</strong> {{ odt.Cant_Muestra }}</p>
-                <p><strong>Cliente:</strong> {{ odt.Cliente }}</p>
-                <p><strong>Proyecto:</strong> {{ odt.Proyecto }}</p>
-                <p><strong>Despacho:</strong> {{ odt.Despacho }}</p>
-                <p><strong>Envío:</strong> {{ odt.Envio }}</p>
-                <p><strong>Muestra:</strong> {{ odt.Muestra }}</p>
-                <p><strong>Referencia:</strong> {{ odt.Referencia }}</p>
-                <p><strong>Comentarios:</strong> {{ odt.Comentarios }}</p>
+        <h1 class="mb-4">Orden de trabajo - {{ odt.Nro_OT }}</h1>
+        <button class="btn btn-info" onclick="ShowDataInfo()">Mostrar detalles</button>
+        <button class="btn btn-info" onclick="DeleteODT()">Eliminar ODT</button>
+        <a href="/ODT/" class="btn btn-primary">Atras</a>
+        <a href="#" class="btn btn-success">Añadir muestra</a>
+
+        <div id="OdtInfoPanel">
+            <div class="content-container">
+                <div class="card-body">
+                    <h2 class="mb-4">Detalles de Orden de Trabajo (Nro OT: {{ odt.Nro_OT }})</h2>
+                    <h5 class="card-title">Información de ODT</h5>
+                    <p><strong>Fecha de Recepción:</strong> {{ odt.Fec_Recep }}</p>
+                    <p><strong>Cantidad de Muestra:</strong> {{ odt.Cant_Muestra }}</p>
+                    <p><strong>Cliente:</strong> {{ odt.Cliente }}</p>
+                    <p><strong>Proyecto:</strong> {{ odt.Proyecto }}</p>
+                    <p><strong>Despacho:</strong> {{ odt.Despacho }}</p>
+                    <p><strong>Envío:</strong> {{ odt.Envio }}</p>
+                    <p><strong>ID de muestras:</strong> {{ odt.Muestra }}</p>
+                    <p><strong>Referencia:</strong> {{ odt.Referencia }}</p>
+                    <p><strong>Comentarios:</strong> {{ odt.Comentarios }}</p>
+                </div>
             </div>
+            <button class="btn btn-info OdtInfoPanel-Button" onclick="ShowDataInfo()">ShowDataInfo</button>
         </div>
+
+        <div class="card mb-4"></div>
         <br/>
         <h5 class="mb-3">Análisis Realizados</h5>
         <br/>
-        {% for ot in ots %}
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title">Muestra: {% if ot.id_muestra %}{{ ot.id_muestra }}{% else %}Vacio{% endif %}</h5>
-                <div class="table-responsive">
-                    <table class="table table-bordered">
-                        <tbody>
-                            <tr>
-                                <th scope="row">Peso Muestra:</th>
-                                <td>{{ ot.peso_muestra }}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">Volumen:</th>
-                                <td>{{ ot.volumen }}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">Dilución:</th>
-                                <td>{{ ot.dilucion }}</td>
-                            </tr>
-                            <!-- Agrega más detalles de OT según sea necesario -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <div class="table-container">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID Código</th>
+                        <th>Peso Muestra</th>
+                        <th>Volumen</th>
+                        <th>Dilución</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ot in ots %}
+                    <tr>
+                        <td>{{ ot.id_muestra }}</td>
+                        <td>{{ ot.peso_muestra }}</td>
+                        <td>{{ ot.volumen }}</td>
+                        <td>{{ ot.dilucion }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4">No hay análisis realizados.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-        {% endfor %}
-
-        <a href="/ODT/" class="btn btn-primary">Atras</a>
-        <a href="#" class="btn btn-success">Añadir muestra</a>
     </div>
 </body>
+<script>
+    var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    function ShowDataInfo() {
+        var panel = document.getElementById("OdtInfoPanel");
+        if (panel.style.left === "0px") {
+            panel.style.left = "-100%"; 
+        } else {
+            panel.style.left = "0";
+        }
+    }
+
+    function DeleteODT() {
+        const elementId = {{ odt.id }};
+        const urlDat = '/MasterData/';
+        const Token = csrfToken;
+        const context = 'ODT'; 
+        const action = 'del'; 
+        const stade = "acces"; 
+    
+        Swal.fire({
+            title: '¿Seguro que quieres borrar la orden de trabajo junto con los campos de muestras?',
+            text: "Esta acción no se puede deshacer.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Confirmar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: urlDat,
+                    type: 'POST',
+                    headers: {
+                        'X-CSRFToken': Token
+                    },
+                    data: {
+                        'id': elementId,
+                        'context': context,
+                        'action': action,
+                        'stade': stade
+                    },
+                    success: function(response) {
+                        if (response.redirect_url) {
+                            window.location.href = response.redirect_url; 
+                        } else {
+                            console.log(response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Error al enviar datos:', xhr.responseText);
+                    }
+                });
+            }
+        });
+    }
+</script>
 </html>

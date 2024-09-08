@@ -3,6 +3,7 @@ import http
 import base64
 import json
 from django.shortcuts import HttpResponse
+from django.contrib import messages
 from django.conf import settings
 from django.core import signing
 from datetime import datetime, timedelta
@@ -109,14 +110,22 @@ def ODT_Info(request):
         odt = models.ODT.objects.get(id=odt_id)
         ots = models.OT.objects.filter(odt=odt)
 
+        # Procesar los datos para ordenar
+        def extract_number_from_id(id_muestra):
+            # Extraer el número después del último guion
+            parts = id_muestra.split('-')
+            return int(parts[-1]) if parts[-1].isdigit() else 0
+
+        # Ordenar los objetos OT por el número después del último guion
+        ots_sorted = sorted(ots, key=lambda ot: extract_number_from_id(ot.id_muestra))
+
         context = {
-            "odt":odt,
-            "ots":ots
+            "odt": odt,
+            "ots": ots_sorted
         }
-        # Puedes hacer más con el ID, como consultas a la base de datos
+
         return render(request, 'ODT-Info.html', context)
     else:
-        # Manejar otros métodos aquí si es necesario
         return HttpResponse(status=405)  # Método no permitido si no es POST
     
 
@@ -224,27 +233,40 @@ def general_form(request, token):
         
         elif context == 'ODT':
             if action == 'add':
-                print(f"Current URL: {request.build_absolute_uri()}")
                 form = forms.FormODT()
                 if request.method == 'POST':
                     form = forms.FormODT(request.POST)
                     if form.is_valid():
-                        odt_instance = form.save()  # Guardar el ODT y obtener la instancia creada
-                        cant_muestra = form.cleaned_data['Cant_Muestra']
+                        odt_instance = form.save()
                         
-                        # Crear OTs basados en Cant_Muestra y asociarlos al ODT recién creado
-                        for _ in range(cant_muestra):
-                            models.OT.objects.create(
-                                odt=odt_instance,
-                                peso_muestra=0.0,  # Valor inicial para peso_muestra
-                                volumen=0.0,       # Valor inicial para volumen
-                                dilucion=0.0       # Valor inicial para dilucion
-                            )
-                        return redirect(reverse('Main_ODT'))
+                        muestra_codigo = odt_instance.Muestra
+                        inicio_codigo = odt_instance.InicioCodigo
+                        fin_codigo = odt_instance.FinCodigo
+                        
+                        if inicio_codigo is not None and fin_codigo is not None:
+                            if fin_codigo < inicio_codigo:
+                                form.add_error(None, 'El número final del código debe ser mayor o igual al número inicial.')
+                            else:
+                                for codigo in range(inicio_codigo, fin_codigo + 1):
+                                    codigo_completo = f"{muestra_codigo}-{codigo:02d}"
+                                    models.OT.objects.create(
+                                        id_muestra=codigo_completo,
+                                        odt=odt_instance,
+                                        peso_muestra=0.0,
+                                        volumen=0.0,
+                                        dilucion=0.0
+                                    )
+                                return redirect(reverse('Main_ODT'))
+                        else:
+                            form.add_error(None, 'Debe especificar el rango de códigos de muestra.')
+                    else:
+                        messages.add_message(request=request, level=messages.ERROR, message=f'El usuario no tiene permiso para acceder aquí')
+                        print(form.errors)
+                        #YB-283713
             elif action == 'mod':
                 # Lógica para modificar un elemento
-                model = models.Elementos.objects.get(id=target_ID)
-                form = forms.FormElements(instance = model)
+                model = models.ODT.objects.get(id=target_ID)
+                form = forms.FormODT(instance = model)
                 if request.method == 'POST':
                     form = forms.FormElements(request.POST, instance=model)
                     if form.is_valid():
@@ -252,13 +274,12 @@ def general_form(request, token):
                         return redirect(reverse('Main_ODT'))
                         
             elif action == 'del':
-                model = models.Elementos.objects.get(id=target_ID)
-                print(model)
-                print(request.method)
-                if request.method == "GET":
-                    model.delete()
-                    print("Deleted")
-                    return redirect(reverse('Main_ODT'))
+                print("EIMINAR ODT")
+                model = models.ODT.objects.get(id=target_ID)
+                models.OT.objects.filter(odt=model).delete()
+                model.delete()
+                print("Deleted")
+                return redirect(reverse('Main_ODT'))
         
         elif context == 'Read':
             # Lógica para 'Read'

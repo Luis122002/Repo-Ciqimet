@@ -255,7 +255,7 @@
             font-family: 'Arial', sans-serif;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             overflow-y: auto;
-            flex: 1; /* Para permitir que el contenido ocupe el espacio disponible */
+            flex: 1;
         }
 
         .StyleCard-style h3 {
@@ -269,11 +269,11 @@
         }
 
         .sticky-btn {
-            position: absolute; /* Posiciona el botón de manera absoluta */
-            bottom: 0; /* Alinea el botón en la parte inferior del contenedor */
-            left: 50%; /* Opcional: Centra el botón horizontalmente en el contenedor */
-            transform: translateX(-50%); /* Ajusta el botón horizontalmente para centrarlo */
-            padding: 15px; /* Espaciado interno, opcional */
+            position: absolute; 
+            bottom: 0; 
+            left: 50%;
+            transform: translateX(-50%); 
+            padding: 15px;
             cursor: pointer;
         }
         
@@ -305,8 +305,8 @@
         }
         
         .extra-card:not(.show) {
-            visibility: hidden; /* Asegura que no se pueda interactuar cuando está oculto */
-            transition: transform 0.4s ease, opacity 0.4s ease, visibility 0s ease 0.4s; /* Sincroniza visibilidad con animación */
+            visibility: hidden; 
+            transition: transform 0.4s ease, opacity 0.4s ease, visibility 0s ease 0.4s;
         }
 
         .extra-card .nav-links {
@@ -360,7 +360,7 @@
             color: #eceff1;
             text-decoration: none;
             display: block;
-            width: 100%; /* Asegura que cada ítem ocupe todo el ancho del dropdown */
+            width: 100%;
             padding: 10px;
             transition: color 0.3s, background-color 0.3s;
         }
@@ -381,7 +381,6 @@
             transition: transform 0.3s ease;
         }
 
-        /* Flecha rotada de forma independiente para cuando se agrega la clase rotate */
         .extra-card .dropdown-arrow.rotate {
             transform: rotate(180deg);
         }
@@ -576,6 +575,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz4fnFO9O2md6zPzEjjr4cO/Y28HhNR83Xf8Dd8YwNY2j1fTZjK5s5T1vB" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const dropdownToggles = document.querySelectorAll('.nav-link.dropdown-toggle');
@@ -641,6 +642,10 @@
         function returnMenu() {
             window.location.href = "/index/";
         }
+
+        $(document).ready(function(){
+            $('[data-bs-toggle="tooltip"]').tooltip();   
+          });
     </script>
 </body>
 </html>
