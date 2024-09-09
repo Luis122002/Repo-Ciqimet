@@ -21,7 +21,7 @@ class ODT(models.Model):
     Cliente = models.CharField(max_length=200)
     Proyecto = models.CharField(max_length=200)
     Despacho = models.CharField(max_length=200)
-    Envio = models.CharField(max_length=200)
+    Envio = models.CharField(_("Envío"),max_length=200)
     Muestra = models.CharField(_("Código de muestras"), max_length=200)
     Referencia = models.CharField(max_length=200)
     Comentarios = models.CharField(max_length=255, blank=True)
