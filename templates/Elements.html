@@ -21,6 +21,7 @@
 <body>
     <div class="container mt-5">
         <!-- Filtros -->
+        <h1 class="custom-title">Registros de elementos</h1>
         <div class="row mb-3">
             <div class="col-md-4">
                 <label for="search-box">Buscar:</label>
@@ -42,17 +43,18 @@
                     <option value="true" {% if request.GET.enabled == 'true' %}selected{% endif %}>Activos</option>
                     <option value="false" {% if request.GET.enabled == 'false' %}selected{% endif %}>Inactivos</option>
                 </select>
+                <br/>
                 <button class="btn btn-success" onclick="addElement()">
                     Añadir elementos
                 </button>
                 <br/>
             </div>
         </div>
-
+        <br/>
         <!-- Verificar si hay elementos -->
         {% if elementos %}
-            <table class="table">
-                <thead>
+            <table class="table table-striped mb-0">
+                <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
                     <tr>
                         <th scope="col">Simbolo</th>
                         <th scope="col">Nombre</th>

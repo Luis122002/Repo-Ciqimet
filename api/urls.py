@@ -6,12 +6,15 @@ urlpatterns = [
     path('', views.requestAcces, name="Acces"),
     path('register/', views.login),
     path('index/', views.Main, name='index'),  # Asegúrate de definir 'index'
-    path('AddODT/', views.AddODT),
     path('ODT/', views.ODT_Module, name='Main_ODT'),
     path('ODT-info/', views.ODT_Info),
+    path('ODT-info_Request/', views.ODT_Info_Request),
     
     path('Action-Resource/<str:token>/', views.general_form, name='general_form'),
     path('Action-Resource/<str:token>/Action-Resource/', views.general_form),
+
+    path('ModMuestra/', views.ModMuestras),
+    path('ModODT/', views.ModODT),
 
     path('Elements-Manager/', views.Elements_Section, name='elements_manager'),
     path('Analisis-Manager/', views.Elements_Section, name='analisis_manager'),

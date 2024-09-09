@@ -19,6 +19,8 @@ from django.views.decorators.csrf import csrf_exempt
 from .decorators import is_administrador, is_supervisor, is_quimico, is_cliente
 from Setup.settings import DEBUG, CORS_ALLOWED_ORIGINS
 from django.urls import reverse
+from django.db import IntegrityError, transaction
+from django.db.models import Q
 
 def requestAcces(request):
     
@@ -53,35 +55,163 @@ def Main(request):
     
 
 def ODT_Module(request):
+    # Obtener parámetros de búsqueda y filtro desde la solicitud
+    search_query = request.GET.get('search', '')
+    filter_year = request.GET.get('year', '')
+    filter_month = request.GET.get('month', '')
 
+    # Filtrar objetos ODT según los parámetros proporcionados
     odts = models.ODT.objects.all()
+
+    if search_query:
+        odts = odts.filter(
+            # Buscar en los campos especificados
+            Q(Nro_OT__icontains=search_query) |
+            Q(Cliente__icontains=search_query) |
+            Q(Proyecto__icontains=search_query) |
+            Q(Muestra__icontains=search_query) |
+            Q(Cant_Muestra__icontains=search_query)|
+            Q(Despacho__icontains=search_query)|
+            Q(Envio__icontains=search_query)|
+            Q(Referencia__icontains=search_query)
+        )
+
+    if filter_year:
+        odts = odts.filter(Fec_Recep__year=filter_year)
+
+    if filter_month:
+        odts = odts.filter(Fec_Recep__month=filter_month)
+
     context = {
-        'odts': odts
+        'odts': odts,
+        'available_years': list(models.ODT.objects.dates('Fec_Recep', 'year').values_list('Fec_Recep__year', flat=True).distinct()),
+        'available_months': [
+            {'value': 1, 'label': 'Enero'}, {'value': 2, 'label': 'Febrero'}, {'value': 3, 'label': 'Marzo'},
+            {'value': 4, 'label': 'Abril'}, {'value': 5, 'label': 'Mayo'}, {'value': 6, 'label': 'Junio'},
+            {'value': 7, 'label': 'Julio'}, {'value': 8, 'label': 'Agosto'}, {'value': 9, 'label': 'Septiembre'},
+            {'value': 10, 'label': 'Octubre'}, {'value': 11, 'label': 'Noviembre'}, {'value': 12, 'label': 'Diciembre'}
+        ]
     }
 
     return render(request, 'ODT-Site.html', context)
 
-def AddODT(request):
-    form = forms.FormODT()
+
+def ModMuestras(request):
     if request.method == 'POST':
-        form = forms.FormODT(request.POST)
-        if form.is_valid():
-            odt_instance = form.save()  # Guardar el ODT y obtener la instancia creada
-            cant_muestra = form.cleaned_data['Cant_Muestra']
-            
-            # Crear OTs basados en Cant_Muestra y asociarlos al ODT recién creado
-            for _ in range(cant_muestra):
+        Contex = request.POST.get('contex')
+        idODT = request.POST.get('ODTID')
+        CodigoMuestra = request.POST.get('MuestraODT', '')
+        Volumen = request.POST.get('valVol')
+        Peso = request.POST.get('valPes')
+        Disol = request.POST.get('valDis')
+        muestra_id = str(request.POST.get('valID', '00'))
+        targetDel = str(request.POST.get('TargetDel', ''))
+        
+        if len(muestra_id) == 1:
+            muestra_id = "0" + muestra_id
+
+        ID_CodeOT = CodigoMuestra + "-" + muestra_id
+        print(idODT)
+        try:
+            odt_instance = models.ODT.objects.get(id=idODT)
+        except models.ODT.DoesNotExist:
+            return JsonResponse({'error': 'ODT no encontrado'}, status=404)
+
+        try:
+            if Contex == "Add":
                 models.OT.objects.create(
+                    id_muestra=ID_CodeOT,
                     odt=odt_instance,
-                    peso_muestra=0.0,  # Valor inicial para peso_muestra
-                    volumen=0.0,       # Valor inicial para volumen
-                    dilucion=0.0       # Valor inicial para dilucion
+                    peso_muestra=0.0,
+                    volumen=0.0,
+                    dilucion=0.0
                 )
-            
-            return redirect("/ODT")  # Redireccionar a la lista de ODTs (ajusta la URL según tu configuración)
-    
-    data = {'form': form}
-    return render(request, 'Form-ODT.html', data)
+            elif Contex == "Mod":
+                TargetOT = models.OT.objects.get(id_muestra=targetDel)
+                TargetOT.dilucion = Disol
+                TargetOT.volumen = Volumen
+                TargetOT.peso_muestra = Peso
+                TargetOT.id_muestra = ID_CodeOT
+                TargetOT.save()
+            elif Contex == "Del":
+                TargetOT = models.OT.objects.get(id_muestra=targetDel)
+                TargetOT.delete()
+            else:
+                return JsonResponse({'error': 'Método no permitido'}, status=405)
+        except models.OT.DoesNotExist:
+            return JsonResponse({'error': 'Muestra no encontrada'}, status=404)
+
+        count_ots = models.OT.objects.filter(odt=odt_instance).count()
+        odt_instance.Cant_Muestra = count_ots
+        odt_instance.save()
+
+        return JsonResponse({'success': True})
+
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+
+def ModODT(request):
+    if request.method == 'POST':
+        try:
+            odt_id = request.POST.get('idODT')
+            print(odt_id)
+            odt = models.ODT.objects.get(id=odt_id)
+            print(odt)
+
+            # Extraer valores del formulario
+            Nro_OT = request.POST.get('Nro_OT')
+            Fec_Recep = request.POST.get('Fec_Recep')
+            Cliente = request.POST.get('Cliente')
+            Proyecto = request.POST.get('Proyecto')
+            Despacho = request.POST.get('Despacho')
+            Envio = request.POST.get('Envio')
+            Muestra = request.POST.get('Muestra')
+            Referencia = request.POST.get('Referencia')
+            Comentarios = request.POST.get('Comentarios')
+
+            with transaction.atomic():
+                # Actualizar la ODT
+                odt.Nro_OT = Nro_OT
+                odt.Fec_Recep = Fec_Recep
+                odt.Cliente = Cliente
+                odt.Proyecto = Proyecto
+                odt.Despacho = Despacho
+                odt.Envio = Envio
+                odt.Muestra = Muestra
+                odt.Referencia = Referencia
+                odt.Comentarios = Comentarios
+                odt.save()
+
+                ots = models.OT.objects.filter(odt=odt)
+
+                nuevo_id_muestras = set()
+                for ot in ots:
+                    id_muestra_actual = ot.id_muestra
+                    parts = id_muestra_actual.rsplit('-', 1)
+                    
+                    if len(parts) == 2:
+                        nuevo_id_muestra = f"{Muestra}-{parts[1]}"
+                        if nuevo_id_muestra in nuevo_id_muestras:
+                            return JsonResponse({'error': 'Ya existe un registro con el ID de muestra actualizado'}, status=400)
+                        nuevo_id_muestras.add(nuevo_id_muestra)
+
+                for ot in ots:
+                    id_muestra_actual = ot.id_muestra
+                    parts = id_muestra_actual.rsplit('-', 1)
+                    
+                    if len(parts) == 2:
+                        nuevo_id_muestra = f"{Muestra}-{parts[1]}"
+                        ot.id_muestra = nuevo_id_muestra
+                        ot.save()
+
+            return JsonResponse({'success': True})
+
+        except models.ODT.DoesNotExist:
+            return JsonResponse({'error': 'ODT no encontrado'}, status=404)
+
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+
 
 
 def PT_Module(request):
@@ -126,10 +256,49 @@ def ODT_Info(request):
 
         return render(request, 'ODT-Info.html', context)
     else:
-        return HttpResponse(status=405)  # Método no permitido si no es POST
+        return HttpResponse(status=405)
     
 
+def ODT_Info_Request(request):
+    if request.method == 'POST':
+        odt_id = request.POST.get('odt_id')
+        try:
+            odt = models.ODT.objects.get(id=odt_id)
+        except models.ODT.DoesNotExist:
+            return JsonResponse({'error': 'ODT no encontrado'}, status=404)
 
+        ots = models.OT.objects.filter(odt=odt)
+
+        def extract_number_from_id(id_muestra):
+            parts = id_muestra.split('-')
+            return int(parts[-1]) if parts[-1].isdigit() else 0
+
+        ots_sorted = sorted(ots, key=lambda ot: extract_number_from_id(ot.id_muestra))
+
+        ots_data = [{
+            'id_muestra': ot.id_muestra,
+            'peso_muestra': ot.peso_muestra,
+            'volumen': ot.volumen,
+            'dilucion': ot.dilucion
+        } for ot in ots_sorted]
+
+        # Agregar los detalles del ODT a la respuesta JSON
+        odt_data = {
+            'Cant_Muestra': odt.Cant_Muestra,
+            'Fec_Recep': odt.Fec_Recep,
+            'Cliente': odt.Cliente,
+            'Proyecto': odt.Proyecto,
+            'Despacho': odt.Despacho,
+            'Envio': odt.Envio,
+            'Muestra': odt.Muestra,
+            'Referencia': odt.Referencia,
+            'Comentarios': odt.Comentarios,
+        }
+
+        return JsonResponse({'ots': ots_data, 'odt': odt_data})
+    else:
+        return HttpResponse(status=405)
+    
 
 def Elements_Section(request):
     # Obtener todos los elementos
@@ -233,36 +402,52 @@ def general_form(request, token):
         
         elif context == 'ODT':
             if action == 'add':
-                form = forms.FormODT()
+                form = forms.FormODT(request.POST or None)
                 if request.method == 'POST':
-                    form = forms.FormODT(request.POST)
                     if form.is_valid():
-                        odt_instance = form.save()
-                        
-                        muestra_codigo = odt_instance.Muestra
-                        inicio_codigo = odt_instance.InicioCodigo
-                        fin_codigo = odt_instance.FinCodigo
-                        
-                        if inicio_codigo is not None and fin_codigo is not None:
-                            if fin_codigo < inicio_codigo:
-                                form.add_error(None, 'El número final del código debe ser mayor o igual al número inicial.')
+                        try:
+                            # Guardar la instancia de ODT
+                            odt_instance = form.save()
+                            
+                            muestra_codigo = odt_instance.Muestra
+                            inicio_codigo = odt_instance.InicioCodigo
+                            fin_codigo = odt_instance.FinCodigo
+                            
+                            if inicio_codigo is not None and fin_codigo is not None:
+                                if fin_codigo < inicio_codigo:
+                                    form.add_error(None, 'El número final del código debe ser mayor o igual al número inicial.')
+                                else:
+                                    for codigo in range(inicio_codigo, fin_codigo + 1):
+                                        codigo_completo = f"{muestra_codigo}-{codigo:02d}"
+                                        
+                                        # Verificar si el código ya existe antes de crear el registro
+                                        if models.OT.objects.filter(id_muestra=codigo_completo).exists():
+                                            form.add_error(None, f'El código de muestra {codigo_completo} ya existe en OT.')
+                                            break  # Salir del bucle si encontramos un duplicado
+                                        
+                                        # Crear el registro en OT
+                                        models.OT.objects.create(
+                                            id_muestra=codigo_completo,
+                                            odt=odt_instance,
+                                            peso_muestra=0.0,
+                                            volumen=0.0,
+                                            dilucion=0.0
+                                        )
+                                    
+                                    if not form.errors:
+                                        return redirect(reverse('Main_ODT'))
                             else:
-                                for codigo in range(inicio_codigo, fin_codigo + 1):
-                                    codigo_completo = f"{muestra_codigo}-{codigo:02d}"
-                                    models.OT.objects.create(
-                                        id_muestra=codigo_completo,
-                                        odt=odt_instance,
-                                        peso_muestra=0.0,
-                                        volumen=0.0,
-                                        dilucion=0.0
-                                    )
-                                return redirect(reverse('Main_ODT'))
-                        else:
-                            form.add_error(None, 'Debe especificar el rango de códigos de muestra.')
+                                form.add_error(None, 'Debe especificar el rango de códigos de muestra.')
+                        except IntegrityError as e:
+                            # Manejar errores de unicidad
+                            if 'duplicate key value violates unique constraint' in str(e):
+                                form.add_error(None, 'Uno o más códigos de muestra ya existen. Por favor, revise los códigos e intente de nuevo.')
+                            else:
+                                form.add_error(None, 'Error al guardar el registro. Por favor, intente de nuevo.')
+                            print(e)  # Para depuración
                     else:
-                        messages.add_message(request=request, level=messages.ERROR, message=f'El usuario no tiene permiso para acceder aquí')
+                        messages.add_message(request=request, level=messages.ERROR, message='El usuario no tiene permiso para acceder aquí')
                         print(form.errors)
-                        #YB-283713
             elif action == 'mod':
                 # Lógica para modificar un elemento
                 model = models.ODT.objects.get(id=target_ID)

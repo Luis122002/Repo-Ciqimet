@@ -64,22 +64,23 @@
         <button class="btn btn-info" onclick="ShowDataInfo()">Mostrar detalles</button>
         <button class="btn btn-info" onclick="DeleteODT()">Eliminar ODT</button>
         <a href="/ODT/" class="btn btn-primary">Atras</a>
-        <a href="#" class="btn btn-success">Añadir muestra</a>
+        <button class="btn btn-success" onclick="AddMuestra()">Añadir muestra</button>
+        <button class="btn btn-info" onclick="showOdtEditPanel()">Modificar ODT</button>
 
         <div id="OdtInfoPanel">
             <div class="content-container">
                 <div class="card-body">
                     <h2 class="mb-4">Detalles de Orden de Trabajo (Nro OT: {{ odt.Nro_OT }})</h2>
                     <h5 class="card-title">Información de ODT</h5>
-                    <p><strong>Fecha de Recepción:</strong> {{ odt.Fec_Recep }}</p>
-                    <p><strong>Cantidad de Muestra:</strong> {{ odt.Cant_Muestra }}</p>
-                    <p><strong>Cliente:</strong> {{ odt.Cliente }}</p>
-                    <p><strong>Proyecto:</strong> {{ odt.Proyecto }}</p>
-                    <p><strong>Despacho:</strong> {{ odt.Despacho }}</p>
-                    <p><strong>Envío:</strong> {{ odt.Envio }}</p>
-                    <p><strong>ID de muestras:</strong> {{ odt.Muestra }}</p>
-                    <p><strong>Referencia:</strong> {{ odt.Referencia }}</p>
-                    <p><strong>Comentarios:</strong> {{ odt.Comentarios }}</p>
+                    <p><strong>Fecha de Recepción:</strong> <span class="Fec_Recep">{{ odt.Fec_Recep }}</span></p>
+                    <p><strong>Cantidad de Muestra:</strong> <span class="Cant_Muestra">{{ odt.Cant_Muestra }}</span></p>
+                    <p><strong>Cliente:</strong> <span class="Cliente">{{ odt.Cliente }}</span></p>
+                    <p><strong>Proyecto:</strong> <span class="Proyecto">{{ odt.Proyecto }}</span></p>
+                    <p><strong>Despacho:</strong> <span class="Despacho">{{ odt.Despacho }}</span></p>
+                    <p><strong>Envío:</strong> <span class="Envio">{{ odt.Envio }}</span></p>
+                    <p><strong>ID de muestras:</strong> <span class="Muestra">{{ odt.Muestra }}</span></p>
+                    <p><strong>Referencia:</strong> <span class="Referencia">{{ odt.Referencia }}</span></p>
+                    <p><strong>Comentarios:</strong> <span class="Comentarios">{{ odt.Comentarios }}</span></p>
                 </div>
             </div>
             <button class="btn btn-info OdtInfoPanel-Button" onclick="ShowDataInfo()">ShowDataInfo</button>
@@ -90,8 +91,8 @@
         <h5 class="mb-3">Análisis Realizados</h5>
         <br/>
         <div class="table-container">
-            <table class="table table-bordered">
-                <thead>
+            <table class="table table table-striped mb-0">
+                <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
                     <tr>
                         <th>ID Código</th>
                         <th>Peso Muestra</th>
@@ -101,7 +102,7 @@
                 </thead>
                 <tbody>
                     {% for ot in ots %}
-                    <tr>
+                    <tr class="sample-row" data-id="{{ ot.id_muestra }}">
                         <td>{{ ot.id_muestra }}</td>
                         <td>{{ ot.peso_muestra }}</td>
                         <td>{{ ot.volumen }}</td>
@@ -115,10 +116,13 @@
                 </tbody>
             </table>
         </div>
+        
     </div>
 </body>
 <script>
     var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    var idODT = "{{odt.id}}"
+    var MuestraODT = "{{odt.Muestra}}"
 
     function ShowDataInfo() {
         var panel = document.getElementById("OdtInfoPanel");
@@ -174,5 +178,410 @@
             }
         });
     }
+
+    function AddEventsTouch()
+    {
+
+        document.querySelectorAll('.sample-row').forEach(row => {
+            row.addEventListener('click', function() {
+                const sampleId = this.getAttribute('data-id');
+                
+                Swal.fire({
+                    title: 'Información de la Muestra',
+                    text: 'ID de la muestra: ' + sampleId,
+                    icon: 'info',
+                    showCancelButton: true,
+                    showDenyButton: true,
+                    confirmButtonText: 'Modificar',
+                    denyButtonText: 'Eliminar',
+                    cancelButtonText: 'Cerrar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Obtén los valores actuales para los campos
+                        const pesoMuestra = this.querySelector('td:nth-child(2)').textContent;
+                        const volumen = this.querySelector('td:nth-child(3)').textContent;
+                        const dilucion = this.querySelector('td:nth-child(4)').textContent;
+                        
+                        Swal.fire({
+                            title: 'Modificar Muestra',
+                            html: `
+                                <div style="text-align: center; margin-bottom: 15px;">
+                                    <label for="id_muestra" style="display: block; margin-bottom: 5px;">ID Muestra</label>
+                                    <input type="number" id="id_muestra" class="swal2-input" placeholder="ID Muestra" value="${sampleId.split('-').pop()}" />
+                                </div>
+                                <div style="text-align: center; margin-bottom: 15px;">
+                                    <label for="peso_muestra" style="display: block; margin-bottom: 5px;">Peso Muestra</label>
+                                    <input type="number" id="peso_muestra" class="swal2-input" placeholder="Peso Muestra" step="any" value="${pesoMuestra}" />
+                                </div>
+                                <div style="text-align: center; margin-bottom: 15px;">
+                                    <label for="volumen" style="display: block; margin-bottom: 5px;">Volumen</label>
+                                    <input type="number" id="volumen" class="swal2-input" placeholder="Volumen" step="any" value="${volumen}" />
+                                </div>
+                                <div style="text-align: center; margin-bottom: 15px;">
+                                    <label for="dilucion" style="display: block; margin-bottom: 5px;">Dilución</label>
+                                    <input type="number" id="dilucion" class="swal2-input" placeholder="Dilución" step="any" value="${dilucion}" />
+                                </div>
+                            `,
+                            focusConfirm: false,
+                            showCancelButton: true,
+                            confirmButtonText: 'Guardar',
+                            cancelButtonText: 'Cancelar',
+                            preConfirm: () => {
+                                const id_muestra = document.getElementById('id_muestra').value;
+                                const peso_muestra = document.getElementById('peso_muestra').value;
+                                const volumen = document.getElementById('volumen').value;
+                                const dilucion = document.getElementById('dilucion').value;
+
+                                // Validación del ID Muestra
+                                if (!/^\d{1,3}$/.test(id_muestra)) {
+                                    Swal.showValidationMessage('El ID Muestra debe ser un número de 1 a 3 dígitos');
+                                    return false;
+                                }
+
+                                return { id_muestra, peso_muestra, volumen, dilucion };
+                            }
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '/ModMuestra/', 
+                                    data: {
+                                        'MuestraODT': MuestraODT, 
+                                        'TargetDel': sampleId,
+                                        'valID': result.value.id_muestra,
+                                        'valPes': result.value.peso_muestra,
+                                        'valVol': result.value.volumen,
+                                        'valDis': result.value.dilucion,
+                                        'ODTID': idODT,
+                                        'contex': 'Mod',
+                                        'csrfmiddlewaretoken': csrfToken  
+                                    },
+                                    success: function(response) {
+                                        Swal.fire('Muestra Modificada', '', 'success');
+                                        ReloadContent();
+                                    },
+                                    error: function(xhr, status, error) {
+                                        let errorMessage = 'Ocurrió un error al modificar la muestra.';
+                                        if (xhr.responseJSON && xhr.responseJSON.error) {
+                                            errorMessage = xhr.responseJSON.error;
+                                        }
+                                        Swal.fire('Error', errorMessage, 'error');
+                                    }
+                                });
+                            }
+                        });
+                    } else if (result.isDenied) {
+                        // Confirmación para eliminar la muestra
+                        Swal.fire({
+                            title: '¿Estás seguro?',
+                            text: "No podrás deshacer esta acción.",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Sí, eliminar',
+                            cancelButtonText: 'Cancelar'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '/ModMuestra/',
+                                    data: {
+                                        'MuestraODT': MuestraODT, 
+                                        'TargetDel': sampleId,
+                                        'ODTID': idODT,
+                                        'contex': 'Del',
+                                        'csrfmiddlewaretoken': csrfToken
+                                    },
+                                    success: function(response) {
+                                        Swal.fire('Muestra Eliminada', '', 'success');
+                                        row.remove();
+                                        ReloadContent();
+                                    },
+                                    error: function(xhr, status, error) {
+                                        let errorMessage = 'Ocurrió un error al eliminar la muestra.';
+                                        if (xhr.responseJSON && xhr.responseJSON.error) {
+                                            errorMessage = xhr.responseJSON.error;
+                                        }
+                                        Swal.fire('Error', errorMessage, 'error');
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    }
+
+    AddEventsTouch();
+
+    function AddMuestra() {
+        Swal.fire({
+            title: 'Ingresa el número de muestra',
+            html: `
+                <style>
+                    .swal2-input {
+                        width: 80%;
+                    }
+                </style>
+                <input type="number" id="sampleNumber" class="swal2-input" placeholder="Número de muestra" min="0" max="999" oninput="AjustID('sampleNumber')" value="0" />
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Aplicar',
+            cancelButtonText: 'Cancelar',
+            
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const sampleNumber = document.getElementById('sampleNumber').value;
+                $.ajax({
+                    type: 'POST',
+                    url: '/ModMuestra/',
+                    data: {
+                        'MuestraODT' : MuestraODT, 
+                        'contex': 'Add',
+                        'ODTID':idODT,
+                        'valID': sampleNumber,
+                        'csrfmiddlewaretoken': csrfToken
+                    },
+                    success: function(response) {
+                        ReloadContent();
+                        Swal.fire('Muestra agregada', '', 'success');
+                    },
+                    error: function(xhr, status, error) {
+                        Swal.fire('Error', 'Ocurrió un error al eliminar la muestra.', 'error');
+                    }
+                });
+
+            } else if (result.isDismissed) {
+                console.log('Operación cancelada');
+            }
+        });
+    }
+
+    function showOdtEditPanel() {
+        Swal.fire({
+            title: 'Modificar ODT',
+            html: `
+            <style>
+                .swal2-input-container {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 10px;
+                    width: 100%;
+                }
+                .swal2-input-container label {
+                    width: 50%;
+                    font-weight: bold;
+                    margin-right: 10px;
+                    text-align: left;
+                    font-size: 14px;
+                }
+                .swal2-input-container input,
+                .swal2-input-container textarea {
+                    width: 70%;
+                    box-sizing: border-box;
+                }
+                .swal2-textarea {
+                    resize: vertical;
+                    height: 80px;
+                }
+                .swal2-input, .swal2-textarea {
+                    height: 30px;
+                }
+            </style>
+            <form id="odtEditForm">
+                <div class="swal2-input-container">
+                    <label for="Nro_OT">Número OT</label>
+                    <input type="text" id="Nro_OT" class="swal2-input" value="{{ odt.Nro_OT }}">
+                </div>
+                <div class="swal2-input-container">
+                    <label for="Fec_Recep">Fecha de Recepción</label>
+                    <input type="date" id="Fec_Recep" class="swal2-input" value="{{ odt.Fec_Recep|date:'Y-m-d' }}">
+                </div>
+                <div class="swal2-input-container">
+                    <label for="Cliente">Cliente</label>
+                    <input type="text" id="Cliente" class="swal2-input" value="{{ odt.Cliente }}">
+                </div>
+                <div class="swal2-input-container">
+                    <label for="Proyecto">Proyecto</label>
+                    <input type="text" id="Proyecto" class="swal2-input" value="{{ odt.Proyecto }}">
+                </div>
+                <div class="swal2-input-container">
+                    <label for="Despacho">Despacho</label>
+                    <input type="text" id="Despacho" class="swal2-input" value="{{ odt.Despacho }}">
+                </div>
+                <div class="swal2-input-container">
+                    <label for="Envio">Envío</label>
+                    <input type="text" id="Envio" class="swal2-input" value="{{ odt.Envio }}">
+                </div>
+                <div class="swal2-input-container">
+                    <label for="Muestra">Muestra</label>
+                    <input type="text" id="Muestra" class="swal2-input" value="{{ odt.Muestra }}">
+                </div>
+                <div class="swal2-input-container">
+                    <label for="Referencia">Referencia</label>
+                    <input type="text" id="Referencia" class="swal2-input" value="{{ odt.Referencia }}">
+                </div>
+                <div class="swal2-input-container">
+                    <label for="Comentarios">Comentarios</label>
+                    <textarea id="Comentarios" class="swal2-textarea">{{ odt.Comentarios }}</textarea>
+                </div>
+            </form>
+        `,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'Guardar',
+            cancelButtonText: 'Cancelar',
+            preConfirm: () => {
+                const Nro_OT = document.getElementById('Nro_OT').value;
+                const Fec_Recep = document.getElementById('Fec_Recep').value;
+                const Cliente = document.getElementById('Cliente').value;
+                const Proyecto = document.getElementById('Proyecto').value;
+                const Despacho = document.getElementById('Despacho').value;
+                const Envio = document.getElementById('Envio').value;
+                const Muestra = document.getElementById('Muestra').value;
+                const Referencia = document.getElementById('Referencia').value;
+                const Comentarios = document.getElementById('Comentarios').value;
+    
+                // Asegurarse de que el formato de la fecha es correcto
+                if (Fec_Recep) {
+                    const fecha = new Date(Fec_Recep);
+                    if (!isNaN(fecha.getTime())) {
+                        const formattedDate = fecha.toISOString().split('T')[0];
+                        return $.ajax({
+                            type: 'POST',
+                            url: '/ModODT/',
+                            data: {
+                                'idODT': idODT,
+                                'Nro_OT': Nro_OT,
+                                'Fec_Recep': formattedDate,
+                                'Cliente': Cliente,
+                                'Proyecto': Proyecto,
+                                'Despacho': Despacho,
+                                'Envio': Envio,
+                                'Muestra': Muestra,
+                                'Referencia': Referencia,
+                                'Comentarios': Comentarios,
+                                'csrfmiddlewaretoken': csrfToken 
+                            },
+                            success: function(response) {
+                                ReloadContent();
+                                Swal.fire('Modificado', 'Los detalles de la ODT han sido actualizados', 'success');
+                            },
+                            error: function(xhr, status, error) {
+                                Swal.fire('Error', 'Ocurrió un error al modificar la ODT.', 'error');
+                            }
+                        });
+                    } else {
+                        Swal.fire('Error', 'Fecha inválida.', 'error');
+                    }
+                } else {
+                    return $.ajax({
+                        type: 'POST',
+                        url: '/ModODT/',
+                        data: {
+                            'idODT': idODT,
+                            'Nro_OT': Nro_OT,
+                            'Fec_Recep': Fec_Recep,
+                            'Cliente': Cliente,
+                            'Proyecto': Proyecto,
+                            'Despacho': Despacho,
+                            'Envio': Envio,
+                            'Muestra': Muestra,
+                            'Referencia': Referencia,
+                            'Comentarios': Comentarios,
+                            'csrfmiddlewaretoken': csrfToken 
+                        },
+                        success: function(response) {
+                            Swal.fire('Modificado', 'Los detalles de la ODT han sido actualizados', 'success');
+                            ReloadContent()
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.fire('Error', 'Ocurrió un error al modificar la ODT.', 'error');
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+
+
+
+    function AjustID(IDValue) {
+        let inputField = document.getElementById(IDValue);
+        let value = inputField.value;
+    
+        if (isNaN(value) || value === '') {
+            inputField.value = 0;
+        } else {
+            value = parseInt(value, 10);
+    
+            if (value < 0) {
+                inputField.value = 0;
+            } else if (value > 999) {
+                inputField.value = 999;
+            } else {
+                inputField.value = value;
+            }
+        }
+    }
+
+    function ReloadContent() {
+        console.log("Reload")
+        $.ajax({
+            type: 'POST',
+            url: '/ODT-info_Request/', 
+            data: {
+                'odt_id': idODT,
+                'csrfmiddlewaretoken': csrfToken
+            },
+            success: function(response) {
+                // Actualiza la tabla con los nuevos datos
+                var tableBody = document.querySelector('.table-container tbody');
+                tableBody.innerHTML = '';  // Limpia el contenido actual
+    
+                response.ots.forEach(ot => {
+                    var row = document.createElement('tr');
+                    row.classList.add('sample-row');
+                    row.setAttribute('data-id', ot.id_muestra);
+    
+                    row.innerHTML = `
+                        <td>${ot.id_muestra}</td>
+                        <td>${ot.peso_muestra}</td>
+                        <td>${ot.volumen}</td>
+                        <td>${ot.dilucion}</td>
+                    `;
+    
+                    tableBody.appendChild(row);
+                });
+    
+                if (response.ots.length === 0) {
+                    var row = document.createElement('tr');
+                    row.innerHTML = '<td colspan="4">No hay análisis realizados.</td>';
+                    tableBody.appendChild(row);
+                }
+                AddEventsTouch();
+                // Actualiza el panel OdtInfoPanel con los nuevos datos
+                document.querySelector('#OdtInfoPanel .Cant_Muestra').textContent = response.odt.Cant_Muestra;
+                document.querySelector('#OdtInfoPanel .Fec_Recep').textContent = response.odt.Fec_Recep;
+                document.querySelector('#OdtInfoPanel .Cliente').textContent = response.odt.Cliente;
+                document.querySelector('#OdtInfoPanel .Proyecto').textContent = response.odt.Proyecto;
+                document.querySelector('#OdtInfoPanel .Despacho').textContent = response.odt.Despacho;
+                document.querySelector('#OdtInfoPanel .Envio').textContent = response.odt.Envio;
+                document.querySelector('#OdtInfoPanel .Muestra').textContent = response.odt.Muestra;
+                document.querySelector('#OdtInfoPanel .Referencia').textContent = response.odt.Referencia;
+                document.querySelector('#OdtInfoPanel .Comentarios').textContent = response.odt.Comentarios;
+    
+            },
+            error: function(xhr, status, error) {
+                console.error('Error al actualizar la tabla:', error);
+            }
+        });
+    }
+
+    
+
+
+
 </script>
 </html>

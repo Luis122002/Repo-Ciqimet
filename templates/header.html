@@ -429,6 +429,73 @@
             display: block; /* Aparece cuando se hace visible */
         }
 
+        .custom-title {
+            text-align: center;
+            font-size: 3rem; /* Tamaño de fuente grande */
+            font-weight: bold;
+            color: #2C3E50; /* Color del texto */
+            text-transform: uppercase; /* Transformar el texto a mayúsculas */
+            letter-spacing: 3px; /* Espaciado entre letras */
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2); /* Sombra para el texto */
+            margin-top: 20px;
+        }
+
+        .custom-title::after {
+            content: "";
+            display: block;
+            width: 200px;
+            height: 4px;
+            background-color: #3498DB; /* Línea decorativa debajo del título */
+            margin: 20px auto 0;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+
+        .container {
+            margin-top: 20px;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center; /* Centra los elementos en la fila */
+        }
+
+        .col {
+            margin: 0 10px;
+        }
+
+        .filters,
+        .actions,
+        .add-odt {
+            background-color: #f5f7fa;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .filters {
+            min-width: 400px; /* Tamaño mínimo mayor */
+            max-width: 600px; /* Tamaño máximo mayor para que pueda extenderse más */
+        }
+
+        .actions {
+            width: 200px; /* Tamaño fijo menor */
+            text-align: center;
+        }
+
+        .add-odt {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 200px; /* Tamaño fijo menor */
+        }
+
     </style>
 </head>
 <body>
@@ -449,9 +516,9 @@
                             <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="ordersDropdown">
-                            <li><a class="dropdown-item" href="#">Crear Orden de Trabajo</a></li>
-                            <li><a class="dropdown-item" href="#">Búsqueda y Filtro</a></li>
-                            <li><a class="dropdown-item" href="#">Exportación y Visualización de ODT</a></li>
+                            <li><a class="dropdown-item" href="#">Ver Ordenes de Trabajo</a></li>
+                            <li><a class="dropdown-item" href="#">Ver Muestras de Trabajo</a></li>
+                            <li><a class="dropdown-item" href="#">Ver Hoja de trabajo</a></li>
                             <li><a class="dropdown-item" href="#">Modificar Orden de Trabajo</a></li>
                             <li><a class="dropdown-item" href="#">Asignación Órdenes de Trabajo</a></li>
                         </ul>
@@ -506,9 +573,9 @@
                             <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="ordersDropdownMobile">
-                            <li><a class="dropdown-item" href="#">Crear Orden de Trabajo</a></li>
-                            <li><a class="dropdown-item" href="#">Búsqueda y Filtro</a></li>
-                            <li><a class="dropdown-item" href="#">Exportación y Visualización de ODT</a></li>
+                            <li><a class="dropdown-item" href="#">Ver Ordenes de Trabajo</a></li>
+                            <li><a class="dropdown-item" href="#">Ver Muestras de Trabajo</a></li>
+                            <li><a class="dropdown-item" href="#">Ver Hoja de trabajo</a></li>
                             <li><a class="dropdown-item" href="#">Modificar Orden de Trabajo</a></li>
                             <li><a class="dropdown-item" href="#">Asignación Órdenes de Trabajo</a></li>
                         </ul>

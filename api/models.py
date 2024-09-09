@@ -27,16 +27,18 @@ class ODT(models.Model):
     Comentarios = models.CharField(max_length=255, blank=True)
     InicioCodigo = models.PositiveIntegerField(_("Inicio Código"), blank=True, null=True)
     FinCodigo = models.PositiveIntegerField(_("Fin Código"), blank=True, null=True)
+    Cant_Muestra = models.PositiveIntegerField(_("Cantidad de Muestras"), blank=True, null=True)  # Campo para almacenar Cant_Muestra
     updated_at = models.DateTimeField(auto_now=True)  # Fecha de actualización automática
 
     def __str__(self):
         return self.Nro_OT
 
-    @property
-    def Cant_Muestra(self):
-        if self.InicioCodigo is not None and self.FinCodigo is not None:
-            return self.FinCodigo - self.InicioCodigo + 1
-        return None
+    def save(self, *args, **kwargs):
+        # Solo actualizar Cant_Muestra si es una nueva instancia
+        if self.pk is None:  # La instancia es nueva
+            if self.InicioCodigo is not None and self.FinCodigo is not None:
+                self.Cant_Muestra = self.FinCodigo - self.InicioCodigo + 1
+        super().save(*args, **kwargs)
 
     def clean(self):
         super().clean()
@@ -46,7 +48,7 @@ class ODT(models.Model):
             if self.FinCodigo < self.InicioCodigo:
                 raise ValidationError('El número final del código debe ser mayor o igual al número inicial.')
 
-        # Verificar la unicidad del código dentro del rango
+        # Verificar la unicidad del código dentro del rango en ODT
         if self.Muestra and self.InicioCodigo is not None and self.FinCodigo is not None:
             overlapping_records = ODT.objects.exclude(id=self.id).filter(
                 Muestra=self.Muestra,
@@ -60,6 +62,15 @@ class ODT(models.Model):
                     )
                 )
 
+        # Verificar la existencia del id_muestra en OT
+        if self.Muestra and self.InicioCodigo is not None and self.FinCodigo is not None:
+            for codigo in range(self.InicioCodigo, self.FinCodigo + 1):
+                expected_id_muestra = f"{self.Muestra}-{codigo:03d}"
+                if OT.objects.filter(id_muestra=expected_id_muestra).exists():
+                    raise ValidationError(
+                        f'El código de muestra {expected_id_muestra} ya existe en OT.'
+                    )
+
 class Analisis(models.Model):
     id = models.AutoField(primary_key=True)
     Analisis_metodo = models.CharField(_("Método de Análisis"), max_length=200)
@@ -72,7 +83,7 @@ class Analisis(models.Model):
 
 class OT(models.Model):
     id = models.AutoField(primary_key=True)
-    id_muestra = models.CharField(_("ID Muestra"), max_length=50)
+    id_muestra = models.CharField(_("ID Muestra"), max_length=50, unique=True)
     peso_muestra = models.FloatField(_("Peso Muestra"))
     volumen = models.FloatField(_("Volumen"))
     dilucion = models.FloatField(_("Dilución"))

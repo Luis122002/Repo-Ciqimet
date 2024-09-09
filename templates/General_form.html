@@ -7,33 +7,152 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario General</title>
     <style>
-        .container {
-            margin-top: 30px;
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
+        
+        @media (min-width: 601px) {
+            #myForm {
+                display: grid;
+                gap: 15px; /* Espacio entre columnas */
+                background-color: #f9f9f9; /* Color de fondo claro */
+                border: 2px solid #00796b; /* Azul claro */
+                border-radius: 8px; /* Bordes redondeados */
+                padding: 15px; /* Espacio interno */
+                box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* Sombra suave */
+                transition: all 0.3s ease-in-out; /* Transiciones suaves */
+                width: 100%; /* Ancho completo del contenedor padre */
+            }
+        
+            /* Estilo para los grupos de campos */
+            .form-group {
+                display: flex;
+                flex-direction: column;
+            }
+        
+            .form-group label {
+                font-weight: 600;
+                margin-bottom: 5px;
+            }
+        
+            .form-group input,
+            .form-group select {
+                width: 100%;
+                padding: 8px;
+                border-radius: 4px;
+                border: 1px solid #00796b; /* Azul claro */
+                background-color: #ffffff; /* Blanco */
+            }
+        
+            .form-group input:focus,
+            .form-group select:focus {
+                border-color: #004d40; /* Azul más oscuro */
+                box-shadow: 0 0 3px rgba(0, 77, 64, 0.3); /* Sombra azul más oscura */
+                outline: none;
+            }
+        
+            .form-group input::placeholder,
+            .form-group select::placeholder {
+                color: #004d40; /* Azul oscuro */
+                font-style: italic; /* Cursiva para el texto de marcador de posición */
+            }
+        
+            /* Estilo para los botones del formulario */
+            .btn-submit {
+                grid-column: span 2; /* El botón ocupa toda la fila en pantallas grandes */
+                margin-top: 15px;
+                background-color: #ffab40; /* Naranja claro */
+                color: #ffffff;
+                border: none;
+                border-radius: 4px;
+                padding: 8px 15px;
+                font-weight: 600;
+                transition: background-color 0.3s ease;
+            }
+        
+            .btn-submit:hover {
+                background-color: #ff9800; /* Naranja más oscuro */
+            }
         }
-        .alert {
-            margin-top: 20px;
+
+        
+    
+        /* Estilos para pantallas pequeñas */
+    @media (max-width: 600px) {
+        #myForm {
+            display: block; /* Diseño en columna para pantallas pequeñas */
+            background-color: #ffffff; /* Fondo blanco para contraste */
+            border: none; /* Sin borde para un diseño más limpio */
+            border-radius: 0; /* Sin bordes redondeados */
+            padding: 10px; /* Espacio interno reducido */
+            box-shadow: none; /* Sin sombra para simplicidad */
         }
+
+        /* Estilo para los grupos de campos */
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 10px; /* Espacio entre grupos de campos */
         }
-        .form-control {
-            width: 100%;
-            padding: 10px;
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 16px; /* Tamaño de fuente ajustado para pantallas pequeñas */
         }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: calc(100% - 16px); /* Ajuste del ancho para incluir padding */
+            padding: 10px; /* Padding aumentado para mejor accesibilidad */
+            border-radius: 4px;
+            border: 1px solid #00796b; /* Azul claro */
+            background-color: #ffffff; /* Blanco */
+            font-size: 16px; /* Tamaño de fuente ajustado */
+            box-sizing: border-box; /* Incluye padding en el ancho total */
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #004d40; /* Azul más oscuro */
+            box-shadow: 0 0 3px rgba(0, 77, 64, 0.3); /* Sombra azul más oscura */
+            outline: none;
+        }
+
+        .form-group input::placeholder,
+        .form-group select::placeholder,
+        .form-group textarea::placeholder {
+            color: #004d40; /* Azul oscuro */
+            font-style: italic; /* Cursiva para el texto de marcador de posición */
+        }
+
+        /* Estilo para los botones del formulario */
         .btn-submit {
             margin-top: 15px;
+            background-color: #ffab40; /* Naranja claro */
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            padding: 12px 20px; /* Padding aumentado para mejor accesibilidad */
+            font-weight: 600;
+            font-size: 16px; /* Tamaño de fuente ajustado */
+            width: 100%; /* El botón ocupa todo el ancho en pantallas pequeñas */
+            box-sizing: border-box; /* Incluye padding en el ancho total */
         }
-        .textarea-wrapper {
-            margin-top: 10px;
+
+        .btn-submit:hover {
+            background-color: #ff9800; /* Naranja más oscuro */
         }
-        .editor-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin-bottom: 10px;
+    }
+    
+        /* Estilos para dispositivos de más de 600px */
+        @media (min-width: 601px) {
+            #myForm {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Dos columnas en pantallas grandes */
+            }
         }
-        .editor-buttons button {
-            padding: 5px 10px;
+    
+        /* Tooltip */
+        [data-bs-toggle="tooltip"] {
+            cursor: pointer;
         }
     </style>
 </head>
@@ -73,7 +192,8 @@
             </div>
         {% endfor %}
         
-        <button type="submit" class="btn btn-primary btn-submit">Enviar</button>
+        <button type="submit" class="btn btn-primary btn-submit">Agregar</button>
+        <button onclick="window.location.href='/'">Cancelar</button>
     </form>
     <br/>
     {% if id != "-1" %}
@@ -95,10 +215,9 @@
             </div>
         {% endif %}
     </div>
-    <button id="open-alert">Crear Fórmula Química</button>
+    <button id="open-alert" style="display: none;">Crear Fórmula Química</button>
 </body>
 <script>
-   
     document.getElementById('open-alert')?.addEventListener('click', function() {
         Swal.fire({
             title: 'Añadir Símbolo',
@@ -181,68 +300,44 @@
                     },
                     data: {
                         'id': elementId,
-                        'context': context,
                         'action': action,
+                        'context': context,
                         'stade': stade
                     },
                     success: function(response) {
-                        if (response.redirect_url) {
-                            window.location.href = response.redirect_url; 
-                        } else {
-                            console.log(response.message);
-                        }
+                        Swal.fire(
+                            'Eliminado!',
+                            'El registro ha sido eliminado.',
+                            'success'
+                        ).then(() => {
+                            window.location.href = '/MasterData/';
+                        });
                     },
-                    error: function(xhr) {
-                        console.error('Error al enviar datos:', xhr.responseText);
+                    error: function(xhr, status, error) {
+                        Swal.fire(
+                            'Error!',
+                            'No se pudo eliminar el registro.',
+                            'error'
+                        );
                     }
                 });
-            } else if (result.dismiss === Swal.DismissReason.cancel) {
-                Swal.fire(
-                    'Cancelado',
-                    'La eliminación ha sido cancelada.',
-                    'info'
-                );
             }
-        }).catch(error => {
-            Swal.fire(
-                'Error',
-                'Ocurrió un problema con la eliminación del registro.',
-                'error'
-            );
         });
     }
 
-    function addToFormula(char) {
+    function addToFormula(symbol) {
         const textarea = document.getElementById('formula');
-        const cursorPos = textarea.selectionStart;
-        const textBefore = textarea.value.substring(0, cursorPos);
-        const textAfter = textarea.value.substring(cursorPos, textarea.value.length);
-        
-        textarea.value = textBefore + char + textAfter;
-        textarea.focus();  // Opcional: enfoca el área de texto
-        textarea.setSelectionRange(cursorPos + char.length, cursorPos + char.length);
+        textarea.value += symbol;
+        textarea.focus();
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
-        // Verifica si hay errores en el formulario
-        var formErrors = document.querySelectorAll('.alert-danger').length > 0;
-    
-        // Si hay errores, ajusta la URL
-        if (formErrors) {
-            var currentURL = window.location.href;
-    
-            // Verifica si la URL contiene el segmento adicional "/Action-Resource/"
-            var extraSegment = "Action-Resource/";
-            var index = currentURL.lastIndexOf(extraSegment);
-    
-            if (index !== -1) {
-                // Elimina el último segmento adicional de la URL
-                var newURL = currentURL.substring(0, index);
-    
-                // Reemplaza la URL en el historial del navegador sin recargar la página
-                window.history.replaceState(null, null, newURL);
-            }
-        }
+    document.addEventListener('DOMContentLoaded', function() {
+        const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltips.forEach(tooltip => {
+            new bootstrap.Tooltip(tooltip);
+        });
     });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </html>

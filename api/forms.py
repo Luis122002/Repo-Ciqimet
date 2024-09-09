@@ -19,6 +19,10 @@ class FormODT(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        for field_name, field in self.fields.items():
+            field.widget.attrs.update({'class': 'form-General'})
+
         self.fields['Nro_OT'].help_text = 'Número de orden de trabajo, por ejemplo: OT123456.'
         self.fields['Fec_Recep'].help_text = 'Fecha de recepción de la muestra.'
         self.fields['Cliente'].help_text = 'Nombre del cliente que solicita la muestra.'
@@ -35,10 +39,17 @@ class FormODT(forms.ModelForm):
         cleaned_data = super().clean()
         inicio_codigo = cleaned_data.get('InicioCodigo')
         fin_codigo = cleaned_data.get('FinCodigo')
+        muestra_codigo = cleaned_data.get('Muestra')
 
         if inicio_codigo is not None and fin_codigo is not None:
             if fin_codigo < inicio_codigo:
                 self.add_error('FinCodigo', 'El número final del código debe ser mayor o igual al número inicial.')
+            
+            # Verificar si los códigos generados ya existen
+            for codigo in range(inicio_codigo, fin_codigo + 1):
+                codigo_completo = f"{muestra_codigo}-{codigo:02d}"
+                if models.OT.objects.filter(id_muestra=codigo_completo).exists():
+                    self.add_error(None, f'El código de muestra {codigo_completo} ya existe en OT.')
 
         return cleaned_data
 
@@ -56,6 +67,10 @@ class FormElements(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        for field_name, field in self.fields.items():
+            field.widget.attrs.update({'class': 'form-General'})
+
         self.fields['nombre'].help_text = 'Nombre del elemento, por ejemplo: Hidrógeno.'
         self.fields['descripcion'].help_text = 'Descripción opcional del elemento. Máximo 255 caracteres.'
         self.fields['tipo'].help_text = 'Tipo de elemento, por ejemplo: Metal, No metal.'
@@ -63,6 +78,8 @@ class FormElements(forms.ModelForm):
         self.fields['simbolo'].help_text = 'Símbolo químico del elemento, por ejemplo: H, O.'
         self.fields['numero_atomico'].help_text = 'Número atómico del elemento, por ejemplo: 1 para Hidrógeno.'
         self.fields['masa_atomica'].help_text = 'Masa atómica del elemento en unidades de masa atómica (uma).'
+
+
 
 
 class FormAnalisis(forms.ModelForm):
