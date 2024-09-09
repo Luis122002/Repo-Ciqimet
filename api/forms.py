@@ -21,8 +21,14 @@ class FormODT(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         for field_name, field in self.fields.items():
-            field.widget.attrs.update({'class': 'form-General'})
+            # Añadir clases y tooltips
+            field.widget.attrs.update({
+                'class': 'form-General',
+                'data-bs-toggle': 'tooltip',
+                'title': field.help_text  # Usar help_text como contenido del tooltip
+            })
 
+        # Definir help_texts para cada campo
         self.fields['Nro_OT'].help_text = 'Número de orden de trabajo, por ejemplo: OT123456.'
         self.fields['Fec_Recep'].help_text = 'Fecha de recepción de la muestra.'
         self.fields['Cliente'].help_text = 'Nombre del cliente que solicita la muestra.'
@@ -52,7 +58,6 @@ class FormODT(forms.ModelForm):
                     self.add_error(None, f'El código de muestra {codigo_completo} ya existe en OT.')
 
         return cleaned_data
-
 
 class FormElements(forms.ModelForm):
     class Meta:
