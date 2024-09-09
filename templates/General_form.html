@@ -337,6 +337,32 @@
             new bootstrap.Tooltip(tooltip);
         });
     });
+
+    
+    function ajustarURL() {
+        let currentURL = window.location.href;
+    
+        // Detectar si la URL termina en "Action-Resource/"
+        if (currentURL.endsWith("Action-Resource/")) {
+            // Eliminar el último "Action-Resource/"
+            let newURL = currentURL.slice(0, -("Action-Resource/".length));
+    
+            // Reemplazar la URL actual en el navegador sin acceder a la nueva URL
+            window.history.replaceState(null, null, newURL);
+        }
+    }
+    
+    // Ejecutar la función cuando ocurra un error en el formulario
+    window.addEventListener('load', function() {
+        // Asume que si hay errores visibles, es que hubo un error de validación en el formulario
+        let errorElements = document.querySelectorAll('.alert-danger');
+        if (errorElements.length > 0) {
+            ajustarURL();
+        }
+    });
+
+
+
 </script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
