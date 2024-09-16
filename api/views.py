@@ -6,9 +6,9 @@ from django.shortcuts import HttpResponse
 from django.contrib import messages
 from django.conf import settings
 from django.core import signing
-from datetime import datetime, timedelta
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import  AuthenticationForm
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import login
 from django.forms import ValidationError
 from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect
@@ -22,18 +22,24 @@ from django.urls import reverse
 from django.db import IntegrityError, transaction
 from django.db.models import Q
 
+@login_required(login_url='/login/')
 def requestAcces(request):
-    
     return redirect("/index")
 
-def login(request):
 
-    if DEBUG == True:
-        return render(request,"index.html")
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('/index')
     else:
-        return redirect()
+        form = AuthenticationForm()
+    
+    return render(request, "login.html", {'form': form})
 
-
+@login_required(login_url='/login/')
 def Main(request):
     odts = models.ODT.objects.all()
     analisis_list = models.Analisis.objects.all()
@@ -472,7 +478,7 @@ def general_form(request, token):
 
 
        
-        data = {'form':form, 'id':target_ID, "contexModel": context}
+        data = {'form':form, 'id':target_ID, "contexModel": context, "action": action}
         return render(request, "General_form.html", data)
 
     except Exception as e:
@@ -512,3 +518,12 @@ def Master_def(request):
     redirect_url = f'/Action-Resource/{token}/'
 
     return JsonResponse({'redirect_url': redirect_url, 'message': 'Datos recibidos correctamente'})
+
+
+def get_proyectos(request):
+    cliente_id = request.GET.get('cliente_id')
+    proyectos = models.Proyecto.objects.filter(cliente_id=cliente_id)
+    data = {
+        'proyectos': list(proyectos.values('id', 'nombre'))
+    }
+    return JsonResponse(data)

@@ -95,9 +95,10 @@
                 <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
                     <tr>
                         <th>ID Código</th>
-                        <th>Peso Muestra</th>
-                        <th>Volumen</th>
+                        <th>Peso de muestra (Gr)</th>
+                        <th>Volumen (Ml)</th>
                         <th>Dilución</th>
+                        <th>Elemento</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -107,6 +108,7 @@
                         <td>{{ ot.peso_muestra }}</td>
                         <td>{{ ot.volumen }}</td>
                         <td>{{ ot.dilucion }}</td>
+                        <td>{{ ot.Elemento }}</td>
                     </tr>
                     {% empty %}
                     <tr>
@@ -550,6 +552,8 @@
                         <td>${ot.peso_muestra}</td>
                         <td>${ot.volumen}</td>
                         <td>${ot.dilucion}</td>
+                        <td>${ot.Elemento}</td>
+
                     `;
     
                     tableBody.appendChild(row);

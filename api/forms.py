@@ -1,40 +1,40 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from django.contrib.auth.password_validation import CommonPasswordValidator, validate_password
 from api import models
-
-
 
 class FormODT(forms.ModelForm):
     class Meta:
         model = models.ODT
         fields = '__all__'
         widgets = {
-            'Fec_Recep': forms.DateInput(attrs={'type': 'date'}),
-            'Comentarios': forms.Textarea(attrs={'rows': 3}),
-            'InicioCodigo': forms.NumberInput(attrs={'max': 99999, 'min': 1}),
-            'FinCodigo': forms.NumberInput(attrs={'max': 99999, 'min': 1}),
+            'Fec_Recep': forms.DateInput(attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd'}),
+            'Comentarios': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Ingrese comentarios adicionales'}),
+            'InicioCodigo': forms.NumberInput(attrs={'max': 998, 'min': 1, 'placeholder': 'Ej. 101'}),
+            'FinCodigo': forms.NumberInput(attrs={'max': 999, 'min': 1, 'placeholder': 'Ej. 201'}),
+            'Despacho': forms.NumberInput(attrs={'max': 99999999999, 'min': 0, 'placeholder': 'Ej. 1234567890'}),
+            'Nro_OT': forms.TextInput(attrs={'placeholder': 'Ej. OT123456'}),
+            'Muestra': forms.TextInput(attrs={'placeholder': 'Código de identificación de muestra'}),
+            'Referencia': forms.TextInput(attrs={'placeholder': 'Referencia adicional'}),
         }
-        exclude = ['Cant_Muestra']  # Excluir Cant_Muestra de los campos editables
+        exclude = ['Cant_Muestra']
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
 
+
         for field_name, field in self.fields.items():
-            # Añadir clases y tooltips
             field.widget.attrs.update({
                 'class': 'form-General',
                 'data-bs-toggle': 'tooltip',
-                'title': field.help_text  # Usar help_text como contenido del tooltip
+                'title': field.help_text
             })
 
-        # Definir help_texts para cada campo
         self.fields['Nro_OT'].help_text = 'Número de orden de trabajo, por ejemplo: OT123456.'
         self.fields['Fec_Recep'].help_text = 'Fecha de recepción de la muestra.'
-        self.fields['Cliente'].help_text = 'Nombre del cliente que solicita la muestra.'
+        self.fields['Cliente'].help_text = 'Seleccione el cliente que solicita la muestra.'
         self.fields['Proyecto'].help_text = 'Nombre del proyecto al que se asigna la muestra.'
-        self.fields['Despacho'].help_text = 'Detalles del despacho relacionado con la muestra.'
-        self.fields['Envio'].help_text = 'Detalles del envío relacionado con la muestra.'
+        self.fields['Despacho'].help_text = 'Número de despacho relacionado con la muestra.'
+        self.fields['Envio'].help_text = 'Seleccione el usuario responsable del envío.'
         self.fields['Muestra'].help_text = 'Código de identificación de la muestra.'
         self.fields['Referencia'].help_text = 'Referencia adicional relacionada con la muestra.'
         self.fields['Comentarios'].help_text = 'Comentarios adicionales sobre la muestra, si los hay.'
@@ -50,8 +50,7 @@ class FormODT(forms.ModelForm):
         if inicio_codigo is not None and fin_codigo is not None:
             if fin_codigo < inicio_codigo:
                 self.add_error('FinCodigo', 'El número final del código debe ser mayor o igual al número inicial.')
-            
-            # Verificar si los códigos generados ya existen
+
             for codigo in range(inicio_codigo, fin_codigo + 1):
                 codigo_completo = f"{muestra_codigo}-{codigo:02d}"
                 if models.OT.objects.filter(id_muestra=codigo_completo).exists():
@@ -64,12 +63,12 @@ class FormElements(forms.ModelForm):
         model = models.Elementos
         fields = '__all__'
         widgets = {
-            'descripcion': forms.Textarea(attrs={'rows': 3}),
-            'simbolo': forms.TextInput(attrs={'maxlength': 5}),
-            'numero_atomico': forms.NumberInput(attrs={'min': 1}),
-            'masa_atomica': forms.NumberInput(attrs={'step': 'any'}),
+            'descripcion': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Descripción opcional del elemento'}),
+            'simbolo': forms.TextInput(attrs={'maxlength': 5, 'placeholder': 'Ej. H'}),
+            'numero_atomico': forms.NumberInput(attrs={'min': 1, 'placeholder': 'Ej. 1'}),
+            'masa_atomica': forms.NumberInput(attrs={'step': 'any', 'placeholder': 'Ej. 1.008'}),
         }
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -83,9 +82,6 @@ class FormElements(forms.ModelForm):
         self.fields['simbolo'].help_text = 'Símbolo químico del elemento, por ejemplo: H, O.'
         self.fields['numero_atomico'].help_text = 'Número atómico del elemento, por ejemplo: 1 para Hidrógeno.'
         self.fields['masa_atomica'].help_text = 'Masa atómica del elemento en unidades de masa atómica (uma).'
-
-
-
 
 class FormAnalisis(forms.ModelForm):
     class Meta:

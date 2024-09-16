@@ -166,6 +166,10 @@ STORAGES = {
 
 AUTH_USER_MODEL='api.User'
 
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/index/'
+
+
 # # HSTS settings
 # SECURE_HSTS_SECONDS = 3600  # Considera aumentar este valor
 # SECURE_HSTS_INCLUDE_SUBDOMAINS = True

@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión</title>
+    <link rel="stylesheet" href="{% static 'rest_framework/css/bootstrap.min.css' %}">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+        }
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background-color: #ffffff;
+        }
+        .login-container h2 {
+            margin-bottom: 20px;
+        }
+        .login-container button {
+            width: 100%;
+        }
+        .admin-button {
+            margin-top: 15px;
+            width: 100%;
+        }
+        .admin-button a {
+            display: block;
+            text-align: center;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+        }
+        .admin-button a:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Iniciar sesión</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+        </form>
+        <div class="admin-button mt-3">
+            <a href="{% url 'admin:index' %}">Acceder como Administrador</a>
+        </div>
+    </div>
+</body>
+</html>

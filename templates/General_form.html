@@ -158,7 +158,22 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h1>Formulario General</h1>
+        <h1 class="custom-title">
+            {% if contexModel == 'element' %}
+                {% if action == 'add' %}
+                    Añadir Elemento
+                {% elif action == 'mod' %}
+                    Modificar Elemento
+                {% endif %}
+            {% elif contexModel == 'ODT' %}
+                {% if action == 'add' %}
+                    Añadir Orden de Trabajo
+                {% elif action == 'mod' %}
+                    Modificar Orden de Trabajo
+                {% endif %}
+            {% endif %}
+        </h1>
+        <h1>{{contexModel}} {{action}}</h1>
         {% if form %}
     <form id="myForm" method="POST" action="Action-Resource/">
         {% csrf_token %}
@@ -193,7 +208,8 @@
         {% endfor %}
         
         <button type="submit" class="btn btn-primary btn-submit">Agregar</button>
-        <button onclick="window.location.href='/'">Cancelar</button>
+        <button onclick="window.location.href='{% if contexModel == 'element' %}/Elements-Manager/{% elif contexModel == 'ODT' %}/ODT/{% endif %}'">Cancelar</button>
+
     </form>
     <br/>
     {% if id != "-1" %}
@@ -361,6 +377,53 @@
         }
     });
 
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const clienteField = document.getElementById('id_Cliente');
+        const proyectoField = document.getElementById('id_Proyecto');
+        
+        clienteField.addEventListener('change', function() {
+            const clienteId = this.value;
+            
+            if (clienteId) {
+                fetch(`/get-proyectos/?cliente_id=${clienteId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Limpiar proyectos actuales
+                        proyectoField.innerHTML = '<option value="">---------</option>';
+                        
+                        // Añadir nuevos proyectos
+                        data.proyectos.forEach(proyecto => {
+                            const option = document.createElement('option');
+                            option.value = proyecto.id;
+                            option.textContent = proyecto.nombre;
+                            proyectoField.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error:', error));
+            } else {
+                // Si no hay cliente seleccionado, limpiar proyectos
+                proyectoField.innerHTML = '<option value="">---------</option>';
+            }
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Selecciona todos los inputs de tipo número
+        const numberInputs = document.querySelectorAll('input[type="number"]');
+        
+        numberInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                // Guarda el valor actual
+                let value = this.value;
+                
+                // Si el valor no es un número válido, establece 0
+                if (isNaN(value) || value === '') {
+                    this.value = '0';
+                }
+            });
+        });
+    });
     
 
 </script>
