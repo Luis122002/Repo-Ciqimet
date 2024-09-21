@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Cliente, Proyecto, ODT, Analisis, Elementos, OT, LecturasElementos
+from .models import User, Cliente, Proyecto, ODT, Analisis, Elementos, OT
 
 # Registrar el modelo User (si no lo has hecho ya)
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -50,7 +50,7 @@ class ProyectoAdmin(admin.ModelAdmin):
 # Registrar otros modelos si es necesario
 @admin.register(ODT)
 class ODTAdmin(admin.ModelAdmin):
-    list_display = ('Nro_OT', 'Fec_Recep', 'Cliente', 'Proyecto', 'Despacho', 'Envio', 'Muestra', 'Referencia', 'Comentarios', 'InicioCodigo', 'FinCodigo', 'Cant_Muestra', 'Turno')
+    list_display = ('Nro_OT', 'Fec_Recep', 'Cliente', 'Proyecto', 'Despacho', 'Envio', 'Muestra', 'Comentarios', 'InicioCodigo', 'FinCodigo', 'Cant_Muestra', 'Turno')
     search_fields = ('Nro_OT', 'Muestra', 'Referencia', 'Cliente__username', 'Proyecto')
     list_filter = ('Cliente', 'Turno')
 
@@ -66,10 +66,5 @@ class ElementosAdmin(admin.ModelAdmin):
 
 @admin.register(OT)
 class OTAdmin(admin.ModelAdmin):
-    list_display = ('id_muestra', 'peso_muestra', 'volumen', 'dilucion', 'odt', 'analisis', 'Elemento')
-    search_fields = ('id_muestra', 'odt__Nro_OT', 'analisis__Analisis_metodo', 'Elemento__nombre')
-
-@admin.register(LecturasElementos)
-class LecturasElementosAdmin(admin.ModelAdmin):
-    list_display = ('lectura', 'analisis', 'ot', 'elementos')
-    search_fields = ('analisis__Analisis_metodo', 'ot__id_muestra', 'elementos__nombre')
+    list_display = ('id_muestra', 'peso_muestra', 'volumen', 'dilucion', 'odt')
+    search_fields = ('id_muestra', 'odt__Nro_OT')

@@ -65,7 +65,7 @@
         <button class="btn btn-info" onclick="DeleteODT()">Eliminar ODT</button>
         <a href="/ODT/" class="btn btn-primary">Atras</a>
         <button class="btn btn-success" onclick="AddMuestra()">Añadir muestra</button>
-        <button class="btn btn-info" onclick="showOdtEditPanel()">Modificar ODT</button>
+        <button class="btn btn-info" onclick="EditODT()">Modificar ODT</button>
 
         <div id="OdtInfoPanel">
             <div class="content-container">
@@ -79,7 +79,7 @@
                     <p><strong>Despacho:</strong> <span class="Despacho">{{ odt.Despacho }}</span></p>
                     <p><strong>Envío:</strong> <span class="Envio">{{ odt.Envio }}</span></p>
                     <p><strong>ID de muestras:</strong> <span class="Muestra">{{ odt.Muestra }}</span></p>
-                    <p><strong>Referencia:</strong> <span class="Referencia">{{ odt.Referencia }}</span></p>
+                    <p><strong>Análisis:</strong> <span class="Analisis">{{ odt.Analisis.Analisis_metodo }}</span></p>
                     <p><strong>Comentarios:</strong> <span class="Comentarios">{{ odt.Comentarios }}</span></p>
                 </div>
             </div>
@@ -104,7 +104,7 @@
                 <tbody>
                     {% for ot in ots %}
                     <tr class="sample-row" data-id="{{ ot.id_muestra }}">
-                        <td>{{ ot.id_muestra }}</td>
+                        <td>{{ ot.id_muestraInput }}</td>
                         <td>{{ ot.peso_muestra }}</td>
                         <td>{{ ot.volumen }}</td>
                         <td>{{ ot.dilucion }}</td>
@@ -187,10 +187,13 @@
         document.querySelectorAll('.sample-row').forEach(row => {
             row.addEventListener('click', function() {
                 const sampleId = this.getAttribute('data-id');
+                const completID = this.querySelector('td:nth-child(1)').textContent;
+
+                
                 
                 Swal.fire({
                     title: 'Información de la Muestra',
-                    text: 'ID de la muestra: ' + sampleId,
+                    text: 'ID de la muestra: ' + completID,
                     icon: 'info',
                     showCancelButton: true,
                     showDenyButton: true,
@@ -359,153 +362,54 @@
         });
     }
 
-    function showOdtEditPanel() {
-        Swal.fire({
-            title: 'Modificar ODT',
-            html: `
-            <style>
-                .swal2-input-container {
-                    display: flex;
-                    align-items: center;
-                    margin-bottom: 10px;
-                    width: 100%;
-                }
-                .swal2-input-container label {
-                    width: 50%;
-                    font-weight: bold;
-                    margin-right: 10px;
-                    text-align: left;
-                    font-size: 14px;
-                }
-                .swal2-input-container input,
-                .swal2-input-container textarea {
-                    width: 70%;
-                    box-sizing: border-box;
-                }
-                .swal2-textarea {
-                    resize: vertical;
-                    height: 80px;
-                }
-                .swal2-input, .swal2-textarea {
-                    height: 30px;
-                }
-            </style>
-            <form id="odtEditForm">
-                <div class="swal2-input-container">
-                    <label for="Nro_OT">Número OT</label>
-                    <input type="text" id="Nro_OT" class="swal2-input" value="{{ odt.Nro_OT }}">
-                </div>
-                <div class="swal2-input-container">
-                    <label for="Fec_Recep">Fecha de Recepción</label>
-                    <input type="date" id="Fec_Recep" class="swal2-input" value="{{ odt.Fec_Recep|date:'Y-m-d' }}">
-                </div>
-                <div class="swal2-input-container">
-                    <label for="Cliente">Cliente</label>
-                    <input type="text" id="Cliente" class="swal2-input" value="{{ odt.Cliente }}">
-                </div>
-                <div class="swal2-input-container">
-                    <label for="Proyecto">Proyecto</label>
-                    <input type="text" id="Proyecto" class="swal2-input" value="{{ odt.Proyecto }}">
-                </div>
-                <div class="swal2-input-container">
-                    <label for="Despacho">Despacho</label>
-                    <input type="text" id="Despacho" class="swal2-input" value="{{ odt.Despacho }}">
-                </div>
-                <div class="swal2-input-container">
-                    <label for="Envio">Envío</label>
-                    <input type="text" id="Envio" class="swal2-input" value="{{ odt.Envio }}">
-                </div>
-                <div class="swal2-input-container">
-                    <label for="Muestra">Muestra</label>
-                    <input type="text" id="Muestra" class="swal2-input" value="{{ odt.Muestra }}">
-                </div>
-                <div class="swal2-input-container">
-                    <label for="Referencia">Referencia</label>
-                    <input type="text" id="Referencia" class="swal2-input" value="{{ odt.Referencia }}">
-                </div>
-                <div class="swal2-input-container">
-                    <label for="Comentarios">Comentarios</label>
-                    <textarea id="Comentarios" class="swal2-textarea">{{ odt.Comentarios }}</textarea>
-                </div>
-            </form>
-        `,
-            focusConfirm: false,
-            showCancelButton: true,
-            confirmButtonText: 'Guardar',
-            cancelButtonText: 'Cancelar',
-            preConfirm: () => {
-                const Nro_OT = document.getElementById('Nro_OT').value;
-                const Fec_Recep = document.getElementById('Fec_Recep').value;
-                const Cliente = document.getElementById('Cliente').value;
-                const Proyecto = document.getElementById('Proyecto').value;
-                const Despacho = document.getElementById('Despacho').value;
-                const Envio = document.getElementById('Envio').value;
-                const Muestra = document.getElementById('Muestra').value;
-                const Referencia = document.getElementById('Referencia').value;
-                const Comentarios = document.getElementById('Comentarios').value;
-    
-                // Asegurarse de que el formato de la fecha es correcto
-                if (Fec_Recep) {
-                    const fecha = new Date(Fec_Recep);
-                    if (!isNaN(fecha.getTime())) {
-                        const formattedDate = fecha.toISOString().split('T')[0];
-                        return $.ajax({
-                            type: 'POST',
-                            url: '/ModODT/',
-                            data: {
-                                'idODT': idODT,
-                                'Nro_OT': Nro_OT,
-                                'Fec_Recep': formattedDate,
-                                'Cliente': Cliente,
-                                'Proyecto': Proyecto,
-                                'Despacho': Despacho,
-                                'Envio': Envio,
-                                'Muestra': Muestra,
-                                'Referencia': Referencia,
-                                'Comentarios': Comentarios,
-                                'csrfmiddlewaretoken': csrfToken 
-                            },
-                            success: function(response) {
-                                ReloadContent();
-                                Swal.fire('Modificado', 'Los detalles de la ODT han sido actualizados', 'success');
-                            },
-                            error: function(xhr, status, error) {
-                                Swal.fire('Error', 'Ocurrió un error al modificar la ODT.', 'error');
-                            }
-                        });
-                    } else {
-                        Swal.fire('Error', 'Fecha inválida.', 'error');
-                    }
+    function EditODT() 
+    {
+        const elementId = idODT;
+        const urlDat = '/MasterData/';
+        const Token = csrfToken;
+        const context = 'ODT'; 
+        const action = 'mod'; 
+        const stade = "acces"; 
+        $.ajax({
+            url: urlDat,
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': Token
+            },
+            data: {
+                'id': elementId,
+                'context': context,
+                'action': action,
+                'stade': stade
+            },
+            success: function(response) {
+                if (response.redirect_url) {
+                    window.location.href = response.redirect_url; 
                 } else {
-                    return $.ajax({
-                        type: 'POST',
-                        url: '/ModODT/',
-                        data: {
-                            'idODT': idODT,
-                            'Nro_OT': Nro_OT,
-                            'Fec_Recep': Fec_Recep,
-                            'Cliente': Cliente,
-                            'Proyecto': Proyecto,
-                            'Despacho': Despacho,
-                            'Envio': Envio,
-                            'Muestra': Muestra,
-                            'Referencia': Referencia,
-                            'Comentarios': Comentarios,
-                            'csrfmiddlewaretoken': csrfToken 
-                        },
-                        success: function(response) {
-                            Swal.fire('Modificado', 'Los detalles de la ODT han sido actualizados', 'success');
-                            ReloadContent()
-                        },
-                        error: function(xhr, status, error) {
-                            Swal.fire('Error', 'Ocurrió un error al modificar la ODT.', 'error');
-                        }
-                    });
+                    console.log(response.message);
                 }
+            },
+            error: function(xhr) {
+                console.error('Error al enviar datos:', xhr.responseText);
             }
         });
     }
 
+        function applyFilters() {
+            // Obtener los valores de los filtros
+            var year = document.getElementById('filter-year').value;
+            var month = document.getElementById('filter-month').value;
+            var search = document.getElementById('search-box').value;
+        
+            // Construir la URL de la solicitud con los parámetros de búsqueda y filtro
+            var url = new URL(window.location.href);
+            url.searchParams.set('year', year);
+            url.searchParams.set('month', month);
+            url.searchParams.set('search', search);
+        
+            // Redirigir a la nueva URL con los parámetros de filtro aplicados
+            window.location.href = url.toString();
+        }
 
 
 
@@ -548,12 +452,10 @@
                     row.setAttribute('data-id', ot.id_muestra);
     
                     row.innerHTML = `
-                        <td>${ot.id_muestra}</td>
-                        <td>${ot.peso_muestra}</td>
-                        <td>${ot.volumen}</td>
-                        <td>${ot.dilucion}</td>
-                        <td>${ot.Elemento}</td>
-
+                        <td>${ot.id_muestraInput}</td>
+                        <td>${ot.peso_muestra.toFixed(1)}</td>
+                        <td>${ot.volumen.toFixed(1)}</td>
+                        <td>${ot.dilucion.toFixed(1)}</td>
                     `;
     
                     tableBody.appendChild(row);
@@ -568,13 +470,13 @@
                 // Actualiza el panel OdtInfoPanel con los nuevos datos
                 document.querySelector('#OdtInfoPanel .Cant_Muestra').textContent = response.odt.Cant_Muestra;
                 document.querySelector('#OdtInfoPanel .Fec_Recep').textContent = response.odt.Fec_Recep;
-                document.querySelector('#OdtInfoPanel .Cliente').textContent = response.odt.Cliente;
-                document.querySelector('#OdtInfoPanel .Proyecto').textContent = response.odt.Proyecto;
+                document.querySelector('#OdtInfoPanel .Cliente').textContent = response.odt.Cliente.nombre_cliente;
+                document.querySelector('#OdtInfoPanel .Proyecto').textContent = response.odt.Proyecto.nombre;
                 document.querySelector('#OdtInfoPanel .Despacho').textContent = response.odt.Despacho;
-                document.querySelector('#OdtInfoPanel .Envio').textContent = response.odt.Envio;
+                document.querySelector('#OdtInfoPanel .Envio').textContent = response.odt.Envio.username;
                 document.querySelector('#OdtInfoPanel .Muestra').textContent = response.odt.Muestra;
-                document.querySelector('#OdtInfoPanel .Referencia').textContent = response.odt.Referencia;
                 document.querySelector('#OdtInfoPanel .Comentarios').textContent = response.odt.Comentarios;
+                document.querySelector('#OdtInfoPanel .Analisis').textContent = response.odt.Analisis.Analisis_metodo;
     
             },
             error: function(xhr, status, error) {

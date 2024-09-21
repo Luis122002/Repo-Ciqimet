@@ -408,17 +408,25 @@
     });
 
     document.addEventListener('DOMContentLoaded', function() {
-        // Selecciona todos los inputs de tipo número
         const numberInputs = document.querySelectorAll('input[type="number"]');
-        
+    
         numberInputs.forEach(input => {
             input.addEventListener('input', function() {
-                // Guarda el valor actual
                 let value = this.value;
-                
-                // Si el valor no es un número válido, establece 0
+    
+                const min = parseFloat(this.min) || -Infinity;
+                const max = parseFloat(this.max) || Infinity; 
+    
                 if (isNaN(value) || value === '') {
                     this.value = '0';
+                } else {
+                    value = parseFloat(value);
+    
+                    if (value < min) {
+                        this.value = min; 
+                    } else if (value > max) {
+                        this.value = max; 
+                    }
                 }
             });
         });

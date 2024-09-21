@@ -45,7 +45,6 @@ def Main(request):
     analisis_list = models.Analisis.objects.all()
     ots = models.OT.objects.all()
     elementos = models.Elementos.objects.all()
-    lecturas_elementos = models.LecturasElementos.objects.all()
 
     # Pasar los datos al contexto de la plantilla
     context = {
@@ -53,7 +52,6 @@ def Main(request):
         'analisis_list': analisis_list,
         'ots': ots,
         'elementos': elementos,
-        'lecturas_elementos': lecturas_elementos
     }
     
     return render(request, 'index.html', context)
@@ -160,10 +158,9 @@ def ModODT(request):
     if request.method == 'POST':
         try:
             odt_id = request.POST.get('idODT')
-            print(odt_id)
-            odt = models.ODT.objects.get(id=odt_id)
-            print(odt)
 
+            odt = models.ODT.objects.get(id=odt_id)
+            
             # Extraer valores del formulario
             Nro_OT = request.POST.get('Nro_OT')
             Fec_Recep = request.POST.get('Fec_Recep')
@@ -246,18 +243,28 @@ def ODT_Info(request):
         odt = models.ODT.objects.get(id=odt_id)
         ots = models.OT.objects.filter(odt=odt)
 
-        # Procesar los datos para ordenar
-        def extract_number_from_id(id_muestra):
-            # Extraer el número después del último guion
-            parts = id_muestra.split('-')
-            return int(parts[-1]) if parts[-1].isdigit() else 0
+        # Ordenar los objetos OT por el id_muestra original
+        ots_sorted = sorted(ots, key=lambda ot: ot.id_muestra)
 
-        # Ordenar los objetos OT por el número después del último guion
-        ots_sorted = sorted(ots, key=lambda ot: extract_number_from_id(ot.id_muestra))
+        # Crear una nueva lista con id_muestra sin el último guion
+        new_ots = []
+        for ot in ots_sorted:
+            cleaned_id_muestra = str(ot.id_muestra).replace("-","")
+            print(cleaned_id_muestra)
+            new_ots.append({
+                'id':ot.id,
+                'id_muestra': ot.id_muestra,
+                'id_muestraInput': cleaned_id_muestra,
+                'peso_muestra': ot.peso_muestra,
+                'volumen': ot.volumen,
+                'dilucion': ot.dilucion,
+                'odt': ot.odt,
+                'updated_at': ot.updated_at
+            })
 
         context = {
             "odt": odt,
-            "ots": ots_sorted
+            "ots": new_ots,
         }
 
         return render(request, 'ODT-Info.html', context)
@@ -266,6 +273,7 @@ def ODT_Info(request):
     
 
 def ODT_Info_Request(request):
+    print("hola")
     if request.method == 'POST':
         odt_id = request.POST.get('odt_id')
         try:
@@ -281,30 +289,50 @@ def ODT_Info_Request(request):
 
         ots_sorted = sorted(ots, key=lambda ot: extract_number_from_id(ot.id_muestra))
 
-        ots_data = [{
-            'id_muestra': ot.id_muestra,
-            'peso_muestra': ot.peso_muestra,
-            'volumen': ot.volumen,
-            'dilucion': ot.dilucion
-        } for ot in ots_sorted]
 
-        # Agregar los detalles del ODT a la respuesta JSON
+        new_ots = []
+        for ot in ots_sorted:
+            cleaned_id_muestra = str(ot.id_muestra).replace("-","")
+            new_ots.append({
+                'id':ot.id,
+                'id_muestra': ot.id_muestra,
+                'id_muestraInput': cleaned_id_muestra,
+                'peso_muestra': ot.peso_muestra,
+                'volumen': ot.volumen,
+                'dilucion': ot.dilucion,
+                'odt': ot.odt.Nro_OT,
+                'updated_at': ot.updated_at
+            })
+
+
         odt_data = {
+            'Nro_OT': odt.Nro_OT,
             'Cant_Muestra': odt.Cant_Muestra,
             'Fec_Recep': odt.Fec_Recep,
-            'Cliente': odt.Cliente,
-            'Proyecto': odt.Proyecto,
+            'Cliente': {
+                'id': odt.Cliente.id,
+                'nombre_cliente': odt.Cliente.nombre_cliente,
+            } if odt.Cliente else None,  
+            'Proyecto': {
+                'id': odt.Proyecto.id,
+                'nombre': odt.Proyecto.nombre,
+            } if odt.Proyecto else None,  
+            'Envio': {
+                'id': odt.Envio.id,
+                'username': odt.Envio.username,
+            } if odt.Envio else None,
             'Despacho': odt.Despacho,
-            'Envio': odt.Envio,
             'Muestra': odt.Muestra,
-            'Referencia': odt.Referencia,
             'Comentarios': odt.Comentarios,
+            'Analisis':{
+                'id': odt.Analisis.id,
+                'Analisis_metodo': odt.Analisis.Analisis_metodo,
+            }
         }
 
-        return JsonResponse({'ots': ots_data, 'odt': odt_data})
+        return JsonResponse({'ots': new_ots, 'odt': odt_data})
     else:
         return HttpResponse(status=405)
-    
 
 def Elements_Section(request):
     # Obtener todos los elementos
@@ -376,7 +404,6 @@ def general_form(request, token):
         # Procesar según el contexto y la acción
         if context == 'element':
             if action == 'add':
-                print(f"Current URL: {request.build_absolute_uri()}")
                 form = forms.FormElements()
                 if request.method == 'POST':
                     form = forms.FormElements(request.POST)
@@ -395,11 +422,8 @@ def general_form(request, token):
                         
             elif action == 'del':
                 model = models.Elementos.objects.get(id=target_ID)
-                print(model)
-                print(request.method)
                 if request.method == "GET":
                     model.delete()
-                    print("Deleted")
                     return redirect(reverse('elements_manager'))
         
         elif context == 'analytic':
@@ -414,7 +438,7 @@ def general_form(request, token):
                         try:
                             # Guardar la instancia de ODT
                             odt_instance = form.save()
-                            
+                            ProyectDis = odt_instance.Proyecto.volVal
                             muestra_codigo = odt_instance.Muestra
                             inicio_codigo = odt_instance.InicioCodigo
                             fin_codigo = odt_instance.FinCodigo
@@ -436,7 +460,7 @@ def general_form(request, token):
                                             id_muestra=codigo_completo,
                                             odt=odt_instance,
                                             peso_muestra=0.0,
-                                            volumen=0.0,
+                                            volumen=ProyectDis,
                                             dilucion=0.0
                                         )
                                     
@@ -455,15 +479,15 @@ def general_form(request, token):
                         messages.add_message(request=request, level=messages.ERROR, message='El usuario no tiene permiso para acceder aquí')
                         print(form.errors)
             elif action == 'mod':
-                # Lógica para modificar un elemento
+                print("Modificar ODTs")
                 model = models.ODT.objects.get(id=target_ID)
                 form = forms.FormODT(instance = model)
                 if request.method == 'POST':
-                    form = forms.FormElements(request.POST, instance=model)
+                    form = forms.FormODT(request.POST, instance=model)
                     if form.is_valid():
                         form = form.save()
                         return redirect(reverse('Main_ODT'))
-                        
+                    
             elif action == 'del':
                 print("EIMINAR ODT")
                 model = models.ODT.objects.get(id=target_ID)

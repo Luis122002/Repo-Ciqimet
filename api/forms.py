@@ -8,19 +8,17 @@ class FormODT(forms.ModelForm):
         widgets = {
             'Fec_Recep': forms.DateInput(attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd'}),
             'Comentarios': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Ingrese comentarios adicionales'}),
-            'InicioCodigo': forms.NumberInput(attrs={'max': 998, 'min': 1, 'placeholder': 'Ej. 101'}),
+            'InicioCodigo': forms.NumberInput(attrs={'max': 999, 'min': 1, 'placeholder': 'Ej. 101'}),
             'FinCodigo': forms.NumberInput(attrs={'max': 999, 'min': 1, 'placeholder': 'Ej. 201'}),
-            'Despacho': forms.NumberInput(attrs={'max': 99999999999, 'min': 0, 'placeholder': 'Ej. 1234567890'}),
+            'Despacho': forms.TextInput(attrs={'placeholder': 'Ej. CG-12345678'}),
             'Nro_OT': forms.TextInput(attrs={'placeholder': 'Ej. OT123456'}),
             'Muestra': forms.TextInput(attrs={'placeholder': 'Código de identificación de muestra'}),
-            'Referencia': forms.TextInput(attrs={'placeholder': 'Referencia adicional'}),
         }
         exclude = ['Cant_Muestra']
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-
 
         for field_name, field in self.fields.items():
             field.widget.attrs.update({
@@ -33,13 +31,25 @@ class FormODT(forms.ModelForm):
         self.fields['Fec_Recep'].help_text = 'Fecha de recepción de la muestra.'
         self.fields['Cliente'].help_text = 'Seleccione el cliente que solicita la muestra.'
         self.fields['Proyecto'].help_text = 'Nombre del proyecto al que se asigna la muestra.'
-        self.fields['Despacho'].help_text = 'Número de despacho relacionado con la muestra.'
+        self.fields['Despacho'].help_text = 'Sección donde se entrega la orden de trabajo.'
         self.fields['Envio'].help_text = 'Seleccione el usuario responsable del envío.'
         self.fields['Muestra'].help_text = 'Código de identificación de la muestra.'
-        self.fields['Referencia'].help_text = 'Referencia adicional relacionada con la muestra.'
         self.fields['Comentarios'].help_text = 'Comentarios adicionales sobre la muestra, si los hay.'
-        self.fields['InicioCodigo'].help_text = 'Número de inicio para el código de muestra.'
-        self.fields['FinCodigo'].help_text = 'Número final para el código de muestra.'
+        self.fields['InicioCodigo'].help_text = 'Número de inicio para el código de muestra (1-999).'
+        self.fields['FinCodigo'].help_text = 'Número final para el código de muestra (1-999).'
+
+        # Bloquear campos si se está modificando un registro existente
+        if self.instance.pk:  # Si ya tiene un ID, es una modificación
+            self.fields['InicioCodigo'].widget.attrs['readonly'] = 'readonly'
+            self.fields['FinCodigo'].widget.attrs['readonly'] = 'readonly'
+            self.fields['InicioCodigo'].widget.attrs['style'] = 'background-color: #f0f0f0; cursor: not-allowed;'
+            self.fields['FinCodigo'].widget.attrs['style'] = 'background-color: #f0f0f0; cursor: not-allowed;'
+        
+        # Asegurarse de que la fecha de recepción tenga el formato correcto
+        if 'Fec_Recep' in self.data:
+            self.fields['Fec_Recep'].widget.attrs['value'] = self.data['Fec_Recep']
+        elif self.instance and self.instance.Fec_Recep:
+            self.fields['Fec_Recep'].widget.attrs['value'] = self.instance.Fec_Recep.strftime('%Y-%m-%d')
 
     def clean(self):
         cleaned_data = super().clean()
@@ -47,14 +57,16 @@ class FormODT(forms.ModelForm):
         fin_codigo = cleaned_data.get('FinCodigo')
         muestra_codigo = cleaned_data.get('Muestra')
 
-        if inicio_codigo is not None and fin_codigo is not None:
-            if fin_codigo < inicio_codigo:
-                self.add_error('FinCodigo', 'El número final del código debe ser mayor o igual al número inicial.')
+        # Solo aplicar validaciones si es un nuevo registro
+        if not self.instance.pk:  # Si no tiene un ID, es un nuevo registro
+            if inicio_codigo is not None and fin_codigo is not None:
+                if fin_codigo < inicio_codigo:
+                    self.add_error('FinCodigo', 'El número final del código debe ser mayor o igual al número inicial.')
 
-            for codigo in range(inicio_codigo, fin_codigo + 1):
-                codigo_completo = f"{muestra_codigo}-{codigo:02d}"
-                if models.OT.objects.filter(id_muestra=codigo_completo).exists():
-                    self.add_error(None, f'El código de muestra {codigo_completo} ya existe en OT.')
+                for codigo in range(inicio_codigo, fin_codigo + 1):
+                    codigo_completo = f"{muestra_codigo}-{codigo:02d}"
+                    if models.OT.objects.filter(id_muestra=codigo_completo).exists():
+                        self.add_error(None, f'El código de muestra {codigo_completo} ya existe en OT.')
 
         return cleaned_data
 
