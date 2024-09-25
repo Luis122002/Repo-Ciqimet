@@ -445,7 +445,7 @@ def Analysis_Section(request):
         'analisis': analisis,
         'metodos_unicos': tipos_unicos,
     }
-    return render(request, "Analysis.html", context)
+    return render(request, "analysis.html", context)
 
 
 
