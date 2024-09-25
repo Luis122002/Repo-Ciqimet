@@ -44,22 +44,41 @@ class ODT(models.Model):
     Fec_Recep = models.DateField()
     Cliente = models.ForeignKey(Cliente, null=True, blank=True, on_delete=models.CASCADE)
     Proyecto = models.ForeignKey(Proyecto, null=True, blank=True, on_delete=models.CASCADE)
-    Despacho = models.CharField(_("Despacho"),max_length=200, blank=True, null=True)
+    Despacho = models.CharField(_("Despacho"), max_length=200, blank=True, null=True)
     Envio = models.ForeignKey(User, limit_choices_to={'rolname__in': [User.Role.QUIMICO_A, User.Role.QUIMICO_B, User.Role.QUIMICO_C]}, on_delete=models.CASCADE, related_name='envios', verbose_name=_("Responsable de envío"))
     Muestra = models.CharField(_("Código de muestras"), max_length=200)
     Comentarios = models.CharField(max_length=255, blank=True)
-    Turno = models.CharField(
-        _("Turno"),
-        max_length=10,
-        choices=[('DIA', _('Día')), ('NOCHE', _('Noche'))],
-        default='DIA'
-    )
+    Turno = models.CharField(_("Turno"), max_length=10, choices=[('DIA', _('Día')), ('NOCHE', _('Noche'))], default='DIA')
     InicioCodigo = models.PositiveIntegerField(_("Inicio Código"), blank=True, null=True)
     FinCodigo = models.PositiveIntegerField(_("Fin Código"), blank=True, null=True)
     Cant_Muestra = models.PositiveIntegerField(_("Cantidad de Muestras"), blank=True, null=True)
     
     Analisis = models.ForeignKey('Analisis', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Análisis"))
     updated_at = models.DateTimeField(auto_now=True)  # Fecha de última modificación
+
+    def save(self, *args, **kwargs):
+        # Automatizar Nro_OT si no existe
+        if not self.Nro_OT:
+            # Generar un Nro_OT automático
+            last_odt = ODT.objects.order_by('id').last()
+            if last_odt:
+                last_ot_number = int(last_odt.Nro_OT.split('OT')[-1])  # Suponiendo que el formato es 'OT123456'
+                self.Nro_OT = f"OT{last_ot_number + 1:06d}"
+            else:
+                self.Nro_OT = "OT000001"
+
+        # Automatizar el campo de muestra si no está definido
+        if not self.Muestra and self.InicioCodigo and self.FinCodigo:
+            self.Muestra = f"M-{self.InicioCodigo}-{self.FinCodigo}"
+
+        # Asignar automáticamente el Cliente del Proyecto
+        if self.Proyecto and self.Proyecto.cliente:
+            self.Cliente = self.Proyecto.cliente
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.Nro_OT
 
     def __str__(self):
         return self.Nro_OT
@@ -103,20 +122,20 @@ class Analisis(models.Model):
     Formula = models.CharField(max_length=255)
     Elementos = models.ManyToManyField('Elementos', verbose_name=_("Elementos"), blank=True)  # Relación con Elementos
     updated_at = models.DateTimeField(auto_now=True)  # Fecha de última modificación
+    enabled = models.BooleanField(_("Activo"), default=True)
 
     def __str__(self):
         return self.Analisis_metodo
-    
 
 class Elementos(models.Model):
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(_("Nombre"), max_length=200)
-    descripcion = models.TextField(max_length=255, blank=True)
     tipo = models.CharField(max_length=200)
-    enabled = models.BooleanField(_("Activo"), default=True)
     simbolo = models.CharField(max_length=5, blank=True, null=True)
     numero_atomico = models.IntegerField(blank=True, null=True) 
     masa_atomica = models.FloatField(blank=True, null=True)
+    enabled = models.BooleanField(_("Activo"), default=True)
+    descripcion = models.TextField(max_length=255, blank=True)
     updated_at = models.DateTimeField(auto_now=True)  # Fecha de última modificación
 
     def __str__(self):

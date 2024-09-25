@@ -171,6 +171,12 @@
                 {% elif action == 'mod' %}
                     Modificar Orden de Trabajo
                 {% endif %}
+            {% elif contexModel == 'analytic' %}
+                {% if action == 'add' %}
+                    Añadir Análisis de Trabajo
+                {% elif action == 'mod' %}
+                    Modificar Análisis de Trabajo
+                {% endif %}
             {% endif %}
         </h1>
         {% if form %}
@@ -232,6 +238,9 @@
     </div>
     <button id="open-alert" style="display: none;">Crear Fórmula Química</button>
 </body>
+
+{% include 'Footer.html' %}
+
 <script>
     document.getElementById('open-alert')?.addEventListener('click', function() {
         Swal.fire({
@@ -290,6 +299,9 @@
     });
 
     function OnDeleteRegister() {
+        console.log("ID: {{ id }}");
+        console.log("Contexto: {{ contexModel }}");
+        
         Swal.fire({
             title: '¿Estás seguro que quieres eliminar este registro?',
             text: "Esta acción no se puede deshacer.",
@@ -307,6 +319,7 @@
                 const context = "{{ contexModel }}"; 
                 const action = 'del'; 
                 const stade = "acces"; 
+                
                 $.ajax({
                     url: urlDat,
                     type: 'POST',
@@ -320,12 +333,14 @@
                         'stade': stade
                     },
                     success: function(response) {
+                        // Manejar la respuesta aquí
                         Swal.fire(
                             'Eliminado!',
                             'El registro ha sido eliminado.',
                             'success'
                         ).then(() => {
-                            window.location.href = '/MasterData/';
+                            // Redireccionar si es necesario
+                            window.location.href = response.redirect_url;
                         });
                     },
                     error: function(xhr, status, error) {
@@ -339,6 +354,7 @@
             }
         });
     }
+
 
     function addToFormula(symbol) {
         const textarea = document.getElementById('formula');
@@ -376,37 +392,7 @@
         }
     });
 
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const clienteField = document.getElementById('id_Cliente');
-        const proyectoField = document.getElementById('id_Proyecto');
-        
-        clienteField.addEventListener('change', function() {
-            const clienteId = this.value;
-            
-            if (clienteId) {
-                fetch(`/get-proyectos/?cliente_id=${clienteId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        // Limpiar proyectos actuales
-                        proyectoField.innerHTML = '<option value="">---------</option>';
-                        
-                        // Añadir nuevos proyectos
-                        data.proyectos.forEach(proyecto => {
-                            const option = document.createElement('option');
-                            option.value = proyecto.id;
-                            option.textContent = proyecto.nombre;
-                            proyectoField.appendChild(option);
-                        });
-                    })
-                    .catch(error => console.error('Error:', error));
-            } else {
-                // Si no hay cliente seleccionado, limpiar proyectos
-                proyectoField.innerHTML = '<option value="">---------</option>';
-            }
-        });
-    });
-
+    
     document.addEventListener('DOMContentLoaded', function() {
         const numberInputs = document.querySelectorAll('input[type="number"]');
     

@@ -59,33 +59,32 @@ def Main(request):
     
 
 def ODT_Module(request):
-    # Obtener parámetros de búsqueda y filtro desde la solicitud
     search_query = request.GET.get('search', '')
     filter_year = request.GET.get('year', '')
     filter_month = request.GET.get('month', '')
 
-    # Filtrar objetos ODT según los parámetros proporcionados
+    print(search_query)
+
     odts = models.ODT.objects.all()
 
-    if search_query:
-        odts = odts.filter(
-            # Buscar en los campos especificados
-            Q(Nro_OT__icontains=search_query) |
-            Q(Cliente__icontains=search_query) |
-            Q(Proyecto__icontains=search_query) |
-            Q(Muestra__icontains=search_query) |
-            Q(Cant_Muestra__icontains=search_query)|
-            Q(Despacho__icontains=search_query)|
-            Q(Envio__icontains=search_query)|
-            Q(Referencia__icontains=search_query)
-        )
-
+    odts = odts.filter(
+        Q(Nro_OT__icontains=search_query) |
+        Q(Cliente__nombre_cliente__icontains=search_query) |  # Acceder al nombre del cliente
+        Q(Proyecto__nombre__icontains=search_query) |  # Acceder al nombre del proyecto
+        Q(Muestra__icontains=search_query) |
+        Q(Cant_Muestra__icontains=search_query) |
+        Q(Despacho__icontains=search_query) |
+        Q(Envio__username__icontains=search_query) |  # Acceder al nombre de usuario del envío
+        Q(Turno__icontains=search_query)
+    )
+    
+    
     if filter_year:
         odts = odts.filter(Fec_Recep__year=filter_year)
 
     if filter_month:
         odts = odts.filter(Fec_Recep__month=filter_month)
-
+    
     context = {
         'odts': odts,
         'available_years': list(models.ODT.objects.dates('Fec_Recep', 'year').values_list('Fec_Recep__year', flat=True).distinct()),
@@ -243,23 +242,46 @@ def ODT_Info(request):
         odt = models.ODT.objects.get(id=odt_id)
         ots = models.OT.objects.filter(odt=odt)
 
+        # Obtener el análisis basado en el método de análisis de la ODT
+        analisis = models.Analisis.objects.get(Analisis_metodo=odt.Analisis)
+
+        # Obtener los elementos asociados al análisis
+        elementos = analisis.Elementos.all()
+
+        # Imprimir cada elemento asociado al análisis (opcional)
+        print("Elementos asociados al análisis:")
+        for elemento in elementos:
+            print(f"Nombre: {elemento.nombre}, Símbolo: {elemento.simbolo}, Número Atómico: {elemento.numero_atomico}")
+
         # Ordenar los objetos OT por el id_muestra original
         ots_sorted = sorted(ots, key=lambda ot: ot.id_muestra)
 
-        # Crear una nueva lista con id_muestra sin el último guion
+        # Crear una nueva lista con id_muestra sin el último guion e incluir los elementos
         new_ots = []
         for ot in ots_sorted:
-            cleaned_id_muestra = str(ot.id_muestra).replace("-","")
-            print(cleaned_id_muestra)
+            cleaned_id_muestra = str(ot.id_muestra).replace("-", "")
+            
+            # Crear una lista de diccionarios con los detalles de cada elemento asociado al análisis
+            elementos_data = [
+                {
+                    'nombre': elemento.nombre,
+                    'simbolo': elemento.simbolo,
+                    'numero_atomico': elemento.numero_atomico,
+                    'masa_atomica': elemento.masa_atomica,
+                }
+                for elemento in elementos
+            ]
+            
             new_ots.append({
-                'id':ot.id,
+                'id': ot.id,
                 'id_muestra': ot.id_muestra,
                 'id_muestraInput': cleaned_id_muestra,
                 'peso_muestra': ot.peso_muestra,
                 'volumen': ot.volumen,
                 'dilucion': ot.dilucion,
                 'odt': ot.odt,
-                'updated_at': ot.updated_at
+                'updated_at': ot.updated_at,
+                'elementos': elementos_data  # Agregar la lista de elementos aquí
             })
 
         context = {
@@ -283,28 +305,52 @@ def ODT_Info_Request(request):
 
         ots = models.OT.objects.filter(odt=odt)
 
+        # Obtener el análisis basado en el método de análisis de la ODT
+        try:
+            analisis = models.Analisis.objects.get(Analisis_metodo=odt.Analisis)
+        except models.Analisis.DoesNotExist:
+            return JsonResponse({'error': 'Análisis no encontrado'}, status=404)
+
+        # Obtener los elementos asociados al análisis
+        elementos = analisis.Elementos.all()
+
+        # Función para extraer el número de id_muestra
         def extract_number_from_id(id_muestra):
             parts = id_muestra.split('-')
             return int(parts[-1]) if parts[-1].isdigit() else 0
 
+        # Ordenar los objetos OT
         ots_sorted = sorted(ots, key=lambda ot: extract_number_from_id(ot.id_muestra))
 
-
+        # Crear una nueva lista con id_muestra sin el último guion e incluir los elementos
         new_ots = []
         for ot in ots_sorted:
-            cleaned_id_muestra = str(ot.id_muestra).replace("-","")
+            cleaned_id_muestra = str(ot.id_muestra).replace("-", "")
+            
+            # Crear una lista de diccionarios con los detalles de cada elemento asociado al análisis
+            elementos_data = [
+                {
+                    'nombre': elemento.nombre,
+                    'simbolo': elemento.simbolo,
+                    'numero_atomico': elemento.numero_atomico,
+                    'masa_atomica': elemento.masa_atomica,
+                }
+                for elemento in elementos
+            ]
+
             new_ots.append({
-                'id':ot.id,
+                'id': ot.id,
                 'id_muestra': ot.id_muestra,
                 'id_muestraInput': cleaned_id_muestra,
                 'peso_muestra': ot.peso_muestra,
                 'volumen': ot.volumen,
                 'dilucion': ot.dilucion,
                 'odt': ot.odt.Nro_OT,
-                'updated_at': ot.updated_at
+                'updated_at': ot.updated_at,
+                'elementos': elementos_data  # Agregar los elementos al OT
             })
 
-
+        # Datos de ODT
         odt_data = {
             'Nro_OT': odt.Nro_OT,
             'Cant_Muestra': odt.Cant_Muestra,
@@ -312,11 +358,11 @@ def ODT_Info_Request(request):
             'Cliente': {
                 'id': odt.Cliente.id,
                 'nombre_cliente': odt.Cliente.nombre_cliente,
-            } if odt.Cliente else None,  
+            } if odt.Cliente else None,
             'Proyecto': {
                 'id': odt.Proyecto.id,
                 'nombre': odt.Proyecto.nombre,
-            } if odt.Proyecto else None,  
+            } if odt.Proyecto else None,
             'Envio': {
                 'id': odt.Envio.id,
                 'username': odt.Envio.username,
@@ -324,7 +370,7 @@ def ODT_Info_Request(request):
             'Despacho': odt.Despacho,
             'Muestra': odt.Muestra,
             'Comentarios': odt.Comentarios,
-            'Analisis':{
+            'Analisis': {
                 'id': odt.Analisis.id,
                 'Analisis_metodo': odt.Analisis.Analisis_metodo,
             }
@@ -335,30 +381,20 @@ def ODT_Info_Request(request):
         return HttpResponse(status=405)
 
 def Elements_Section(request):
-    # Obtener todos los elementos
     elementos = models.Elementos.objects.all()
-    
-    # Obtener tipos únicos para el filtro
     tipos_unicos = models.Elementos.objects.values_list('tipo', flat=True).distinct()
-
-    # Filtrar por tipo si se proporciona en la solicitud
     tipo_filtrado = request.GET.get('tipo', '')
     if tipo_filtrado:
         elementos = elementos.filter(tipo__iexact=tipo_filtrado)
-
-    # Filtrar por estado de habilitación si se proporciona en la solicitud
     enabled_filtrado = request.GET.get('enabled', '')
     if enabled_filtrado:
         if enabled_filtrado.lower() == 'true':
             elementos = elementos.filter(enabled=True)
         elif enabled_filtrado.lower() == 'false':
             elementos = elementos.filter(enabled=False)
-
-    # Manejo de la acción seleccionada
     if request.method == 'POST':
         action = request.POST.get('action', '')
         element_id = request.POST.get('id', '')
-
         if action and element_id:
             try:
                 elemento = models.Elementos.objects.get(pk=element_id)
@@ -370,7 +406,6 @@ def Elements_Section(request):
                 return JsonResponse({'success': True})
             except models.Elementos.DoesNotExist:
                 return JsonResponse({'success': False, 'error': 'Elemento no encontrado'})
-
     context = {
         'elementos': elementos,
         'tipos_unicos': tipos_unicos,
@@ -378,9 +413,44 @@ def Elements_Section(request):
     return render(request, "Elements.html", context)
 
 
+
+def Analysis_Section(request):
+    analisis = models.Analisis.objects.all()
+    tipos_unicos = models.Analisis.objects.values_list('Analisis_metodo', flat=True).distinct()
+    tipo_filtrado = request.GET.get('Analisis_metodo', '')
+    if tipo_filtrado:
+        analisis = analisis.filter(Analisis_metodo__iexact=tipo_filtrado)
+    enabled_filtrado = request.GET.get('enabled', '')
+    if enabled_filtrado:
+        if enabled_filtrado.lower() == 'true':
+            analisis = analisis.filter(enabled=True)
+        elif enabled_filtrado.lower() == 'false':
+            analisis = analisis.filter(enabled=False)
+    if request.method == 'POST':
+        action = request.POST.get('action', '')
+        ID_Targe = request.POST.get('id', '')
+    
+        if action and ID_Targe:
+            try:
+                Target = models.Analisis.objects.get(pk=ID_Targe)
+                if action == 'Activar':
+                    Target.enabled = True
+                elif action == 'Desactivar':
+                    Target.enabled = False
+                Target.save()
+                return JsonResponse({'success': True})
+            except models.Analisis.DoesNotExist:
+                return JsonResponse({'success': False, 'error': 'Análisis no encontrado'})
+    context = {
+        'analisis': analisis,
+        'metodos_unicos': tipos_unicos,
+    }
+    return render(request, "Analysis.html", context)
+
+
+
 def general_form(request, token):
     try:
-        # Decodificar el token desde base64
         decoded_data = base64.urlsafe_b64decode(token.encode()).decode()
         data = json.loads(decoded_data)
 
@@ -388,6 +458,10 @@ def general_form(request, token):
         context = data.get('context')
         action = data.get('action')
         stade = data.get('stade')
+
+        print(target_ID)
+        print(context)
+        print(action)
 
         form = None
         model = None
@@ -427,9 +501,28 @@ def general_form(request, token):
                     return redirect(reverse('elements_manager'))
         
         elif context == 'analytic':
-            # Lógica para 'analytic'
-            result_message = f'Análisis {target_ID} procesado con éxito.'
-        
+            if action == 'add':
+                form = forms.FormAnalisis()
+                if request.method == 'POST':
+                    form = forms.FormAnalisis(request.POST)
+                    if form.is_valid():
+                        form.save()
+                        return redirect(reverse('analisis_manager'))
+            elif action == 'mod':
+                # Lógica para modificar un elemento
+                model = models.Analisis.objects.get(id=target_ID)
+                form = forms.FormAnalisis(instance = model)
+                if request.method == 'POST':
+                    form = forms.FormAnalisis(request.POST, instance=model)
+                    if form.is_valid():
+                        form = form.save()
+                        return redirect(reverse('analisis_manager'))
+                        
+            elif action == 'del':
+                model = models.Analisis.objects.get(id=target_ID)
+                if request.method == "GET":
+                    model.delete()
+                    return redirect(reverse('analisis_manager'))
         elif context == 'ODT':
             if action == 'add':
                 form = forms.FormODT(request.POST or None)

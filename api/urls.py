@@ -18,7 +18,7 @@ urlpatterns = [
     path('get-proyectos/', views.get_proyectos, name='get_proyectos'),
 
     path('Elements-Manager/', views.Elements_Section, name='elements_manager'),
-    path('Analisis-Manager/', views.Elements_Section, name='analisis_manager'),
+    path('Analysis-Manager/', views.Analysis_Section, name='analisis_manager'),
     path('Puesto-trabajo/', views.PT_Module),
     path('Puesto-instrumental/', views.PI_Module),
 

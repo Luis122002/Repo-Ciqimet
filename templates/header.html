@@ -63,7 +63,7 @@
             transition: all 0.3s;
             position: relative;
             right: 50%;
-            
+            cursor: pointer;
         }
 
         .header .logo img:hover {
@@ -100,7 +100,7 @@
         .header .nav-links .dropdown-menu {
             display: none;
             position: absolute;
-            background-color: #164766f0;
+            background-color: #103349ef;
             list-style: none;
             padding: 10px;
             margin: 0;
@@ -130,7 +130,7 @@
 
         .header .nav-links .dropdown-menu a:hover {
             color: #fcc058;
-            background-color: #143f5a;
+            background-color: #103349;
         }
 
         /* Botón de contacto */
@@ -346,7 +346,7 @@
 
         .extra-card .nav-links .dropdown-menu {
             display: none;
-            background-color: #164766f0;
+            background-color: #11364d;
             padding: 0; /* Ajusta el padding si es necesario */
             margin: 0;
             border-radius: 5px;
@@ -495,7 +495,7 @@
             justify-content: center;
             width: 200px; /* Tamaño fijo menor */
         }
-
+        
     </style>
 </head>
 <body>
@@ -516,11 +516,13 @@
                             <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="ordersDropdown">
-                            <li><a class="dropdown-item" href="ODT/">Ver Ordenes de Trabajo</a></li>
-                            <li><a class="dropdown-item" href="#">Ver Muestras de Trabajo</a></li>
-                            <li><a class="dropdown-item" href="#">Ver Hoja de trabajo</a></li>
-                            <li><a class="dropdown-item" href="#">Modificar Orden de Trabajo</a></li>
-                            <li><a class="dropdown-item" href="#">Asignación Órdenes de Trabajo</a></li>
+                            <li><a class="dropdown-item" href="">Ver orden de trabajo</a></li>
+                            <li><a class="dropdown-item" href="">Añadir orden de trabajo</a></li>
+                            <li><a class="dropdown-item" href="">Exportar información de ODT</a></li>
+                            <li><a class="dropdown-item" href="">Ver análisis</a></li>
+                            <li><a class="dropdown-item" href="">Añadir análisis</a></li>
+                            <li><a class="dropdown-item" href="">Ver elementos</a></li>
+                            <li><a class="dropdown-item" href="">Añadir elementos</a></li>
                         </ul>
                     </li>
                     <!-- Menú desplegable Puesto de Trabajo Instrumental -->
@@ -530,12 +532,11 @@
                             <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="instrumentalDropdown">
-                            <li><a class="dropdown-item" href="#">Cálculo de Operaciones</a></li>
-                            <li><a class="dropdown-item" href="#">Búsqueda de ODT</a></li>
-                            <li><a class="dropdown-item" href="#">Exportación de Resultados</a></li>
-                            <li><a class="dropdown-item" href="#">Asignación de Fechas de Registros</a></li>
-                            <li><a class="dropdown-item" href="#">Importar Procedimientos de Análisis de Balanza</a></li>
-                            <li><a class="dropdown-item" href="#">Asignación de Valores de Balanzas</a></li>
+                            <li><a class="dropdown-item" href="">Abrir plantilla ODT</a></li>
+                            <li><a class="dropdown-item" href="">Exportar plantilla ODT</a></li>
+                            <li><a class="dropdown-item" href="">Modificar muestra</a></li>
+                            <li><a class="dropdown-item" href="">Eliminar muestra</a></li>
+                            <li><a class="dropdown-item" href="">Exportar plantilla de balanza ODT</a></li>
                         </ul>
                     </li>
                     <!-- Menú desplegable Puesto de Trabajo (Balanza de Muestras) -->
@@ -545,11 +546,10 @@
                             <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="balanzaDropdown">
-                            <li><a class="dropdown-item" href="#">Búsqueda de ODT Asignada</a></li>
-                            <li><a class="dropdown-item" href="#">Asignar Código de Despacho</a></li>
-                            <li><a class="dropdown-item" href="#">Creación de Actualización de Fechas de Registros</a></li>
-                            <li><a class="dropdown-item" href="#">Asignación de Valores de Balanza</a></li>
-                            <li><a class="dropdown-item" href="#">Actualización de Registros</a></li>
+                            <li><a class="dropdown-item" href="">Abrir plantilla ODT</a></li>
+                            <li><a class="dropdown-item" href="">Asignar lotes de muestras</a></li>
+                            <li><a class="dropdown-item" href="">Obtener análisis de muestras</a></li>
+                            <li><a class="dropdown-item" href="">Exportar análisis de ODT</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -573,11 +573,13 @@
                             <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="ordersDropdownMobile">
-                            <li><a class="dropdown-item" href="#">Ver Ordenes de Trabajo</a></li>
-                            <li><a class="dropdown-item" href="#">Ver Muestras de Trabajo</a></li>
-                            <li><a class="dropdown-item" href="#">Ver Hoja de trabajo</a></li>
-                            <li><a class="dropdown-item" href="#">Modificar Orden de Trabajo</a></li>
-                            <li><a class="dropdown-item" href="#">Asignación Órdenes de Trabajo</a></li>
+                            <li><a class="dropdown-item" href="/ODT/">Ver orden de trabajo</a></li>
+                            <li><a class="dropdown-item" href="">Añadir orden de trabajo</a></li>
+                            <li><a class="dropdown-item" href="">Exportar información de ODT</a></li>
+                            <li><a class="dropdown-item" href="">Ver análisis</a></li>
+                            <li><a class="dropdown-item" href="">Añadir análisis</a></li>
+                            <li><a class="dropdown-item" href="">Ver elementos</a></li>
+                            <li><a class="dropdown-item" href="">Añadir elementos</a></li>
                         </ul>
                     </li>
                     <br/><br/>
@@ -588,12 +590,11 @@
                             <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="instrumentalDropdownMobile">
-                            <li><a class="dropdown-item" href="#">Cálculo de Operaciones</a></li>
-                            <li><a class="dropdown-item" href="#">Búsqueda de ODT</a></li>
-                            <li><a class="dropdown-item" href="#">Exportación de Resultados</a></li>
-                            <li><a class="dropdown-item" href="#">Asignación de Fechas de Registros</a></li>
-                            <li><a class="dropdown-item" href="#">Importar Procedimientos de Análisis de Balanza</a></li>
-                            <li><a class="dropdown-item" href="#">Asignación de Valores de Balanzas</a></li>
+                            <li><a class="dropdown-item" href="">Abrir plantilla ODT</a></li>
+                            <li><a class="dropdown-item" href="">Exportar plantilla ODT</a></li>
+                            <li><a class="dropdown-item" href="">Modificar muestra</a></li>
+                            <li><a class="dropdown-item" href="">Eliminar muestra</a></li>
+                            <li><a class="dropdown-item" href="">Exportar plantilla de balanza ODT</a></li>
                         </ul>
                     </li>
                     <br/><br/>
@@ -604,11 +605,10 @@
                             <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="balanzaDropdownMobile">
-                            <li><a class="dropdown-item" href="#">Búsqueda de ODT Asignada</a></li>
-                            <li><a class="dropdown-item" href="#">Asignar Código de Despacho</a></li>
-                            <li><a class="dropdown-item" href="#">Creación de Actualización de Fechas de Registros</a></li>
-                            <li><a class="dropdown-item" href="#">Asignación de Valores de Balanza</a></li>
-                            <li><a class="dropdown-item" href="#">Actualización de Registros</a></li>
+                            <li><a class="dropdown-item" href="">Abrir plantilla ODT</a></li>
+                            <li><a class="dropdown-item" href="">Asignar lotes de muestras</a></li>
+                            <li><a class="dropdown-item" href="">Obtener análisis de muestras</a></li>
+                            <li><a class="dropdown-item" href="">Exportar análisis de ODT</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -634,9 +634,6 @@
         </div>
     </div>
     </body>
-
-    <br/>
-
     <!-- Uso de códigos JS de estilos de página web, peticiones y mensajes -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-0q4D8HpohF3oBuKTVBSCgA0AKuqNf4+K5B5XtO/DdqtH5KzvZbKb1dfU+lj7RQc4" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz4fnFO9O2md6zPzEjjr4cO/Y28HhNR83Xf8Dd8YwNY2j1fTZjK5s5T1vB" crossorigin="anonymous"></script>

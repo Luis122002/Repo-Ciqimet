@@ -60,7 +60,7 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="mb-4">Orden de trabajo - {{ odt.Nro_OT }}</h1>
+        <h1 class="custom-title">Orden de trabajo - {{ odt.Nro_OT }}</h1>
         <button class="btn btn-info" onclick="ShowDataInfo()">Mostrar detalles</button>
         <button class="btn btn-info" onclick="DeleteODT()">Eliminar ODT</button>
         <a href="/ODT/" class="btn btn-primary">Atras</a>
@@ -108,7 +108,11 @@
                         <td>{{ ot.peso_muestra }}</td>
                         <td>{{ ot.volumen }}</td>
                         <td>{{ ot.dilucion }}</td>
-                        <td>{{ ot.Elemento }}</td>
+                        <td>
+                            {% for elemento in ot.elementos %}
+                                {{ elemento.nombre }} ({{ elemento.simbolo }})<br>
+                            {% endfor %}
+                        </td>
                     </tr>
                     {% empty %}
                     <tr>
@@ -121,6 +125,8 @@
         
     </div>
 </body>
+{% include 'Footer.html' %}
+
 <script>
     var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     var idODT = "{{odt.id}}"
@@ -433,10 +439,10 @@
     }
 
     function ReloadContent() {
-        console.log("Reload")
+        console.log("Reload");
         $.ajax({
             type: 'POST',
-            url: '/ODT-info_Request/', 
+            url: '/ODT-info_Request/',
             data: {
                 'odt_id': idODT,
                 'csrfmiddlewaretoken': csrfToken
@@ -451,11 +457,19 @@
                     row.classList.add('sample-row');
                     row.setAttribute('data-id', ot.id_muestra);
     
+                    // Crear una cadena de texto para los elementos asociados al OT
+                    var elementosContent = '';
+                    ot.elementos.forEach(elemento => {
+                        elementosContent += `${elemento.nombre} (${elemento.simbolo}), `;
+                    });
+                    elementosContent = elementosContent.slice(0, -2);  // Quitar la última coma y espacio
+    
                     row.innerHTML = `
                         <td>${ot.id_muestraInput}</td>
                         <td>${ot.peso_muestra.toFixed(1)}</td>
                         <td>${ot.volumen.toFixed(1)}</td>
                         <td>${ot.dilucion.toFixed(1)}</td>
+                        <td>${elementosContent}</td>  <!-- Nueva columna para elementos -->
                     `;
     
                     tableBody.appendChild(row);
@@ -463,10 +477,12 @@
     
                 if (response.ots.length === 0) {
                     var row = document.createElement('tr');
-                    row.innerHTML = '<td colspan="4">No hay análisis realizados.</td>';
+                    row.innerHTML = '<td colspan="5">No hay análisis realizados.</td>';  // Aumentar colspan si agregas más columnas
                     tableBody.appendChild(row);
                 }
+    
                 AddEventsTouch();
+    
                 // Actualiza el panel OdtInfoPanel con los nuevos datos
                 document.querySelector('#OdtInfoPanel .Cant_Muestra').textContent = response.odt.Cant_Muestra;
                 document.querySelector('#OdtInfoPanel .Fec_Recep').textContent = response.odt.Fec_Recep;
