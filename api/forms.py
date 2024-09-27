@@ -14,27 +14,25 @@ class FormODT(forms.ModelForm):
             'InicioCodigo': forms.NumberInput(attrs={'max': 999, 'min': 1, 'placeholder': 'Ej. 101'}),
             'FinCodigo': forms.NumberInput(attrs={'max': 999, 'min': 1, 'placeholder': 'Ej. 201'}),
             'Despacho': forms.TextInput(attrs={'placeholder': 'Ej. CG-12345678'}),
-            
             'Nro_OT': forms.TextInput(attrs={'placeholder': 'Ej. OT123456'}),
             'Muestra': forms.TextInput(attrs={'placeholder': 'Código de identificación de muestra'}),
         }
         exclude = ['Cant_Muestra', 'Cliente']  # Ocultar cliente en el formulario
 
     def __init__(self, *args, **kwargs):
-        # Capturamos el proyecto desde los kwargs si está disponible
-        self.proyecto = kwargs.pop('proyecto', None)
+        self.proyecto = kwargs.pop('proyecto', None)  # Capturar el proyecto desde los kwargs si está disponible
         super().__init__(*args, **kwargs)
-        
-        if self.proyecto and self.proyecto.cliente:
-            self.fields['Cliente'].initial = self.proyecto.cliente
 
-        # Si es un nuevo registro (sin pk), genera automáticamente Nro_OT y Muestra
+        # Inicializa los campos de Nro_OT y Muestra si es un nuevo registro
         if not self.instance.pk:
             self.fields['Nro_OT'].initial = self.generar_nro_ot()
             self.fields['Muestra'].initial = self.generar_codigo_muestra()
 
-        self.fields['Cliente'].initial = models.Cliente.objects.get(self.proyecto)
+        # Si el proyecto está disponible, establece el Cliente correspondiente
+        if self.proyecto and self.proyecto.cliente:
+            self.fields['Cliente'].initial = self.proyecto.cliente
 
+        # Personaliza los atributos de los campos del formulario
         for field_name, field in self.fields.items():
             field.widget.attrs.update({
                 'class': 'form-General',
@@ -63,7 +61,6 @@ class FormODT(forms.ModelForm):
         inicio_codigo = cleaned_data.get('InicioCodigo')
         fin_codigo = cleaned_data.get('FinCodigo')
         muestra_codigo = cleaned_data.get('Muestra')
-        
 
         # Validación del rango de códigos
         if not self.instance.pk:
@@ -77,6 +74,7 @@ class FormODT(forms.ModelForm):
                         self.add_error(None, f'El código de muestra {codigo_completo} ya existe en OT.')
 
         return cleaned_data
+
     
 
 class FormElements(forms.ModelForm):

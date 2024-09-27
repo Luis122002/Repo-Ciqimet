@@ -59,18 +59,16 @@ class ODT(models.Model):
     InicioCodigo = models.PositiveIntegerField(_("Inicio Código"), blank=True, null=True)
     FinCodigo = models.PositiveIntegerField(_("Fin Código"), blank=True, null=True)
     Cant_Muestra = models.PositiveIntegerField(_("Cantidad de Muestras"), blank=True, null=True)
-    
     Analisis = models.ForeignKey('Analisis', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Análisis"))
     updated_at = models.DateTimeField(auto_now=True)  # Fecha de última modificación
 
     def save(self, *args, **kwargs):
-        # Automatizar Nro_OT si no existe
-
+        # Asignar automáticamente el Cliente del Proyecto al guardar ODT
         if self.Proyecto and self.Proyecto.cliente:
             self.Cliente = self.Proyecto.cliente
 
+        # Automatizar Nro_OT si no existe
         if not self.Nro_OT:
-            # Generar un Nro_OT automático
             last_odt = ODT.objects.order_by('id').last()
             if last_odt:
                 last_ot_number = int(last_odt.Nro_OT.split('OT')[-1])  # Suponiendo que el formato es 'OT123456'
@@ -82,22 +80,6 @@ class ODT(models.Model):
         if not self.Muestra and self.InicioCodigo and self.FinCodigo:
             self.Muestra = f"M-{self.InicioCodigo}-{self.FinCodigo}"
 
-        # Asignar automáticamente el Cliente del Proyecto
-        if self.Proyecto and self.Proyecto.cliente:
-            self.Cliente = self.Proyecto.cliente
-
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.Nro_OT
-
-    def __str__(self):
-        return self.Nro_OT
-
-    def save(self, *args, **kwargs):
-        if self.pk is None:
-            if self.InicioCodigo is not None and self.FinCodigo is not None:
-                self.Cant_Muestra = self.FinCodigo - self.InicioCodigo + 1
         super().save(*args, **kwargs)
 
     def clean(self):
