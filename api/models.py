@@ -1,42 +1,49 @@
-from django.contrib.auth.models import AbstractUser 
-from django.core.exceptions import ValidationError
+import uuid
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext as _
 
 
+# Modelo para almacenar los usuarios
 class User(AbstractUser):
     class Role(models.TextChoices):
-        CLIENTE = 'Cliente', _('Cliente')
-        SUPERVISOR = 'Supervisor', _('Supervisor')
-        ADMINISTRADOR = 'Administrador', _('Administrador')
-        QUIMICO_A = 'QuimicoA', _('Químico A')
-        QUIMICO_B = 'QuimicoB', _('Químico B')
-        QUIMICO_C = 'QuimicoC', _('Químico C')
-
+            CLIENTE = 'Cliente', _('Cliente')
+            SUPERVISOR = 'Supervisor', _('Supervisor')
+            ADMINISTRADOR = 'Administrador', _('Administrador')
+            QUIMICO_A = 'QuimicoA', _('Químico A')
+            QUIMICO_B = 'QuimicoB', _('Químico B')
+            QUIMICO_C = 'QuimicoC', _('Químico C')
+            
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     rut = models.CharField(max_length=200, null=True, blank=True)
     rolname = models.CharField(max_length=200, choices=Role.choices, default=Role.CLIENTE)
     is_superuser = models.BooleanField(default=False)
     credential = models.CharField(_("Credential"), max_length=50, blank=True)
 
     def __str__(self):
-        return self.username  # Cambié esto a `username` para representar al usuario de manera más estándar.
+        return self.username  
+
+# Modelo para almacenar los clientes y proyectos
+class Proyecto(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100, null=False, blank=False)
+    cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE, null=False, blank=False)
+    fecha_emision = models.DateField(null=False, blank=False)
+    
+    def __str__(self):
+        return self.cliente.nombre
 
 class Cliente(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, limit_choices_to={'rolname': User.Role.CLIENTE})
-    nombre_cliente = models.CharField(max_length=255)
-    updated_at = models.DateTimeField(auto_now=True)  # Fecha de última modificación
-
-    def __str__(self):
-        return self.nombre_cliente
-
-class Proyecto(models.Model):
-    nombre = models.CharField(max_length=255)
-    cliente = models.ForeignKey(Cliente, null=True, blank=True, on_delete=models.CASCADE, related_name='proyectos')
-    updated_at = models.DateTimeField(auto_now=True)  # Fecha de última modificación
-    volVal = models.FloatField(_("uso de volumen"), default=0.0, blank=True, null=True)
-
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nombre = models.CharField(max_length=100, null=False, blank=False)
+    rut = models.CharField(max_length=100, null=False, blank=False)
+    direccion = models.CharField(max_length=100, null=False, blank=False)
+    telefono = models.CharField(max_length=100, null=False, blank=False)
+    email = models.EmailField(null=False, blank=False)
+    
     def __str__(self):
         return self.nombre
+
 
 class ODT(models.Model):
     id = models.AutoField(primary_key=True)
