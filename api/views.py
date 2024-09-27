@@ -530,7 +530,10 @@ def general_form(request, token):
                     if form.is_valid():
                         try:
                             # Guardar la instancia de ODT
-                            odt_instance = form.save()
+                            odt_instance = form.save(commit=False)
+                            if odt_instance.Proyecto and odt_instance.Proyecto.cliente:
+                                odt_instance.Cliente = odt_instance.Proyecto.cliente
+                            odt_instance.save()
                             ProyectDis = odt_instance.Proyecto.volVal
                             muestra_codigo = odt_instance.Muestra
                             inicio_codigo = odt_instance.InicioCodigo
