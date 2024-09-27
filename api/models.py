@@ -65,6 +65,10 @@ class ODT(models.Model):
 
     def save(self, *args, **kwargs):
         # Automatizar Nro_OT si no existe
+
+        if self.Proyecto and self.Proyecto.cliente:
+            self.Cliente = self.Proyecto.cliente
+
         if not self.Nro_OT:
             # Generar un Nro_OT automático
             last_odt = ODT.objects.order_by('id').last()

@@ -24,6 +24,9 @@ class FormODT(forms.ModelForm):
         # Capturamos el proyecto desde los kwargs si está disponible
         self.proyecto = kwargs.pop('proyecto', None)
         super().__init__(*args, **kwargs)
+        
+        if self.proyecto and self.proyecto.cliente:
+            self.fields['Cliente'].initial = self.proyecto.cliente
 
         # Si es un nuevo registro (sin pk), genera automáticamente Nro_OT y Muestra
         if not self.instance.pk:
