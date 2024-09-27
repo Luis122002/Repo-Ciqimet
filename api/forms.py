@@ -30,8 +30,6 @@ class FormODT(forms.ModelForm):
             self.fields['Nro_OT'].initial = self.generar_nro_ot()
             self.fields['Muestra'].initial = self.generar_codigo_muestra()
 
-        # Si hay un proyecto, asigna su cliente al campo "Cliente"
-        if self.proyecto and self.proyecto.cliente:
             self.instance.Cliente = self.proyecto.cliente
 
         for field_name, field in self.fields.items():
