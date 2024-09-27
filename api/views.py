@@ -69,7 +69,6 @@ def ODT_Module(request):
 
     odts = odts.filter(
         Q(Nro_OT__icontains=search_query) |
-        Q(Cliente__nombre_cliente__icontains=search_query) |  # Acceder al nombre del cliente
         Q(Proyecto__nombre__icontains=search_query) |  # Acceder al nombre del proyecto
         Q(Muestra__icontains=search_query) |
         Q(Cant_Muestra__icontains=search_query) |
@@ -295,39 +294,31 @@ def ODT_Info(request):
     
 
 def ODT_Info_Request(request):
-    print("hola")
     if request.method == 'POST':
         odt_id = request.POST.get('odt_id')
         try:
             odt = models.ODT.objects.get(id=odt_id)
         except models.ODT.DoesNotExist:
             return JsonResponse({'error': 'ODT no encontrado'}, status=404)
-
+        
         ots = models.OT.objects.filter(odt=odt)
 
-        # Obtener el análisis basado en el método de análisis de la ODT
         try:
             analisis = models.Analisis.objects.get(Analisis_metodo=odt.Analisis)
         except models.Analisis.DoesNotExist:
             return JsonResponse({'error': 'Análisis no encontrado'}, status=404)
 
-        # Obtener los elementos asociados al análisis
         elementos = analisis.Elementos.all()
 
-        # Función para extraer el número de id_muestra
         def extract_number_from_id(id_muestra):
             parts = id_muestra.split('-')
             return int(parts[-1]) if parts[-1].isdigit() else 0
-
-        # Ordenar los objetos OT
+        
         ots_sorted = sorted(ots, key=lambda ot: extract_number_from_id(ot.id_muestra))
-
-        # Crear una nueva lista con id_muestra sin el último guion e incluir los elementos
         new_ots = []
         for ot in ots_sorted:
             cleaned_id_muestra = str(ot.id_muestra).replace("-", "")
             
-            # Crear una lista de diccionarios con los detalles de cada elemento asociado al análisis
             elementos_data = [
                 {
                     'nombre': elemento.nombre,
@@ -347,10 +338,9 @@ def ODT_Info_Request(request):
                 'dilucion': ot.dilucion,
                 'odt': ot.odt.Nro_OT,
                 'updated_at': ot.updated_at,
-                'elementos': elementos_data  # Agregar los elementos al OT
+                'elementos': elementos_data 
             })
 
-        # Datos de ODT
         odt_data = {
             'Nro_OT': odt.Nro_OT,
             'Cant_Muestra': odt.Cant_Muestra,
@@ -531,9 +521,7 @@ def general_form(request, token):
                         try:
                             # Guardar la instancia de ODT
                             odt_instance = form.save(commit=False)
-                            if odt_instance.Proyecto and odt_instance.Proyecto.cliente:
-                                print(odt_instance.Proyecto.cliente)
-                                odt_instance.Cliente = odt_instance.Proyecto.cliente
+                            odt_instance.Cliente = odt_instance.Proyecto.cliente
                             odt_instance.save()
                             ProyectDis = odt_instance.Proyecto.volVal
                             muestra_codigo = odt_instance.Muestra
@@ -582,7 +570,22 @@ def general_form(request, token):
                 if request.method == 'POST':
                     form = forms.FormODT(request.POST, instance=model)
                     if form.is_valid():
-                        form = form.save()
+                        odt_instance = form.save(commit=False)
+                        odt_instance.Cliente = odt_instance.Proyecto.cliente
+                        odt_instance.save()
+                        MuestrasOT = models.OT.objects.filter(odt = odt_instance)                        
+                        for muestra in MuestrasOT:
+                            # Extraer la última parte del ID después del último '-'
+                            id_string = muestra.id_muestra  # Asumimos que el campo ID de la muestra tiene el formato 'M-54b8d539-11'
+                            # Extraemos el valor que está después del último '-'
+                            numero = id_string.split('-')[-1]
+
+                            # Concatenar con el valor de `Muestra` de la instancia `odt_instance`
+                            muestra.id_muestra = f"{odt_instance.Muestra}-{numero}"
+
+                            # Guardar el cambio en la base de datos
+                            muestra.save()
+
                         return redirect(reverse('Main_ODT'))
                     
             elif action == 'del':

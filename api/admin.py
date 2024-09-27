@@ -35,11 +35,7 @@ class UserAdmin(BaseUserAdmin):
 
 admin.site.register(User, UserAdmin)
 
-# Registrar los modelos Cliente y Proyecto
-@admin.register(Cliente)
-class ClienteAdmin(admin.ModelAdmin):
-    list_display = ('user', 'nombre_cliente')
-    search_fields = ('user__username', 'nombre_cliente')
+
 
 @admin.register(Proyecto)
 class ProyectoAdmin(admin.ModelAdmin):
@@ -50,9 +46,8 @@ class ProyectoAdmin(admin.ModelAdmin):
 # Registrar otros modelos si es necesario
 @admin.register(ODT)
 class ODTAdmin(admin.ModelAdmin):
-    list_display = ('Nro_OT', 'Fec_Recep', 'Cliente', 'Proyecto', 'Despacho', 'Envio', 'Muestra', 'Comentarios', 'InicioCodigo', 'FinCodigo', 'Cant_Muestra', 'Turno')
-    search_fields = ('Nro_OT', 'Muestra', 'Referencia', 'Cliente__username', 'Proyecto')
-    list_filter = ('Cliente', 'Turno')
+    list_display = ('Nro_OT', 'Fec_Recep', 'Proyecto', 'Despacho', 'Envio', 'Muestra', 'Comentarios', 'InicioCodigo', 'FinCodigo', 'Cant_Muestra', 'Turno')
+    search_fields = ('Nro_OT', 'Muestra', 'Referencia', 'Proyecto')
 
 @admin.register(Analisis)
 class AnalisisAdmin(admin.ModelAdmin):

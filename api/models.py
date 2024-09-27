@@ -1,5 +1,7 @@
 import uuid
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
+
 from django.db import models
 from django.utils.translation import gettext as _
 
@@ -14,7 +16,6 @@ class User(AbstractUser):
             QUIMICO_B = 'QuimicoB', _('Químico B')
             QUIMICO_C = 'QuimicoC', _('Químico C')
             
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     rut = models.CharField(max_length=200, null=True, blank=True)
     rolname = models.CharField(max_length=200, choices=Role.choices, default=Role.CLIENTE)
     is_superuser = models.BooleanField(default=False)
@@ -25,24 +26,18 @@ class User(AbstractUser):
 
 # Modelo para almacenar los clientes y proyectos
 class Proyecto(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nombre = models.CharField(max_length=100, null=False, blank=False)
     cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE, null=False, blank=False)
-    fecha_emision = models.DateField(null=False, blank=False)
-    
+    volVal = models.FloatField(blank=True, null=True)
     def __str__(self):
-        return self.cliente.nombre
+        return self.cliente.nombre_cliente
 
 class Cliente(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    nombre = models.CharField(max_length=100, null=False, blank=False)
-    rut = models.CharField(max_length=100, null=False, blank=False)
-    direccion = models.CharField(max_length=100, null=False, blank=False)
-    telefono = models.CharField(max_length=100, null=False, blank=False)
-    email = models.EmailField(null=False, blank=False)
-    
+    nombre_cliente = models.CharField(max_length=100, null=False, blank=False)
+    updated_at = models.DateTimeField(auto_now=True)  # Fecha de última modificación
+
     def __str__(self):
-        return self.nombre
+        return self.nombre_cliente
 
 
 class ODT(models.Model):
@@ -59,16 +54,14 @@ class ODT(models.Model):
     InicioCodigo = models.PositiveIntegerField(_("Inicio Código"), blank=True, null=True)
     FinCodigo = models.PositiveIntegerField(_("Fin Código"), blank=True, null=True)
     Cant_Muestra = models.PositiveIntegerField(_("Cantidad de Muestras"), blank=True, null=True)
+    
     Analisis = models.ForeignKey('Analisis', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Análisis"))
     updated_at = models.DateTimeField(auto_now=True)  # Fecha de última modificación
 
     def save(self, *args, **kwargs):
-        # Asignar automáticamente el Cliente del Proyecto al guardar ODT
-        if self.Proyecto and self.Proyecto.cliente:
-            self.Cliente = self.Proyecto.cliente
-
         # Automatizar Nro_OT si no existe
         if not self.Nro_OT:
+            # Generar un Nro_OT automático
             last_odt = ODT.objects.order_by('id').last()
             if last_odt:
                 last_ot_number = int(last_odt.Nro_OT.split('OT')[-1])  # Suponiendo que el formato es 'OT123456'
@@ -80,6 +73,22 @@ class ODT(models.Model):
         if not self.Muestra and self.InicioCodigo and self.FinCodigo:
             self.Muestra = f"M-{self.InicioCodigo}-{self.FinCodigo}"
 
+        # Asignar automáticamente el Cliente del Proyecto
+        if self.Proyecto and self.Proyecto.cliente:
+            self.Cliente = self.Proyecto.cliente
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.Nro_OT
+
+    def __str__(self):
+        return self.Nro_OT
+
+    def save(self, *args, **kwargs):
+        if self.pk is None:
+            if self.InicioCodigo is not None and self.FinCodigo is not None:
+                self.Cant_Muestra = self.FinCodigo - self.InicioCodigo + 1
         super().save(*args, **kwargs)
 
     def clean(self):
