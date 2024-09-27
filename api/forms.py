@@ -18,7 +18,7 @@ class FormODT(forms.ModelForm):
             'Nro_OT': forms.TextInput(attrs={'placeholder': 'Ej. OT123456'}),
             'Muestra': forms.TextInput(attrs={'placeholder': 'Código de identificación de muestra'}),
         }
-        exclude = ['Cant_Muestra', 'Cliente']  # Ocultar cliente en el formulario
+        exclude = ['Cant_Muestra']  # Ocultar cliente en el formulario
 
     def __init__(self, *args, **kwargs):
         # Capturamos el proyecto desde los kwargs si está disponible
