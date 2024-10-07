@@ -260,7 +260,7 @@ def HT_Module(request):
         'hts': hts,
     }
 
-    return render(request, 'Hoja_trabajo.html', context)
+    return render(request, 'Hoja_Trabajo.html', context)
 
 def Balanza_Module(request):
 
