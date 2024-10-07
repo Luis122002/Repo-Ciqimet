@@ -3,6 +3,8 @@ from api import models
 import uuid
 from datetime import datetime
 import random
+from django.contrib.auth.password_validation import CommonPasswordValidator, validate_password
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 class FormODT(forms.ModelForm):
     class Meta:
@@ -16,7 +18,7 @@ class FormODT(forms.ModelForm):
             'Despacho': forms.TextInput(attrs={'placeholder': 'Ej. CG-12345678'}),
             
             'Nro_OT': forms.TextInput(attrs={'placeholder': 'Ej. OT123456'}),
-            'Muestra': forms.TextInput(attrs={'placeholder': 'Código de identificación de muestra'}),
+            'Prefijo': forms.TextInput(attrs={'placeholder': 'Código de identificación de muestra'}),
         }
         exclude = ['Cant_Muestra', 'Cliente']  # Ocultar cliente en el formulario
 
@@ -28,7 +30,7 @@ class FormODT(forms.ModelForm):
         # Si es un nuevo registro (sin pk), genera automáticamente Nro_OT y Muestra
         if not self.instance.pk:
             self.fields['Nro_OT'].initial = self.generar_nro_ot()
-            self.fields['Muestra'].initial = self.generar_codigo_muestra()
+            #self.fields['Prefijo'].initial = self.generar_codigo_muestra()
 
         # Si hay un proyecto, asigna su cliente al campo "Cliente"
         if self.proyecto and self.proyecto.cliente:
@@ -53,15 +55,12 @@ class FormODT(forms.ModelForm):
         numero_aleatorio = random.randint(100, 999)
         return f"OT{fecha_actual}{numero_aleatorio}"
 
-    def generar_codigo_muestra(self):
-        # Código único basado en UUID acortado
-        return f"M-{uuid.uuid4().hex[:8]}"
 
     def clean(self):
         cleaned_data = super().clean()
         inicio_codigo = cleaned_data.get('InicioCodigo')
         fin_codigo = cleaned_data.get('FinCodigo')
-        muestra_codigo = cleaned_data.get('Muestra')
+        muestra_codigo = cleaned_data.get('Prefijo')
         
 
         # Validación del rango de códigos
@@ -127,3 +126,59 @@ class FormAnalisis(forms.ModelForm):
         self.fields['Formula'].help_text = 'Fórmulas de los elementos metalúrgicos analizados, por ejemplo: Fe, Al, Cu.'
         self.fields['Elementos'].help_text = 'Seleccione los elementos metalúrgicos involucrados en el análisis.'
         self.fields['enabled'].help_text = 'Marque si el análisis está activo.'
+
+
+
+
+
+
+
+class CustomUserCreationForm(UserCreationForm):
+   
+    class Meta:
+        model = models.User 
+        fields = ('first_name', 'last_name', 'rut', 'username', 'is_administrador', 'is_supervisor', 'is_quimico')
+     
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if models.User.objects.filter(username=username).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError(('Este correo electrónico ya está en uso.'))
+        return username
+
+    def clean_password1(self):
+        password1 = self.cleaned_data.get("password1")
+        if password1:
+            try:
+                validate_password(password1, self.instance)
+            except forms.ValidationError as error:
+                raise forms.ValidationError(error)
+            common_validator = CommonPasswordValidator()
+            try:
+                common_validator.validate(password1)
+            except forms.ValidationError:
+                raise forms.ValidationError(("La contraseña es demasiado común."))
+        return password1
+
+    def clean_password2(self):
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError(("Las contraseñas no coinciden."))
+        return password2
+    
+    
+class CustomUserChangeForm(UserChangeForm):
+    class Meta:
+        model = models.User 
+        fields = ('first_name', 'last_name', 'rut', 'username', 'is_administrador', 'is_supervisor', 'is_quimico')
+        
+
+class ClienteForm(forms.ModelForm):
+    class Meta:
+        model = models.Cliente
+        fields = ('__all__')
+
+class ProyectoForm(forms.ModelForm):
+    class Meta:
+        model = models.Proyecto
+        fields = ('__all__')

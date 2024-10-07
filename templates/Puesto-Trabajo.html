@@ -14,15 +14,32 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Montserrat', sans-serif;
-            
+        }
+        
+        /* Contenedor Principal */
+        .content-wrapper {
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+            width: 100%;
+        }
+
+        /* Sidebar (Perfil) */
+        .sidebar {
+            width: 350px;
+            background-color: #d7d7d7;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            height: 100vh;
+            overflow: auto;
+            flex-shrink: 0;
         }
 
         /* Main content */
         .main-content {
             flex-grow: 1;
-            padding-bottom: 100px; /* Asegúrate de que no haya padding en la parte superior */
+            padding: 0; /* Asegúrate de que no haya padding en la parte superior */
             margin: 0;  /* Elimina cualquier margen */
-            background-color: #d7d7d7;
         }
 
         /* Cards */
@@ -43,23 +60,23 @@
         .card {
             width: 100%;
             max-width: 350px;
-            margin: 10px;
-            border-radius: 3px;
+            margin: 20px;
+            border-radius: 6px;
             overflow: hidden;
-            background: #ffffff;
-            box-shadow: 0px 1px 10px rgba(0, 0, 0, 0.619);
-            transition: all 200ms ease-out;
+            background: #d7d7d7;
+            box-shadow: 0px 1px 10px rgba(0, 0, 0, 0.2);
+            transition: all 400ms ease-out;
             cursor: default;
         }
 
         .card:hover {
-            box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.806);
+            box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.4);
             transform: translateY(-3%);
         }
 
         .card img {
             width: 100%;
-            height: 250px;
+            height: 210px;
         }
 
         .card .contenido-card {
@@ -69,8 +86,7 @@
 
         .card .contenido-card h3 {
             margin-bottom: 15px;
-            color: #111111bc;
-            font-weight: bold;
+            color: #111111d6;
         }
 
         .card .contenido-card p {
@@ -88,6 +104,10 @@
             border-radius: 4px;
             transition: all 400ms ease;
             margin-bottom: 5px;
+        }
+
+        .card .contenido-card a:hover {
+            background: #2fb4cc;
         }
 
         /* Responsive Design */
@@ -121,11 +141,19 @@
     </style>
 </head>
 <body>
+    <div class="content-wrapper">
+        <!-- Sidebar (Perfil) -->
+        <div class="sidebar">
+            <h2>Novedades</h2>
+            
+            <hr>
+            <p>Ninguna novedad</p>
+        </div>
+
         <!-- Main Content -->
         <div class="main-content">
             <div class="title-cards">
-                <br>
-                <h1 class="custom-title">Menú Principal de Trabajo</h1>
+                <h2>Menú de Trabajo</h2>
             </div>
             <div class="container-card">
                 <div class="card">
@@ -133,10 +161,10 @@
                         <img src="{% static 'rest_framework/img/ODT_module.png' %}" alt="Orden de Trabajo">
                     </figure>
                     <div class="contenido-card">
-                        <h3>Órden de Trabajo</h3>
-                        <p>Gestionamos tus Órdenes de Trabajo desde la solicitud hasta la entrega de resultados, asegurando un proceso eficiente.</p>
+                        <h3>Hoja de trabajo</h3>
+                        <p>Registramos y organizamos los datos de tus muestras en una hoja de trabajo eficiente, desde su asignación hasta su análisis, optimizando el flujo de trabajo.</p>
                         <button class="btn btn-info" onclick="ShowInfo(1)">Leer Más</button>
-                        <button class="btn btn-succes" onclick="window.location.href='/ODT/'">Ingresar</button>
+                        <button class="btn btn-succes" onclick="window.location.href='/Hoja-Trabajo/'">Ingresar</button>
                     </div>
                 </div>
                 <div class="card">
@@ -144,31 +172,17 @@
                         <img src="{% static 'rest_framework/img/Puesto_trabajo.png' %}" alt="Puesto de Trabajo Normal">
                     </figure>
                     <div class="contenido-card">
-                        <h3>Puesto de Trabajo Normal</h3>
-                        <p>Asignamos y procesamos muestras con precisión, optimizando el control de calidad en cada paso con nuestras herramientas.</p>
+                        <h3>Balanza</h3>
+                        <p>Asignamos los valores precisos a tus muestras mediante la balanza, garantizando exactitud en cada etapa del proceso de análisis.</p>
                         <button class="btn btn-info" onclick="ShowInfo(2)">Leer Más</button>
-                        <button class="btn btn-succes" onclick="window.location.href='/Puesto-trabajo/'">Ingresar</button>
-                    </div>
-                </div>
-                <div class="card">
-                    <figure>
-                        <img src="{% static 'rest_framework/img/Puesto_instrumental.png' %}" alt="Puesto de Trabajo Instrumental">
-                    </figure>
-                    <div class="contenido-card">
-                        <h3>Puesto de Trabajo Instrumental</h3>
-                        <p>Realizamos análisis avanzados con herramientas instrumentales, garantizando resultados confiables y exportables.</p>
-                        <button class="btn btn-info" onclick="ShowInfo(3)">Leer Más</button>
-                        <button class="btn btn-succes" onclick="window.location.href='/Puesto-Absorcion/'">Ingresar</button>
+                        <button class="btn btn-succes" onclick="window.location.href='/Balanza/'">Ingresar</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
+    {% include 'Footer.html' %}
 </body>
-
-{% include 'Footer.html' %}
-
 <script>
 
 function ShowInfo(value)

@@ -1,4 +1,5 @@
 {% load static %}
+{% csrf_token %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -449,6 +450,26 @@
             margin: 20px auto 0;
         }
 
+        .secondary-title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2C3E50; /* Color del texto */
+            text-transform: uppercase; /* Transformar el texto a mayúsculas */
+            letter-spacing: 3px; /* Espaciado entre letras */
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2); /* Sombra para el texto */
+            margin-top: 20px;
+        }
+
+        .secondary-title::after {
+            content: "";
+            display: block;
+            width: 200px;
+            height: 4px;
+            background-color: #3498DB; /* Línea decorativa debajo del título */
+            margin: 20px auto 0;
+        }
+
         .button-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -624,15 +645,19 @@
                 <br/>
                 <img src="https://via.placeholder.com/50" class="rounded-circle me-3" alt="User Image">
                 <div>
-                    <h5 class="mb-1">John Doe</h5>
-                    <p class="mb-0 text-muted">johndoe@example.com</p>
-                    <p class="mb-0 text-muted">Trabajador quimico</p>
+                    <h5 class="mb-1" id="card-user-username">John Doe</h5>
+                    <p class="mb-0 text-muted" id="card-user-email">johndoe@example.com</p>
+                    <p class="mb-0 text-muted" id="card-user-role">Trabajador quimico</p>
                 </div>
             </div>
-            <button class="btn btn-danger mt-3" onclick="ShowUser()">Cerrar</button>
-            <br/><br/>
+            <button class="btn btn-info mt-3" onclick="ShowUser()">Cerrar</button>
+            <button class="btn btn-light mt-3" onclick="confirmLogout()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="15" fill="currentColor" class="bi bi-box-arrow-right" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"></path><path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"></path></svg>
+            </button>
+                <br/><br/>
         </div>
     </div>
+    
     </body>
     <!-- Uso de códigos JS de estilos de página web, peticiones y mensajes -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-0q4D8HpohF3oBuKTVBSCgA0AKuqNf4+K5B5XtO/DdqtH5KzvZbKb1dfU+lj7RQc4" crossorigin="anonymous"></script>
@@ -642,6 +667,10 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     
     <script>
+
+
+        RedirecPath = ""
+        LocalPath = ""
         document.addEventListener('DOMContentLoaded', function () {
             const dropdownToggles = document.querySelectorAll('.nav-link.dropdown-toggle');
         
@@ -704,12 +733,90 @@
         }
     
         function returnMenu() {
-            window.location.href = "/index/";
+            Swal.fire({
+                title: 'Ir a menú',
+                text: 'Elige a dónde deseas ir:',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Plataforma de Administrador',
+                cancelButtonText: 'Cancelar',
+                footer: '<button id="intranetButton" class="swal2-confirm btn btn-secondary">Intranet</button>',
+                buttonsStyling: false, 
+                customClass: {
+                    confirmButton: 'swal2-confirm btn btn-primary', 
+                    cancelButton: 'swal2-cancel btn btn-danger', 
+                    actions: 'swal2-actions vertical-buttons'
+                },
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = RedirecPath + "/admin/";
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                }
+            });
+        
+            document.getElementById('intranetButton').addEventListener('click', () => {
+                window.location.href = LocalPath; 
+            });
+        }
+                const style = document.createElement('style');
+        style.innerHTML = `
+        .vertical-buttons {
+            display: flex;
+            flex-direction: column; /* Asegura que los botones estén en una columna */
+            gap: 10px; /* Espacio entre botones */
+        }
+        `;
+        document.head.appendChild(style);
+        
+
+        function confirmLogout() {
+            swal.fire({
+                title: "¿Estás seguro?",
+                text: "¿Quieres cerrar sesión?",
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            })
+            .then((willLogout) => {
+                if (willLogout) {
+                    window.location.href = LocalPath + "/unlogin/"; 
+                }
+            });
         }
 
+        function getUserData() {
+            $.ajax({
+                url: '/api/get-user-data/',  // URL de la vista en Django
+                type: 'GET',                 // Tipo de petición (GET)
+                dataType: 'json',            // Formato de respuesta esperado (JSON)
+                success: function(data) {    // Función a ejecutar en caso de éxito
+        
+                    // Actualiza los elementos con id específicos
+                    $('#user-email').text(data.email);
+                    $('#user-email').attr('href', `mailto:${data.email}`); // Actualiza el enlace del correo
+                    $('#user-username').text(data.full_name);
+                    $('#user-role').text(data.role);
+
+                    $('#card-user-email').text(data.email);
+                    $('#card-user-username').text(data.full_name);
+                    $('#card-user-role').text(data.role);
+                    RedirecPath = data.URLReact;
+                    LocalPath = data.LocalURL;
+                },
+                error: function(xhr, status, error) {  // Función a ejecutar en caso de error
+                    console.error('Error al obtener los datos del usuario:', error);
+                }
+            });
+            
+        }
+        
         $(document).ready(function(){
+            getUserData();
             $('[data-bs-toggle="tooltip"]').tooltip();   
           });
+
     </script>
 </body>
 </html>

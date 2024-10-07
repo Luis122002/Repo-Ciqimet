@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ODT Display</title>
+    <title>Absorción</title>
     <style>
        
         .button-grid {
@@ -55,80 +55,112 @@
             justify-content: center;
             width: 200px; /* Tamaño fijo menor */
         }
+        .data-grid {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .data-grid div {
+            padding: 10px;
+            background-color: #fff;
+            text-align: center;
+            border: 1px solid #ccc;
+            flex: 1;
+        }
+
+        .status-box {
+            background-color: #000000;
+            color: cyan;
+            padding: 15px;
+            text-align: center;
+            border: 2px solid #000;
+            margin-top: 20px;
+        }
+
+        .status-box h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .status-box p {
+            margin: 5px 0;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
-    <h1 class="custom-title">Registros de órdenes de trabajo (ODT)</h1>
+    <h1 class="custom-title">Puesto de Absorción</h1>
 
-    <div class="container">
-        <div class="row">
+<div class="container">
+    <div class="row">
+    
+        <!-- Columna de acciones (más pequeña) -->
+        <div class="col-md-2 actions">
+            <!-- Botones de análisis y gestión -->
+            <div class="button-grid">
+                <!-- Botón -->
+                <a href="#seccion-elementos" class="btn btn-primary text-center">
+                    Gestionar análisis
+                </a>
+                
+                <!-- Botón -->
+                <a href="/Elements-Manager" class="btn btn-primary text-center">
+                    Grabar Análisis
+                </a>
+
+                <!-- Botón -->
+                <a href="/Elements-Manager" class="btn btn-primary text-center">
+                    Exportar
+                </a>
+            </div>
+        </div>
+
+        <!-- Columna de filtros (más grande y centrada) -->
+        <div class="col-md-8 filters">
+            <!-- Filtros -->
+            <div class="row mb-3">
+                <!-- Búsqueda por palabra clave -->
+                <div class="col-md-6 mb-3">
+                    <label for="search-box">Buscar:</label>
+                    <div class="input-group">
+                        <input id="search-box" type="text" class="form-control" placeholder="Buscar órdenes..." value="{{ request.GET.search }}">
+                    </div>
+                </div>
         
-            <!-- Columna de acciones (más pequeña) -->
-            <div class="col actions">
-                <!-- Botones de análisis y gestión -->
-                <div class="button-grid">
-                    <!-- Botón -->
-                    <a href="/Analysis-Manager" class="btn btn-primary text-center">
-                        Gestionar análisis
-                    </a>
-                    
-                    <!-- Botón -->
-                    <a href="/Elements-Manager" class="btn btn-primary text-center">
-                        Gestionar Elementos
-                    </a>
-                </div>
-            </div>
-            <!-- Columna de filtros (más grande y centrada) -->
-            <div class="col filters">
-                <!-- Filtros -->
-                <div class="row mb-3">
-                    <!-- Filtro por año -->
-                    <div class="col-md-6 mb-3">
-                        <label for="filter-year">Año:</label>
-                        <select id="filter-year" class="form-control">
-                            <option value="">Todos los años</option>
-                            {% for year in available_years %}
-                                <option value="{{ year }}" {% if request.GET.year == year|stringformat:"s" %}selected{% endif %}>{{ year }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-            
-                    <!-- Filtro por mes -->
-                    <div class="col-md-6">
-                        <label for="filter-month">Mes:</label>
-                        <select id="filter-month" class="form-control">
-                            <option value="">Todos los meses</option>
-                            {% for month in available_months %}
-                                <option value="{{ month.value }}" {% if request.GET.month == month.value|stringformat:"s" %}selected{% endif %}>{{ month.label }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-            
-                    <!-- Búsqueda por palabra clave -->
-                    <div class="col-md-6 mb-3">
-                        <label for="search-box">Buscar:</label>
-                        <div class="input-group">
-                            <input id="search-box" type="text" class="form-control" placeholder="Buscar órdenes..." value="{{ request.GET.search }}">
-                        </div>
-                    </div>
-            
-                    <div class="col-md-6 mb-3">
-                        <label>&nbsp;</label>
-                        <div class="input-group">
-                            <button class="btn btn-primary" onclick="applyFilters()">Filtrar Órdenes</button>
-                        </div>
+                <div class="col-md-6 mb-3">
+                    <label>&nbsp;</label>
+                    <div class="input-group">
+                        <button class="btn btn-primary" onclick="applyFilters()">Filtrar Órdenes</button>
                     </div>
                 </div>
             </div>
-            <!-- Columna para añadir ODT (sin cambios) -->
-            <div class="col add-odt">
-                <!-- Botón para añadir ODT -->
-                <button class="btn btn-primary" onclick="AddODT()">
-                    Añadir ODT
-                </button>
+
+            <!-- Detalle de Muestras (Horizontal) -->
+            <div class="section">
+                <label for="detalle">Detalle de Muestras:</label>
+                <div class="data-grid">
+                    <div>Muestras: <span id="muestras">0</span></div>
+                    <div>Blk Lab.: <span id="blk_lab">0</span></div>
+                    <div>Blk Prep.: <span id="blk_prep">0</span></div>
+                    <div>Dup. Lab.: <span id="dup_lab">0</span></div>
+                    <div>Dup. Prep.: <span id="dup_prep">0</span></div>
+                    <div>Std. Ref.: <span id="std_ref">0</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna para añadir ODT (sin cambios) -->
+        <div class="col-md-2 add-odt">
+            <div class="status-box">
+                <h2>Id. de Lote</h2>
+                <p>Sin Asig.</p>
+                <p>Creación: <span id="fecha_creacion">22/04/2024</span></p>
             </div>
         </div>
     </div>
+</div>
 
     <div class="container mt-5">
         <section class="intro">
@@ -143,15 +175,16 @@
                                             <table class="table table-striped mb-0">
                                                 <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
                                                     <tr>
-                                                        <th scope="col">ID</th>
-                                                        <th scope="col">Nro OT</th>
-                                                        <th scope="col">Fec Recep</th>
-                                                        <th scope="col">Cant Muestra</th>
+                                                        <th scope="col">Orden</th>
+                                                        <th scope="col">Nro Vaso</th>
+                                                        <th scope="col">Tubo</th>
+                                                        <th scope="col">Id Muestra</th>
+                                                        <th scope="col">Tipo</th>
+                                                        <th scope="col">Peso</th>
+                                                        <th scope="col">Volúmen</th>
+                                                        <th scope="col">Dilución</th>
+                                                        <th scope="col">Hoja de trabajo</th>
                                                         <th scope="col">Cliente</th>
-                                                        <th scope="col">Despacho</th>
-                                                        <th scope="col">Envío</th>
-                                                        <th scope="col">Cod Muestras</th>
-                                                        <th scope="col">Comentarios</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -162,9 +195,11 @@
                                                         <td>{{ odt.Fec_Recep }}</td>
                                                         <td>{{ odt.Cant_Muestra }}</td>
                                                         <td>{{ odt.Cliente }}</td>
+                                                        <td>{{ odt.Proyecto }}</td>
                                                         <td>{{ odt.Despacho }}</td>
                                                         <td>{{ odt.Envio }}</td>
-                                                        <td>{{ odt.Prefijo }}</td>
+                                                        <td>{{ odt.Muestra }}</td>
+                                                        <td>{{ odt.Referencia }}</td>
                                                         <td>{{ odt.Comentarios }}</td>
                                                     </tr>
                                                     {% endfor %}
@@ -261,7 +296,4 @@
 
     </script>
 </body>
-
-{% include 'Footer.html' %}
-
 </html>

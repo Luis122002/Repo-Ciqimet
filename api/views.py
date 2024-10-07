@@ -1,33 +1,30 @@
-from asyncio.log import logger
-import http
 import base64
 import json
 from django.shortcuts import HttpResponse
 from django.contrib import messages
 from django.conf import settings
-from django.core import signing
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import  AuthenticationForm
-from django.contrib.auth import login
-from django.forms import ValidationError
-from django.http import JsonResponse, HttpResponseForbidden
+from django.contrib.auth import login, logout
+from django.http import JsonResponse, HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import render, redirect
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
 from api import models, forms
-from django.views.decorators.csrf import csrf_exempt
-from .decorators import is_administrador, is_supervisor, is_quimico, is_cliente
-from Setup.settings import DEBUG, CORS_ALLOWED_ORIGINS
 from django.urls import reverse
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError, transaction, connection
 from django.db.models import Q
 
-@login_required(login_url='/login/')
+
 def requestAcces(request):
+
     return redirect("/index")
 
 
 def login_view(request):
+
+    if settings.ENABLED_LOGIN_LOCAL == False: 
+
+        return HttpResponseRedirect(settings.URL_REACT)
+
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -39,8 +36,34 @@ def login_view(request):
     
     return render(request, "login.html", {'form': form})
 
+
+
+def logout_View(request):
+    try:
+        # Cerrar sesión del usuario
+        logout(request)
+        print("Usuario deslogueado correctamente")
+
+        # Opcional: Limpiar el token si estás manejando la autenticación basada en tokens
+        if hasattr(request.user, 'token'):
+            request.user.token = None
+            request.user.save()
+            print("Token eliminado del usuario")
+        if settings.ENABLED_LOGIN_LOCAL == False: 
+            return HttpResponseRedirect(settings.URL_REACT)
+        else:
+            return redirect(reverse('login_View'))
+
+    except Exception as e:
+        print(f"Error al desloguear usuario: {e}")
+        message = f"Error al desloguear usuario: {str(e)}"
+        return JsonResponse({'tipo': 'error', 'message': message}, status=500)
+    
+
+
 @login_required(login_url='/login/')
 def Main(request):
+
     odts = models.ODT.objects.all()
     analisis_list = models.Analisis.objects.all()
     ots = models.OT.objects.all()
@@ -70,7 +93,7 @@ def ODT_Module(request):
     odts = odts.filter(
         Q(Nro_OT__icontains=search_query) |
         Q(Proyecto__nombre__icontains=search_query) |  # Acceder al nombre del proyecto
-        Q(Muestra__icontains=search_query) |
+        Q(Prefijo__icontains=search_query) |
         Q(Cant_Muestra__icontains=search_query) |
         Q(Despacho__icontains=search_query) |
         Q(Envio__username__icontains=search_query) |  # Acceder al nombre de usuario del envío
@@ -166,7 +189,7 @@ def ModODT(request):
             Proyecto = request.POST.get('Proyecto')
             Despacho = request.POST.get('Despacho')
             Envio = request.POST.get('Envio')
-            Muestra = request.POST.get('Muestra')
+            Prefijo = request.POST.get('Prefijo')
             Referencia = request.POST.get('Referencia')
             Comentarios = request.POST.get('Comentarios')
 
@@ -178,7 +201,7 @@ def ModODT(request):
                 odt.Proyecto = Proyecto
                 odt.Despacho = Despacho
                 odt.Envio = Envio
-                odt.Muestra = Muestra
+                odt.Prefijo = Prefijo
                 odt.Referencia = Referencia
                 odt.Comentarios = Comentarios
                 odt.save()
@@ -191,7 +214,7 @@ def ModODT(request):
                     parts = id_muestra_actual.rsplit('-', 1)
                     
                     if len(parts) == 2:
-                        nuevo_id_muestra = f"{Muestra}-{parts[1]}"
+                        nuevo_id_muestra = f"{Prefijo}-{parts[1]}"
                         if nuevo_id_muestra in nuevo_id_muestras:
                             return JsonResponse({'error': 'Ya existe un registro con el ID de muestra actualizado'}, status=400)
                         nuevo_id_muestras.add(nuevo_id_muestra)
@@ -201,7 +224,7 @@ def ModODT(request):
                     parts = id_muestra_actual.rsplit('-', 1)
                     
                     if len(parts) == 2:
-                        nuevo_id_muestra = f"{Muestra}-{parts[1]}"
+                        nuevo_id_muestra = f"{Prefijo}-{parts[1]}"
                         ot.id_muestra = nuevo_id_muestra
                         ot.save()
 
@@ -214,25 +237,45 @@ def ModODT(request):
 
 
 
+def HT_Module(request):
+    search_query = request.GET.get('search', '')
 
-def PT_Module(request):
+    hts = models.ODT.objects.all()
 
-    odts = models.ODT.objects.all()
+    if search_query:
+        hts = hts.filter(
+            Q(nro_hticontains=search_query) |
+            Q(fec_hticontains=search_query) |
+            Q(analisisicontains=search_query) |
+            Q(cant_muestrasicontains=search_query) |
+            Q(ot_clienteicontains=search_query) |
+            Q(clienteicontains=search_query) |
+            Q(odticontains=search_query) |
+            Q(proyectoicontains=search_query)|
+            Q(envioicontains=search_query)|
+            Q(en_uso_poricontains=search_query)
+        )
+
     context = {
-        'odts': odts
+        'hts': hts,
     }
 
-    return render(request, 'ODT-Site.html', context)
+    return render(request, 'Hoja_trabajo.html', context)
 
+def Balanza_Module(request):
+
+
+    return render(request, 'Balanza.html')
 
 def PI_Module(request):
 
-    odts = models.ODT.objects.all()
-    context = {
-        'odts': odts
-    }
 
-    return render(request, 'ODT-Site.html', context)
+    return render(request, 'Puesto-Absorcion.html')
+
+def PT_Module(request):
+
+
+    return render(request, 'Puesto-Trabajo.html')
 
 
 def ODT_Info(request):
@@ -347,7 +390,7 @@ def ODT_Info_Request(request):
             'Fec_Recep': odt.Fec_Recep,
             'Cliente': {
                 'id': odt.Cliente.id,
-                'nombre_cliente': odt.Cliente.nombre_cliente,
+                'nombre': odt.Cliente.nombre,
             } if odt.Cliente else None,
             'Proyecto': {
                 'id': odt.Proyecto.id,
@@ -358,7 +401,7 @@ def ODT_Info_Request(request):
                 'username': odt.Envio.username,
             } if odt.Envio else None,
             'Despacho': odt.Despacho,
-            'Muestra': odt.Muestra,
+            'Prefijo': odt.Prefijo,
             'Comentarios': odt.Comentarios,
             'Analisis': {
                 'id': odt.Analisis.id,
@@ -523,8 +566,11 @@ def general_form(request, token):
                             odt_instance = form.save(commit=False)
                             odt_instance.Cliente = odt_instance.Proyecto.cliente
                             odt_instance.save()
+                            odt_instance.save()
                             ProyectDis = odt_instance.Proyecto.volVal
-                            muestra_codigo = odt_instance.Muestra
+                            if(odt_instance.Proyecto.volVal == None):
+                                ProyectDis = 0
+                            muestra_codigo = odt_instance.Prefijo
                             inicio_codigo = odt_instance.InicioCodigo
                             fin_codigo = odt_instance.FinCodigo
                             
@@ -548,7 +594,8 @@ def general_form(request, token):
                                             volumen=ProyectDis,
                                             dilucion=0.0
                                         )
-                                    
+                                        print(codigo_completo)
+
                                     if not form.errors:
                                         return redirect(reverse('Main_ODT'))
                             else:
@@ -581,7 +628,7 @@ def general_form(request, token):
                             numero = id_string.split('-')[-1]
 
                             # Concatenar con el valor de `Muestra` de la instancia `odt_instance`
-                            muestra.id_muestra = f"{odt_instance.Muestra}-{numero}"
+                            muestra.id_muestra = f"{odt_instance.Prefijo}-{numero}"
 
                             # Guardar el cambio en la base de datos
                             muestra.save()
@@ -651,3 +698,25 @@ def get_proyectos(request):
         'proyectos': list(proyectos.values('id', 'nombre'))
     }
     return JsonResponse(data)
+
+
+def check_db_connection(request):
+    try:
+        connection.ensure_connection()
+        return JsonResponse({'status': 'success', 'message': 'Database is connected'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': f'Failed to connect to the database: {str(e)}'})
+    
+
+@login_required
+def get_user_data(request):
+    user = request.user
+
+    user_data = {
+        'email': user.username,         
+        'full_name': f"{user.first_name} {user.last_name}",
+        'role': user.rolname,
+        'URLReact':settings.URL_REACT,
+        'LocalURL':settings.URL_LOCAL          
+    }
+    return JsonResponse(user_data)

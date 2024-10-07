@@ -61,6 +61,7 @@
 <body>
     <div class="container mt-5">
         <h1 class="custom-title">Orden de trabajo - {{ odt.Nro_OT }}</h1>
+        <h5 class="mb-3 secondary-title">Plantilla de muestras </h5>
         <button class="btn btn-info" onclick="ShowDataInfo()">Mostrar detalles</button>
         <button class="btn btn-info" onclick="DeleteODT()">Eliminar ODT</button>
         <a href="/ODT/" class="btn btn-primary">Atras</a>
@@ -78,7 +79,7 @@
                     <p><strong>Proyecto:</strong> <span class="Proyecto">{{ odt.Proyecto }}</span></p>
                     <p><strong>Despacho:</strong> <span class="Despacho">{{ odt.Despacho }}</span></p>
                     <p><strong>Envío:</strong> <span class="Envio">{{ odt.Envio }}</span></p>
-                    <p><strong>ID de muestras:</strong> <span class="Muestra">{{ odt.Muestra }}</span></p>
+                    <p><strong>ID de muestras:</strong> <span class="Muestra">{{ odt.Prefijo }}</span></p>
                     <p><strong>Análisis:</strong> <span class="Analisis">{{ odt.Analisis.Analisis_metodo }}</span></p>
                     <p><strong>Comentarios:</strong> <span class="Comentarios">{{ odt.Comentarios }}</span></p>
                 </div>
@@ -88,7 +89,6 @@
 
         <div class="card mb-4"></div>
         <br/>
-        <h5 class="mb-3">Análisis Realizados</h5>
         <br/>
         <div class="table-container">
             <table class="table table table-striped mb-0">
@@ -130,7 +130,7 @@
 <script>
     var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     var idODT = "{{odt.id}}"
-    var MuestraODT = "{{odt.Muestra}}"
+    var MuestraODT = "{{odt.Prefijo}}"
 
     function ShowDataInfo() {
         var panel = document.getElementById("OdtInfoPanel");
@@ -458,11 +458,10 @@
                     row.setAttribute('data-id', ot.id_muestra);
     
                     // Crear una cadena de texto para los elementos asociados al OT
-                    var elementosContent = '';
+                    let elementosContent = ''; // Inicializa una cadena vacía
                     ot.elementos.forEach(elemento => {
-                        elementosContent += `${elemento.nombre} (${elemento.simbolo}), `;
+                        elementosContent += `${elemento.nombre} (${elemento.simbolo})<br>`; // Agrega cada elemento seguido de un salto de línea
                     });
-                    elementosContent = elementosContent.slice(0, -2);  // Quitar la última coma y espacio
     
                     row.innerHTML = `
                         <td>${ot.id_muestraInput}</td>
@@ -486,11 +485,11 @@
                 // Actualiza el panel OdtInfoPanel con los nuevos datos
                 document.querySelector('#OdtInfoPanel .Cant_Muestra').textContent = response.odt.Cant_Muestra;
                 document.querySelector('#OdtInfoPanel .Fec_Recep').textContent = response.odt.Fec_Recep;
-                document.querySelector('#OdtInfoPanel .Cliente').textContent = response.odt.Cliente.nombre_cliente;
+                document.querySelector('#OdtInfoPanel .Cliente').textContent = response.odt.Cliente.nombre;
                 document.querySelector('#OdtInfoPanel .Proyecto').textContent = response.odt.Proyecto.nombre;
                 document.querySelector('#OdtInfoPanel .Despacho').textContent = response.odt.Despacho;
                 document.querySelector('#OdtInfoPanel .Envio').textContent = response.odt.Envio.username;
-                document.querySelector('#OdtInfoPanel .Muestra').textContent = response.odt.Muestra;
+                document.querySelector('#OdtInfoPanel .Prefijo').textContent = response.odt.Prefijo;
                 document.querySelector('#OdtInfoPanel .Comentarios').textContent = response.odt.Comentarios;
                 document.querySelector('#OdtInfoPanel .Analisis').textContent = response.odt.Analisis.Analisis_metodo;
     

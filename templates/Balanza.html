@@ -58,77 +58,7 @@
     </style>
 </head>
 <body>
-    <h1 class="custom-title">Registros de órdenes de trabajo (ODT)</h1>
-
-    <div class="container">
-        <div class="row">
-        
-            <!-- Columna de acciones (más pequeña) -->
-            <div class="col actions">
-                <!-- Botones de análisis y gestión -->
-                <div class="button-grid">
-                    <!-- Botón -->
-                    <a href="/Analysis-Manager" class="btn btn-primary text-center">
-                        Gestionar análisis
-                    </a>
-                    
-                    <!-- Botón -->
-                    <a href="/Elements-Manager" class="btn btn-primary text-center">
-                        Gestionar Elementos
-                    </a>
-                </div>
-            </div>
-            <!-- Columna de filtros (más grande y centrada) -->
-            <div class="col filters">
-                <!-- Filtros -->
-                <div class="row mb-3">
-                    <!-- Filtro por año -->
-                    <div class="col-md-6 mb-3">
-                        <label for="filter-year">Año:</label>
-                        <select id="filter-year" class="form-control">
-                            <option value="">Todos los años</option>
-                            {% for year in available_years %}
-                                <option value="{{ year }}" {% if request.GET.year == year|stringformat:"s" %}selected{% endif %}>{{ year }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-            
-                    <!-- Filtro por mes -->
-                    <div class="col-md-6">
-                        <label for="filter-month">Mes:</label>
-                        <select id="filter-month" class="form-control">
-                            <option value="">Todos los meses</option>
-                            {% for month in available_months %}
-                                <option value="{{ month.value }}" {% if request.GET.month == month.value|stringformat:"s" %}selected{% endif %}>{{ month.label }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-            
-                    <!-- Búsqueda por palabra clave -->
-                    <div class="col-md-6 mb-3">
-                        <label for="search-box">Buscar:</label>
-                        <div class="input-group">
-                            <input id="search-box" type="text" class="form-control" placeholder="Buscar órdenes..." value="{{ request.GET.search }}">
-                        </div>
-                    </div>
-            
-                    <div class="col-md-6 mb-3">
-                        <label>&nbsp;</label>
-                        <div class="input-group">
-                            <button class="btn btn-primary" onclick="applyFilters()">Filtrar Órdenes</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Columna para añadir ODT (sin cambios) -->
-            <div class="col add-odt">
-                <!-- Botón para añadir ODT -->
-                <button class="btn btn-primary" onclick="AddODT()">
-                    Añadir ODT
-                </button>
-            </div>
-        </div>
-    </div>
+    <h1 class="custom-title">Balanza</h1>
 
     <div class="container mt-5">
         <section class="intro">
@@ -143,29 +73,27 @@
                                             <table class="table table-striped mb-0">
                                                 <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
                                                     <tr>
-                                                        <th scope="col">ID</th>
-                                                        <th scope="col">Nro OT</th>
-                                                        <th scope="col">Fec Recep</th>
-                                                        <th scope="col">Cant Muestra</th>
-                                                        <th scope="col">Cliente</th>
-                                                        <th scope="col">Despacho</th>
-                                                        <th scope="col">Envío</th>
-                                                        <th scope="col">Cod Muestras</th>
-                                                        <th scope="col">Comentarios</th>
+                                                        <th scope="col">Sec</th>
+                                                        <th scope="col">Id Muestra</th>
+                                                        <th scope="col">Tipo</th>
+                                                        <th scope="col">Peso de muestra (Gr)</th>
+                                                        <th scope="col">Volumen de Aforo (M)</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     {% for odt in odts %}
                                                     <tr data-odt-id="{{ odt.id }}">
-                                                        <td>{{ odt.id }}</td>
-                                                        <td>{{ odt.Nro_OT }}</td>
-                                                        <td>{{ odt.Fec_Recep }}</td>
-                                                        <td>{{ odt.Cant_Muestra }}</td>
-                                                        <td>{{ odt.Cliente }}</td>
-                                                        <td>{{ odt.Despacho }}</td>
-                                                        <td>{{ odt.Envio }}</td>
-                                                        <td>{{ odt.Prefijo }}</td>
-                                                        <td>{{ odt.Comentarios }}</td>
+                                                        <td>{{ odt.id_ht }}</td>
+                                                        <td>{{ odt.nro_ht }}</td>
+                                                        <td>{{ odt.fec_ht }}</td>
+                                                        <td>{{ odt.analisis }}</td>
+                                                        <td>{{ odt.cant_muestras }}</td>
+                                                        <td>{{ odt.ot_cliente }}</td>
+                                                        <td>{{ odt.cliente }}</td>
+                                                        <td>{{ odt.odt }}</td>
+                                                        <td>{{ odt.proyecto }}</td>
+                                                        <td>{{ odt.envio }}</td>
+                                                        <td>{{ odt.en_uso_por }}</td>
                                                     </tr>
                                                     {% endfor %}
                                                 </tbody>
@@ -180,7 +108,7 @@
             </div>
         </section>
     </div>
-
+    {% include 'Footer.html' %}
     
     <script>
         
@@ -245,14 +173,10 @@
 
         function applyFilters() {
             // Obtener los valores de los filtros
-            var year = document.getElementById('filter-year').value;
-            var month = document.getElementById('filter-month').value;
             var search = document.getElementById('search-box').value;
         
             // Construir la URL de la solicitud con los parámetros de búsqueda y filtro
             var url = new URL(window.location.href);
-            url.searchParams.set('year', year);
-            url.searchParams.set('month', month);
             url.searchParams.set('search', search);
         
             // Redirigir a la nueva URL con los parámetros de filtro aplicados
@@ -261,7 +185,4 @@
 
     </script>
 </body>
-
-{% include 'Footer.html' %}
-
 </html>

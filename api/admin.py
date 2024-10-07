@@ -46,8 +46,8 @@ class ProyectoAdmin(admin.ModelAdmin):
 # Registrar otros modelos si es necesario
 @admin.register(ODT)
 class ODTAdmin(admin.ModelAdmin):
-    list_display = ('Nro_OT', 'Fec_Recep', 'Proyecto', 'Despacho', 'Envio', 'Muestra', 'Comentarios', 'InicioCodigo', 'FinCodigo', 'Cant_Muestra', 'Turno')
-    search_fields = ('Nro_OT', 'Muestra', 'Referencia', 'Proyecto')
+    list_display = ('Nro_OT', 'Fec_Recep', 'Proyecto', 'Despacho', 'Envio', 'Prefijo', 'Comentarios', 'InicioCodigo', 'FinCodigo', 'Cant_Muestra', 'Turno')
+    search_fields = ('Nro_OT', 'Prefijo', 'Referencia', 'Proyecto')
 
 @admin.register(Analisis)
 class AnalisisAdmin(admin.ModelAdmin):

@@ -1,99 +1,232 @@
-
 {% load static %}
 <!DOCTYPE html>
 <head>
     <style>
-    /* Estilo para el logo */
-    .logos {
-        text-align: center;
-    }
+        /* Transición y color de los enlaces */
+        a {
+            transition: color 0.3s ease;
+            color: #ffffff;
+        }
+        a:hover {
+            color: #fcc758; /* Color amarillo en hover */
+        }
 
-    .logos img {
-        max-width: 60%;
-        height: auto;
-        cursor: pointer;
-        transition: transform 0.3s ease;
-    }
+        /* Estilo para el logo */
+        .logos {
+            text-align: center; /* Alineación a la izquierda */
+        }
 
-    .logos img:hover {
-        transform: scale(1.05);
-    }
+        .logos img {
+            max-width: 60%;
+            height: auto;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            text-align: center;
+        }
 
-    /* Estilo para las imágenes de contacto */
-    .contact-icons {
-        display: flex;
-        flex-direction: column; /* Apila las imágenes verticalmente */
-        align-items: flex-start; /* Alinea las imágenes al inicio del contenedor */
-    }
+        .logos img:hover {
+            transform: scale(1.05);
+        }
 
-    .contact-icons img {
-        height: 25px; /* Tamaño de las imágenes */
-        margin-bottom: 5px; /* Espacio entre las imágenes */
-    }
-</style>
+        /* Estilo para las imágenes de contacto */
+        .contact-icons {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .contact-icons img {
+            height: 25px;
+            margin-right: 5px;
+        }
+
+        /* Estilo del pie de página */
+        footer {
+            background-color: #164866;
+            padding: 30px;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+
+        footer h4 {
+            margin-bottom: 10px;
+        }
+
+        /* Separador */
+        hr {
+            border: 0;
+            border-top: 1px solid #fcc758;
+            margin: 20px 0;
+        }
+
+        /* Sección de redes sociales */
+        .social-links img {
+            height: 25px;
+            margin: 0 10px;
+        }
+
+        /* Estilos responsive */
+        
+        /* Transición y color de los enlaces */
+        a {
+            transition: color 0.3s ease;
+            color: #ffffff;
+        }
+        a:hover {
+            color: #fcc758; /* Color amarillo en hover */
+        }
+
+        /* Estilo para el logo */
+        .logos {
+            text-align: center; /* Alineación a la izquierda */
+        }
+
+        .logos img {
+            max-width: 60%;
+            height: auto;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .logos img:hover {
+            transform: scale(1.05);
+        }
+
+        /* Estilo para las imágenes de contacto */
+        .contact-icons {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .contact-icons img {
+            height: 25px;
+            margin-right: 5px;
+        }
+
+        /* Estilo del pie de página */
+        footer {
+            background-color: #164866;
+            padding: 30px;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+
+        footer h4 {
+            margin-bottom: 10px;
+        }
+
+        /* Separador */
+        hr {
+            border: 0;
+            border-top: 1px solid #fcc758;
+            margin: 20px 0;
+        }
+
+        /* Sección de redes sociales */
+        .social-links img {
+            height: 25px;
+            margin: 0 10px;
+        }
+
+        /* Estilos responsive */
+        @media (max-width: 768px) {
+            footer {
+                padding: 15px;
+            }
+
+            .logos img {
+                max-width: 100%;
+            }
+
+            /* Cambiar tamaño de fuente para pantallas pequeñas */
+            footer p, footer a, footer h4 {
+                font-size: 10px; /* Tamaño más pequeño para texto */
+            }
+
+            .contact-icons {
+                align-items: center; /* Centra los iconos en pantallas pequeñas */
+            }
+
+            .contact-icons div {
+                margin-bottom: 10px;
+            }
+
+            div[style*="flex: 1;"] {
+                text-align: center;
+            }
+        }
+
+
+    </style>
 </head>
-<footer style="background-color: #164866; padding: 30px; color: #fff; font-family: Arial, sans-serif;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-            <!-- Sección del logo y nombre de la empresa -->
-            <div style="flex: 1; min-width: 200px;">
-                <div class="logos">
-                    <img src="{% static 'rest_framework/img/Logocapture-removebg-preview.png' %}" alt="Logo de la marca" onclick="returnMenu()">
-                </div>
-            </div>
-    
-            <!-- Sección de navegación/enlaces -->
-            <div style="flex: 2; min-width: 200px; text-align: center;">
-                <a href="#" style="color: #fcc758; margin: 0 20px; text-decoration: none; font-weight: 500;">Política de Privacidad</a>
-                <a href="#" style="color: #fcc758; margin: 0 20px; text-decoration: none; font-weight: 500;">Términos de Servicio</a>
-                <div style="display: inline-block; text-align: left;">
-                    <div style="margin-bottom: 5px;">
-                        <a href="#" style="color: #fcc758; text-decoration: none; font-weight: 500;">Contacto</a>
-                    </div>
-                    <div class="contact-icons" style="display: flex; flex-direction: column; align-items: flex-start;">
-                        <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                            <img src="{% static 'rest_framework/img/gmail.png' %}" alt="Correo" style="height: 25px; margin-right: 5px;">
-                            <a href="mailto:correo@ejemplo.com" style="color: #fcc758; text-decoration: none;" onclick="copyToClipboard('fcarmona@ciquimet.cl')">fcarmona@ciquimet.cl</a>
-                        </div>
-                        <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                            <img src="{% static 'rest_framework/img/llamada-telefonica.png' %}" alt="Teléfono" style="height: 25px; margin-right: 5px;">
-                            <a href="tel:+569909107071" style="color: #fcc758; text-decoration: none;" onclick="copyToClipboard('+569909107071')">+569909107071</a>
-                        </div>
-                        <div style="display: flex; align-items: center;">
-                            <img src="{% static 'rest_framework/img/marcador-de-posicion.png' %}" alt="Mapa" style="height: 25px; margin-right: 5px;">
-                            <a href="https://maps.app.goo.gl/BDDsbdxYRM9z9T8A7" target="_blank" style="color: #fcc758; text-decoration: none;">Juan Nicolas Saldivar N° 15 mz E, Calama</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-    
-            <!-- Sección de derechos reservados -->
-            <div style="flex: 1; min-width: 200px; text-align: right;">
-                <!-- Este espacio se deja vacío para mantener el diseño -->
-            </div>
+<footer>
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+        <!-- Sección del logo -->
+        <div class="logos" style="flex: 1; min-width: 200px;">
+            <img src="{% static 'rest_framework/img/Logocapture-removebg-preview.png' %}" alt="Logo de la marca" onclick="returnMenu()">
         </div>
-    
-        <!-- Línea separadora -->
-        <hr style="border: 0; border-top: 1px solid #fcc758; margin: 20px 0;">
-    
-        <!-- Sección de derechos reservados -->
-        <div style="text-align: center; margin-bottom: 10px;">
-            <p style="color: #ffffff; font-size: 14px; margin: 0;">© Todos los Derechos Reservados por CIQUIMET | Sitio realizado por Equipo Siete</p>
-        </div>
-    
-        <!-- Sección de redes sociales -->
-        <div style="text-align: center;">
-            <a href="https://m.facebook.com/profile.php?id=100087536900830" target="_blank" style="color: #fff; margin: 0 10px; text-decoration: none;">
-                <img src="{% static 'rest_framework/img/facebook.png' %}" alt="Facebook" style="height: 25px;">
-            </a>
-            <a href="https://www.instagram.com/ciquimet.cl/" target="_blank" style="color: #fff; margin: 0 10px; text-decoration: none;">
-                <img src="{% static 'rest_framework/img/instagram.png' %}" alt="Instagram" style="height: 25px;">
-            </a>
-            <a href="https://cl.linkedin.com/in/ciquimet-chile-843b7525b/" target="_blank" style="color: #fff; margin: 0 10px; text-decoration: none;">
-                <img src="{% static 'rest_framework/img/linkedin.png' %}" alt="LinkedIn" style="height: 25px;">
-            </a>
-        </div>
-    </footer>
 
+        <!-- Primera columna: Información del Usuario -->
+        <div style="flex: 1; min-width: 200px; text-align: center;">
+            <h4>Usuario del Sistema</h4>
+            <div class="contact-icons">
+                <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                    <img src="{% static 'rest_framework/img/gmail.png' %}" alt="Correo">
+                    <a href="mailto:usuario@ejemplo.com" id="user-email">usuario@ejemplo.com</a>
+                </div>
+                <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                    <img src="{% static 'rest_framework/img/usuario.png' %}" alt="usuario">
+                    <a href="#" id="user-username">Nombre de usuario</a>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <img src="{% static 'rest_framework/img/gestion.png' %}" alt="rol">
+                    <a href="#" id="user-role">Texto de ejemplo:</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Segunda columna: Información del Supervisor -->
+        <div style="flex: 1; min-width: 200px; text-align: center;">
+            <h4>Contacto del Supervisor</h4>
+            <div class="contact-icons">
+                <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                    <img src="{% static 'rest_framework/img/gmail.png' %}" alt="Correo">
+                    <a href="mailto:supervisor@ejemplo.com" onclick="copyToClipboard('supervisor@ejemplo.com')">supervisor@ejemplo.com</a>
+                </div>
+                <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                    <img src="{% static 'rest_framework/img/llamada-telefonica.png' %}" alt="Teléfono">
+                    <a href="tel:+569909107071" onclick="copyToClipboard('+569909107071')">+569909107071</a>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <img src="{% static 'rest_framework/img/marcador-de-posicion.png' %}" alt="Mapa">
+                    <a href="https://maps.app.goo.gl/BDDsbdxYRM9z9T8A7" target="_blank">Juan Nicolas Saldivar N° 15 mz E, Calama</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Línea separadora -->
+    <hr>
+
+    <!-- Sección de derechos reservados -->
+    <div style="text-align: center; margin-bottom: 10px;">
+        <p style="font-size: 14px;">© Todos los Derechos Reservados por CIQUIMET | Sitio realizado por Equipo Siete</p>
+    </div>
+
+    <!-- Sección de redes sociales -->
+    <div class="social-links" style="text-align: center;">
+        <a href="https://m.facebook.com/profile.php?id=100087536900830" target="_blank">
+            <img src="{% static 'rest_framework/img/facebook.png' %}" alt="Facebook">
+        </a>
+        <a href="https://www.instagram.com/ciquimet.cl/" target="_blank">
+            <img src="{% static 'rest_framework/img/instagram.png' %}" alt="Instagram">
+        </a>
+        <a href="https://cl.linkedin.com/in/ciquimet-chile-843b7525b/" target="_blank">
+            <img src="{% static 'rest_framework/img/linkedin.png' %}" alt="LinkedIn">
+        </a>
+    </div>
+</footer>
 
     <script>
         function copyToClipboard(text) {
