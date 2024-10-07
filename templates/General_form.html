@@ -180,42 +180,39 @@
             {% endif %}
         </h1>
         {% if form %}
-    <form id="myForm" method="POST" action="Action-Resource/">
-        {% csrf_token %}
-        
-        <!-- Mostrar errores no relacionados con campos específicos -->
-        {% if form.non_field_errors %}
-            <div class="alert alert-danger mt-2">
-                <ul>
-                    {% for error in form.non_field_errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endif %}
-        
-        <!-- Iterar sobre los campos del formulario -->
-        {% for field in form %}
-            <div class="form-group">
-                <label for="{{ field.id_for_label }}"
-                       data-bs-toggle="tooltip" 
-                       data-bs-placement="top" 
-                       title="{{ field.help_text }}">
-                    {{ field.label }}
-                </label>
-                {{ field }}
-                {% if field.errors %}
-                    <div class="alert alert-danger mt-2">
-                        {{ field.errors }}
-                    </div>
-                {% endif %}
-            </div>
-        {% endfor %}
-        
-        <button type="submit" class="btn btn-primary btn-submit">Agregar</button>
-        <button onclick="window.location.href='{% if contexModel == 'element' %}/Elements-Manager/{% elif contexModel == 'ODT' %}/ODT/{% endif %}'">Cancelar</button>
-
-    </form>
+        <form id="myForm" method="POST" action="Action-Resource/">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger mt-2">
+                    <ul>
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}"
+                           data-bs-toggle="tooltip" 
+                           data-bs-placement="top" 
+                           title="{{ field.help_text }}">
+                        {{ field.label }}
+                    </label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="alert alert-danger mt-2">
+                            {{ field.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            Analysis-Manager
+            <button type="submit" class="btn btn-primary btn-submit">Agregar</button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='{% if contexModel == 'element' %}/Elements-Manager/{% elif contexModel == 'ODT' %}/ODT/{% elif contexModel == 'analytic' %}/Analysis-Manager/{% endif %}'">Cancelar</button>
+        </form>
     <br/>
     {% if id != "-1" %}
         <button class="btn btn-primary btn-alert" onclick='OnDeleteRegister()'>Borrar</button>
