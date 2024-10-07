@@ -13,9 +13,8 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from pathlib import Path
 import pymysql 
-from decouple import config
+from decouple import config, Csv, UndefinedValueError
 import dj_database_url
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -27,7 +26,7 @@ pymysql.install_as_MySQLdb()
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG')
+DEBUG = config('DEBUG', cast=bool, default=False)
 
 ALLOWED_HOSTS = ["*"]
 
@@ -181,7 +180,7 @@ LOGIN_REDIRECT_URL = '/index/'
 
 URL_REACT = config('CORS_ALLOWED_ORIGINS')
 URL_LOCAL = config('CORS_ALLOWED_COMPLEMENT')
-ENABLED_LOGIN_LOCAL = False
+ENABLED_LOGIN_LOCAL = config('INTERNAL_MODE', cast=bool, default=False)
 
 # # HSTS settings
 # SECURE_HSTS_SECONDS = 3600  # Considera aumentar este valor
