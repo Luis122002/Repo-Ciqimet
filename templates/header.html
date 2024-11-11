@@ -517,6 +517,55 @@
             width: 200px; /* Tamaño fijo menor */
         }
         
+        .table-container {
+            margin: 20px auto; /* Centra la tabla */
+            padding: 20px;
+            background-color: #ffffff; /* Fondo blanco para la tabla */
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 90%; /* Ancho del 90% de la pantalla */
+            max-width: 1200px; /* Ancho máximo de la tabla */
+        }
+        th {
+            background-color: #164766f0; /* Azul para encabezados */
+            color: white; /* Color de texto blanco para encabezados */
+        }
+        tr:nth-child(even) {
+            background-color: #e9ecef; /* Color gris claro para filas pares */
+        }
+        tr:hover {
+            background-color: #d1ecf1; /* Color azul claro al pasar el mouse */
+        }
+        td {
+            color: #343a40; /* Color de texto oscuro para datos */
+            text-align: center; /* Centrar contenido de las celdas */
+        }
+        .btn-edit, .btn-delete {
+            font-size: 0.8rem; /* Tamaño de fuente más pequeño */
+            padding: 0.3rem 0.6rem; /* Tamaño del padding reducido */
+        }
+        .btn-edit {
+            background-color: #28a745; /* Color verde para botón de editar */
+            color: white;
+        }
+        .btn-delete {
+            background-color: #dc3545; /* Color rojo para botón de eliminar */
+            color: white;
+        }
+        .btn-edit:hover, .btn-delete:hover {
+            opacity: 0.8; /* Efecto de opacidad al pasar el mouse */
+        }
+
+
+
+
+
+
+
+
+
+
+
     </style>
 </head>
 <body>
@@ -668,7 +717,6 @@
     
     <script>
 
-
         RedirecPath = ""
         LocalPath = ""
         document.addEventListener('DOMContentLoaded', function () {
@@ -817,6 +865,37 @@
             $('[data-bs-toggle="tooltip"]').tooltip();   
           });
 
+
+
     </script>
+    {% if messages %}
+    <ul class="messages">
+        {% for m in messages %}
+                {% if m.tags == 'warning' %}
+                    <script>
+                        Swal.fire({
+                            "title":"¡Nuevo mensaje de la Plataforma!",
+                            "text":"{{m}}",
+                            "icon":"{{m.tags}}",
+                            "showCancelButton":true,
+                            "cancelButtonText":"No, Cancelar",
+                            "confirmButtonText":"Si, Eliminar",
+                            "reverseButtons":true,
+                            "confirmButtonColor":"#dc3545"
+                        })
+                    </script>
+                {% else %}
+                    <script>
+                        Swal.fire({
+                            "title":"¡Nuevo mensaje de la Plataforma! ",
+                            "text":"{{m}}",
+                            "icon":"{{m.tags}}"
+                        })
+                    </script>
+                {% endif %}
+
+        {% endfor %}
+    </ul>
+    {% endif %}
 </body>
 </html>

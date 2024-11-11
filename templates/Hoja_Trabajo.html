@@ -79,8 +79,12 @@
                 <div class="row mb-3">
                     <!-- Filtro por año -->
                     <div class="col-md-6 mb-3">
-                        <label for="filter-year">Estado:</label>
-                        <p><input type="radio" name="Pendientes" value="h">Pendientes <input type="radio" name="Cerradas" value="m">Cerradas <input type="radio" name="Todas" value="m">Todas</p>
+                        <label for="filter-state">Estado:</label>
+                        <p>
+                            <input type="radio" name="estado" value="Pendiente" {% if request.GET.estado == 'Pendiente' %}checked{% endif %}> Pendientes 
+                            <input type="radio" name="estado" value="Cerrado" {% if request.GET.estado == 'Cerrado' %}checked{% endif %}> Cerradas 
+                            <input type="radio" name="estado" value="Todas" {% if request.GET.estado == 'Todas' %}checked{% endif %}> Todas
+                        </p>
                     </div>
             
                     <!-- Búsqueda por palabra clave -->
@@ -109,59 +113,47 @@
         </div>
     </div>
 
-    <div class="container mt-5">
-        <section class="intro">
-            <div class="bg-image h-100" style="background-color: #f5f7fa;">
-                <div class="mask d-flex align-items-center h-100">
-                    <div class="container">
-                        <div class="row justify-content-center">
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-body p-0">
-                                        <div class="table-responsive table-scroll" data-mdb-perfect-scrollbar="true" style="position: relative; height: 700px">
-                                            <table class="table table-striped mb-0">
-                                                <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
-                                                    <tr>
-                                                        <th scope="col">ID</th>
-                                                        <th scope="col">Nro HT</th>
-                                                        <th scope="col">Fec HT</th>
-                                                        <th scope="col">Analisis</th>
-                                                        <th scope="col">Cant Muestras</th>
-                                                        <th scope="col">OT Cliente</th>
-                                                        <th scope="col">Cliente</th>
-                                                        <th scope="col">OT</th>
-                                                        <th scope="col">Proyecto</th>
-                                                        <th scope="col">Envío</th>
-                                                        <th scope="col">En uso por</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {% for odt in odts %}
-                                                    <tr data-odt-id="{{ odt.id }}">
-                                                        <td>{{ odt.id_ht }}</td>
-                                                        <td>{{ odt.nro_ht }}</td>
-                                                        <td>{{ odt.fec_ht }}</td>
-                                                        <td>{{ odt.analisis }}</td>
-                                                        <td>{{ odt.cant_muestras }}</td>
-                                                        <td>{{ odt.ot_cliente }}</td>
-                                                        <td>{{ odt.cliente }}</td>
-                                                        <td>{{ odt.odt }}</td>
-                                                        <td>{{ odt.proyecto }}</td>
-                                                        <td>{{ odt.envio }}</td>
-                                                        <td>{{ odt.en_uso_por }}</td>
-                                                    </tr>
-                                                    {% endfor %}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+    <div class="table-container table-responsive">
+        <table class="table table-bordered">
+            <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Nro Hoja de Trabajo</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">ODT</th>
+                    <th scope="col">Estandar</th>
+                    <th scope="col">Método de Análisis</th>
+                    <th scope="col">Muestra Masificada</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Duplicado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ht in hts %}
+                <tr data-ht-id="{{ ht.id }}">
+                    <td>{{ ht.id }}</td>
+                    <td>{{ ht.ID_HDT }}</td>
+                    <td>
+                        {% if ht.confirmar_balanza %}
+                            Cerrado
+                        {% else %}
+                            Pendiente
+                        {% endif %}
+                    </td>
+                    <td>{{ ht.odt }}</td>
+                    <td>
+                        {% for estandar in ht.Estandar.all %}
+                            {{ estandar }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>{{ ht.MetodoAnalisis }}</td>
+                    <td>{{ ht.MuestraMasificada }}</td>
+                    <td>{{ ht.Tipo }}</td>
+                    <td>{{ ht.Duplicado }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>          
     </div>
     {% include 'Footer.html' %}
     
@@ -227,14 +219,14 @@
         }
 
         function applyFilters() {
-            // Obtener los valores de los filtros
             var search = document.getElementById('search-box').value;
+            var estado = document.querySelector('input[name="estado"]:checked') ? document.querySelector('input[name="estado"]:checked').value : ''; // Obtener el valor del radio seleccionado
         
-            // Construir la URL de la solicitud con los parámetros de búsqueda y filtro
             var url = new URL(window.location.href);
             url.searchParams.set('search', search);
-        
-            // Redirigir a la nueva URL con los parámetros de filtro aplicados
+            if (estado) {
+                url.searchParams.set('estado', estado);
+            }
             window.location.href = url.toString();
         }
 

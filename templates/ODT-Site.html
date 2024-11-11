@@ -137,55 +137,47 @@
         </div>
     </div>
 
-    <div class="container mt-5">
-        <section class="intro">
-            <div class="bg-image h-100" style="background-color: #f5f7fa;">
-                <div class="mask d-flex align-items-center h-100">
-                    <div class="container">
-                        <div class="row justify-content-center">
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-body p-0">
-                                        <div class="table-responsive table-scroll" data-mdb-perfect-scrollbar="true" style="position: relative; height: 700px">
-                                            <table class="table table-striped mb-0">
-                                                <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
-                                                    <tr>
-                                                        <th scope="col">ID</th>
-                                                        <th scope="col">Nro OT</th>
-                                                        <th scope="col">Fec Recep</th>
-                                                        <th scope="col">Cant Muestra</th>
-                                                        <th scope="col">Cliente</th>
-                                                        <th scope="col">Despacho</th>
-                                                        <th scope="col">Envío</th>
-                                                        <th scope="col">Cod Muestras</th>
-                                                        <th scope="col">Comentarios</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {% for odt in odts %}
-                                                    <tr data-odt-id="{{ odt.id }}">
-                                                        <td>{{ odt.id }}</td>
-                                                        <td>{{ odt.Nro_OT }}</td>
-                                                        <td>{{ odt.Fec_Recep }}</td>
-                                                        <td>{{ odt.Cant_Muestra }}</td>
-                                                        <td>{{ odt.Cliente }}</td>
-                                                        <td>{{ odt.Despacho }}</td>
-                                                        <td>{{ odt.Envio }}</td>
-                                                        <td>{{ odt.Prefijo }}</td>
-                                                        <td>{{ odt.Comentarios }}</td>
-                                                    </tr>
-                                                    {% endfor %}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+    <div class="table-container table-responsive">
+    
+            <table class="table table-bordered ">
+                <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
+                    <tr>
+                        <th scope="col">Nro ODT</th>
+                        <th scope="col">Fec Recep</th>
+                        <th scope="col">Fec Fin</th>
+                        <th scope="col">Cant Muestra</th>
+                        <th scope="col">Prefijo de muestras</th>
+                        <th scope="col">Cliente</th>
+                        <th scope="col">Proyecto</th>
+                        <th scope="col">Prioridad</th>
+                        <th scope="col">TipoMuestra</th>
+                        <th scope="col">Responsable</th>
+                        <th scope="col">Referencia</th>
+                        <th scope="col">Comentarios</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for odt in odts %}
+                    <tr data-odt-id="{{ odt.id }}">
+                        <td>WSS{{ odt.id }}</td>
+                        <td>{{ odt.Fec_Recep }}</td>
+                        <td>{{ odt.Fec_Finalizacion}}</td>
+                        <td>{{ odt.Cant_Muestra }}</td>
+                        <td>{{ odt.Prefijo }}</td>
+                        <td>{{ odt.Cliente }}</td>
+                        <td>{{ odt.Proyecto }}</td>
+                        <td>{{ odt.Prioridad }}</td>
+                        <td>{{ odt.TipoMuestra }}</td>
+                        <td>{{ odt.Responsable }}</td>
+                        <td>{{ odt.Referencia }}</td>
+                        <td>{{ odt.Comentarios }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+       
+    </div>
+
     </div>
 
     

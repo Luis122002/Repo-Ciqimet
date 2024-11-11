@@ -7,44 +7,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Análisis</title>
-    <style>
-        .inactive {
-            background-color: #e2e3e5; /* Fondo gris claro para elementos inactivos */
-            color: #6c757d; /* Texto gris oscuro para elementos inactivos */
-        }
-        .active {
-            background-color: #a1e3a1; /* Verde intenso para elementos activos */
-            color: #155724; /* Texto verde oscuro para elementos activos */
-        }
-    </style>
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="table-container">
         <!-- Filtros -->
-        <h1 class="custom-title">Registros de análisis</h1>
+        <h1 class="custom-title">Metodo de análisis</h1>
         <div class="row mb-3">
             <div class="col-md-4">
                 <label for="search-box">Buscar:</label>
-                <input id="search-box" type="text" class="form-control" placeholder="Buscar análisis...">
+                <input id="search-box" type="text" class="form-control" placeholder="Buscar análisis..." value="{{ query }}">
             </div>
             <div class="col-md-4">
-                <label for="filter-type">Tipos de elementos:</label>
-                <select id="filter-type" class="form-control">
-                    <option value="">Todos los tipos</option>
-                    {% for tipo in metodos_unicos %}
-                        <option value="{{ tipo }}" {% if request.GET.tipo == tipo %}selected{% endif %}>{{ tipo }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label for="filter-enabled">Estado:</label>
-                <select id="filter-enabled" class="form-control">
-                    <option value="">Todos los estados</option>
-                    <option value="true" {% if request.GET.enabled == 'true' %}selected{% endif %}>Activos</option>
-                    <option value="false" {% if request.GET.enabled == 'false' %}selected{% endif %}>Inactivos</option>
-                </select>
                 <br/>
-                <button class="btn btn-success" onclick="addElement()">
+                <button class="btn btn-success" onclick="addAnalysis()">
                     Añadir análisis
                 </button>
                 <button class="btn btn-info" onclick="window.location.href = '/ODT'">
@@ -56,36 +31,37 @@
         <br/>
         <!-- Verificar si hay elementos -->
         {% if analisis %}
-            <table class="table table-striped mb-0">
-                <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
-                    <tr>
-                        <th scope="col">N° Análisis</th>
-                        <th scope="col">Método</th>
-                        <th scope="col">Descripción</th>
-                        <th scope="col">Elementos</th>
-                        <th scope="col">Estado</th>
-                        <th scope="col">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="analisis-table-body">
-                    {% for item in analisis %}
-                        <tr class="{{ item.enabled|yesno:'active,inactive' }}">
-                            <td>{{ item.Nro_Analisis }}</td>
-                            <td>{{ item.Analisis_metodo }}</td>
-                            <td>{{ item.descripcion }}</td>
-                            <td>
-                                {% for E in item.Elementos.all %}
-                                    {{ E }}{% if not forloop.last %}-{% endif %}
-                                {% endfor %}
-                            </td>
-                            <td>{{ item.enabled|yesno:'Activo,Inactivo' }}</td>
-                            <td>
-                                <button class="btn btn-primary action-btn" data-id="{{ item.id }}">Acción</button>
-                            </td>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
+                        <tr>
+                            <th scope="col">Cliente</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">metodología</th>
+                            <th scope="col">Elementos</th>
+                            <th scope="col">Acciones</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody id="analisis-table-body">
+                        {% for item in analisis %}
+                            
+                                <td>{{ item.cliente }}</td>
+                                <td>{{ item.nombre }}</td>
+                                <td>{{ item.metodologia }}</td>
+                                <td>
+                                    {% for E in item.elementos.all %}
+                                        {{ E }}<br>
+                                    {% endfor %}
+                                </td>
+                                
+                                <td>
+                                    <button class="btn btn-primary action-btn" data-id="{{ item.id }}">Modificar</button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         {% else %}
             <div class="alert alert-warning" role="alert">
                 Sin análisis asignados al sistema.
@@ -110,29 +86,7 @@
         
             $('.action-btn').on('click', function() {
                 const elementIdTARGET = $(this).data('id');
-                Swal.fire({
-                    title: '¿Qué acción quieres aplicar?',
-                    text: 'Elige una acción para el análisis seleccionado. Puedes cerrar este mensaje haciendo clic fuera de él o presionando el botón de cancelar.',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Activar',
-                    cancelButtonText: 'Desactivar',
-                    footer: `
-                        <button id="modify-btn" class="btn btn-secondary">Modificar</button>
-                    `,
-                    customClass: {
-                        confirmButton: 'btn-success',
-                        cancelButton: 'btn-danger'
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        performAction(elementIdTARGET, 'Activar');
-                    } else if (result.dismiss === Swal.DismissReason.cancel) {
-                        performAction(elementIdTARGET, 'Desactivar');
-                    }
-                });
-        
-                $(document).off('click', '#modify-btn').on('click', '#modify-btn', function() {
+               
                     const elementId = elementIdTARGET;
                     const urlDat = '/MasterData/';
                     const Token = csrfToken;
@@ -162,10 +116,6 @@
                             console.error('Error al enviar datos:', xhr.responseText);
                         }
                     });
-                
-
-
-                });
             });
         });
 
@@ -213,7 +163,7 @@
         }
 
 
-        function addElement()
+        function addAnalysis()
         {
             const ID_Target = -1;
             const urlDat = '/MasterData/';

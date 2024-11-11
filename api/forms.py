@@ -1,147 +1,20 @@
 from django import forms
-from api import models
-import uuid
-from datetime import datetime
-import random
-from django.contrib.auth.password_validation import CommonPasswordValidator, validate_password
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-
-class FormODT(forms.ModelForm):
-    class Meta:
-        model = models.ODT
-        fields = '__all__'
-        widgets = {
-            'Fec_Recep': forms.DateInput(attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd'}),
-            'Comentarios': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Ingrese comentarios adicionales'}),
-            'InicioCodigo': forms.NumberInput(attrs={'max': 999, 'min': 1, 'placeholder': 'Ej. 101'}),
-            'FinCodigo': forms.NumberInput(attrs={'max': 999, 'min': 1, 'placeholder': 'Ej. 201'}),
-            'Despacho': forms.TextInput(attrs={'placeholder': 'Ej. CG-12345678'}),
-            
-            'Nro_OT': forms.TextInput(attrs={'placeholder': 'Ej. OT123456'}),
-            'Prefijo': forms.TextInput(attrs={'placeholder': 'Código de identificación de muestra'}),
-        }
-        exclude = ['Cant_Muestra', 'Cliente']  # Ocultar cliente en el formulario
-
-    def __init__(self, *args, **kwargs):
-        # Capturamos el proyecto desde los kwargs si está disponible
-        self.proyecto = kwargs.pop('proyecto', None)
-        super().__init__(*args, **kwargs)
-
-        # Si es un nuevo registro (sin pk), genera automáticamente Nro_OT y Muestra
-        if not self.instance.pk:
-            self.fields['Nro_OT'].initial = self.generar_nro_ot()
-            #self.fields['Prefijo'].initial = self.generar_codigo_muestra()
-
-        # Si hay un proyecto, asigna su cliente al campo "Cliente"
-        if self.proyecto and self.proyecto.cliente:
-            self.instance.Cliente = self.proyecto.cliente
-
-        for field_name, field in self.fields.items():
-            field.widget.attrs.update({
-                'class': 'form-General',
-                'data-bs-toggle': 'tooltip',
-                'title': field.help_text
-            })
-
-        # Asegurarse de que la fecha de recepción tenga el formato correcto
-        if 'Fec_Recep' in self.data:
-            self.fields['Fec_Recep'].widget.attrs['value'] = self.data['Fec_Recep']
-        elif self.instance and self.instance.Fec_Recep:
-            self.fields['Fec_Recep'].widget.attrs['value'] = self.instance.Fec_Recep.strftime('%Y-%m-%d')
-
-    def generar_nro_ot(self):
-        # Número único basado en la fecha y un valor aleatorio
-        fecha_actual = datetime.now().strftime('%Y%m%d%H%M%S')
-        numero_aleatorio = random.randint(100, 999)
-        return f"OT{fecha_actual}{numero_aleatorio}"
-
-
-    def clean(self):
-        cleaned_data = super().clean()
-        inicio_codigo = cleaned_data.get('InicioCodigo')
-        fin_codigo = cleaned_data.get('FinCodigo')
-        muestra_codigo = cleaned_data.get('Prefijo')
-        
-
-        # Validación del rango de códigos
-        if not self.instance.pk:
-            if inicio_codigo is not None and fin_codigo is not None:
-                if fin_codigo < inicio_codigo:
-                    self.add_error('FinCodigo', 'El número final del código debe ser mayor o igual al número inicial.')
-
-                for codigo in range(inicio_codigo, fin_codigo + 1):
-                    codigo_completo = f"{muestra_codigo}-{codigo:02d}"
-                    if models.OT.objects.filter(id_muestra=codigo_completo).exists():
-                        self.add_error(None, f'El código de muestra {codigo_completo} ya existe en OT.')
-
-        return cleaned_data
-    
-
-class FormElements(forms.ModelForm):
-    class Meta:
-        model = models.Elementos
-        fields = '__all__'
-        widgets = {
-            'descripcion': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Descripción opcional del elemento'}),
-            'simbolo': forms.TextInput(attrs={'maxlength': 5, 'placeholder': 'Ej. H'}),
-            'numero_atomico': forms.NumberInput(attrs={'min': 1, 'placeholder': 'Ej. 1'}),
-            'masa_atomica': forms.NumberInput(attrs={'step': 'any', 'placeholder': 'Ej. 1.008'}),
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        for field_name, field in self.fields.items():
-            field.widget.attrs.update({'class': 'form-General'})
-
-        self.fields['nombre'].help_text = 'Nombre del elemento, por ejemplo: Hidrógeno.'
-        self.fields['descripcion'].help_text = 'Descripción opcional del elemento. Máximo 255 caracteres.'
-        self.fields['tipo'].help_text = 'Tipo de elemento, por ejemplo: Metal, No metal.'
-        self.fields['enabled'].help_text = 'Marque si el elemento está activo.'
-        self.fields['simbolo'].help_text = 'Símbolo químico del elemento, por ejemplo: H, O.'
-        self.fields['numero_atomico'].help_text = 'Número atómico del elemento, por ejemplo: 1 para Hidrógeno.'
-        self.fields['masa_atomica'].help_text = 'Masa atómica del elemento en unidades de masa atómica (uma).'
-
-class FormAnalisis(forms.ModelForm):
-    class Meta:
-        model = models.Analisis
-        fields = '__all__'
-        widgets = {
-            'Analisis_metodo': forms.TextInput(attrs={'placeholder': 'Ej. Análisis de espectroscopía de masas'}),
-            'Nro_Analisis': forms.TextInput(attrs={'placeholder': 'Ej. MA-001'}),
-            'descripcion': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Descripción del análisis metalúrgico'}),
-            'Formula': forms.TextInput(attrs={'placeholder': 'Ej. Fe, Al, Cu'}),
-            'Elementos': forms.SelectMultiple(attrs={'class': 'form-General'}),
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        for field_name, field in self.fields.items():
-            field.widget.attrs.update({'class': 'form-General'})
-
-        self.fields['Analisis_metodo'].help_text = 'Método de análisis metalúrgico, por ejemplo: Análisis de espectroscopía de masas.'
-        self.fields['Nro_Analisis'].help_text = 'Código único para el análisis, por ejemplo: MA-001.'
-        self.fields['descripcion'].help_text = 'Descripción del análisis metalúrgico. Máximo 255 caracteres.'
-        self.fields['Formula'].help_text = 'Fórmulas de los elementos metalúrgicos analizados, por ejemplo: Fe, Al, Cu.'
-        self.fields['Elementos'].help_text = 'Seleccione los elementos metalúrgicos involucrados en el análisis.'
-        self.fields['enabled'].help_text = 'Marque si el análisis está activo.'
-
-
-
-
-
+from django.contrib.auth.password_validation import CommonPasswordValidator, validate_password
+from .models import User, Proyecto, Cliente, Muestra, AnalisisCuTFeZn, AnalisisCuS4FeS4MoS4, AnalisisMulti, AnalisisCuS10FeS10MoS10, AnalisisCuSCuSFe, AnalisisCuTestConsH, Resultado, ODT, MuestraMasificada, Elementos, MetodoAnalisis, Parametros, Estandar, HojaTrabajo, CurvaturaElementos
+from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 
 class CustomUserCreationForm(UserCreationForm):
    
     class Meta:
-        model = models.User 
-        fields = ('first_name', 'last_name', 'rut', 'username', 'is_administrador', 'is_supervisor', 'is_quimico')
+        model = User 
+        fields = ('first_name', 'last_name', 'rut', 'username', 'rolname','turno')
      
     def clean_username(self):
         username = self.cleaned_data.get('username')
-        if models.User.objects.filter(username=username).exclude(pk=self.instance.pk).exists():
+        if User.objects.filter(username=username).exclude(pk=self.instance.pk).exists():
             raise forms.ValidationError(('Este correo electrónico ya está en uso.'))
         return username
 
@@ -167,18 +40,251 @@ class CustomUserCreationForm(UserCreationForm):
         return password2
     
     
-class CustomUserChangeForm(UserChangeForm):
+class ProyectoForm(forms.ModelForm):
     class Meta:
-        model = models.User 
-        fields = ('first_name', 'last_name', 'rut', 'username', 'is_administrador', 'is_supervisor', 'is_quimico')
-        
+        model = Proyecto
+        fields = ['nombre', 'cliente', 'fecha_emision']
 
 class ClienteForm(forms.ModelForm):
     class Meta:
-        model = models.Cliente
-        fields = ('__all__')
+        model = Cliente
+        fields = ['nombre', 'rut', 'direccion', 'telefono', 'email']
 
-class ProyectoForm(forms.ModelForm):
+class MuestraForm(forms.ModelForm):
     class Meta:
-        model = models.Proyecto
-        fields = ('__all__')
+        model = Muestra
+        fields = '__all__'
+
+class AnalisisCuTFeZnForm(forms.ModelForm):
+    class Meta:
+        model = AnalisisCuTFeZn
+        fields = ['l_ppm_fe', 'l_ppm_bk_fe', 'fe', 'l_ppm_zn', 'l_ppm_bk_zn', 'zn']
+
+class AnalisisCuS4FeS4MoS4Form(forms.ModelForm):
+    class Meta:
+        model = AnalisisCuS4FeS4MoS4
+        fields = ['control1_cut_cus', 'l_ppm_cus_fe', 'l_ppm_bk_fes4', 'fes4', 'control2_cut_fes4']
+
+class AnalisisMultiForm(forms.ModelForm):
+    class Meta:
+        model = AnalisisMulti
+        fields = [
+            'l_ppm_ag', 'l_ppm_ag_bk', 'ag', 'l_ppm_as', 'l_ppm_as_bk', 
+            'analisis_as', 'l_ppm_mo', 'l_ppm_mo_bk', 'mo', 'l_ppm_pb', 
+            'l_ppm_pb_bk', 'pb', 'l_ppm_cu', 'l_ppm_cu_bk', 'cu'
+        ]
+
+class AnalisisCuS10FeS10MoS10Form(forms.ModelForm):
+    class Meta:
+        model = AnalisisCuS10FeS10MoS10
+        fields = ['control_cut_cus', 'cut', 'cus10']
+
+class AnalisisCuSCuSFeForm(forms.ModelForm):
+    class Meta:
+        model = AnalisisCuSCuSFe
+        fields = [
+            'l_ppm_cus_fe', 'l_ppm_bk_cus_fe', 'cus_fe', 
+            'control2_cut_cus_fe', 'cut', 'cus_c', 'cus_fe_2'
+        ]
+
+class AnalisisCuTestConsHForm(forms.ModelForm):
+    class Meta:
+        model = AnalisisCuTestConsH
+        fields = [
+            'control1_cut_cutest', 'cut', 'cut_test', 'gaston_ml', 
+            'gasto_bk_ml', 'n_naco3', 'alicuota', 'consumo_h'
+        ]
+
+class ResultadoForm(forms.ModelForm):
+    class Meta:
+        model = Resultado
+        fields = '__all__'
+
+
+
+class ODTForm(forms.ModelForm):
+    class Meta:
+        model = ODT
+        fields = [
+            'Fec_Recep', 'Fec_Finalizacion', 'id', 'Prefijo', 'Cliente', 'Proyecto', 
+            'Responsable', 'Prioridad', 'TipoMuestra', 'Referencia', 'Comentarios', 'Cant_Muestra'
+        ]
+        widgets = {
+            'Fec_Recep': forms.DateInput(attrs={'type': 'date'}),
+            'Fec_Finalizacion': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['Fec_Recep'].input_formats = ['%Y-%m-%d']
+        self.fields['Fec_Finalizacion'].input_formats = ['%Y-%m-%d']
+    
+
+    def save(self, commit=True):
+        odt_instance = super().save(commit=commit)
+        muestras_generadas = []
+        if odt_instance.Prefijo and odt_instance.Cant_Muestra:
+            base_prefijo = int(odt_instance.Prefijo)
+
+            for i in range(odt_instance.Cant_Muestra):
+                nuevo_prefijo = str(base_prefijo + i)
+                muestra_existente = MuestraMasificada.objects.filter(odt=odt_instance, Prefijo=nuevo_prefijo).first()
+                if muestra_existente:
+                    muestras_generadas.append(muestra_existente)
+                else:
+                    nueva_muestra = MuestraMasificada.objects.create(
+                        odt=odt_instance,
+                        Prefijo=nuevo_prefijo,
+                        tipoMuestra=odt_instance.TipoMuestra or 'M'
+                    )
+                    muestras_generadas.append(nueva_muestra)
+        todas_muestras_odt = set(MuestraMasificada.objects.filter(odt=odt_instance))
+        muestras_sobrantes = todas_muestras_odt - set(muestras_generadas)
+        muestras_en_uso = []
+        for muestra in muestras_sobrantes:
+            if Muestra.objects.filter(muestraMasificada=muestra).exists():
+                muestras_en_uso.append(muestra)
+        if muestras_en_uso:
+            raise ValidationError("Hay muestras que están en hojas de trabajo, primero elimínelas para continuar.")
+        muestras_a_eliminar = muestras_sobrantes - set(muestras_en_uso)
+        for muestra in muestras_a_eliminar:
+            muestra.delete()
+
+        return odt_instance
+
+class MuestraMasificadaForm(forms.ModelForm):
+    class Meta:
+        model = MuestraMasificada
+        fields = ['odt', 'Prefijo', 'tipoMuestra']
+        widgets = {
+            'fecha_creacion': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        }
+
+class ElementosForm(forms.ModelForm):
+    class Meta:
+        model = Elementos
+        fields = ['nombre', 'gramos', 'miligramos']
+
+class MetodoAnalisisForm(forms.ModelForm):
+    class Meta:
+        model = MetodoAnalisis
+        fields = ['cliente', 'nombre', 'metodologia', 'elementos']
+        widgets = {
+            'metodologia': forms.Textarea(attrs={'rows': 4}),
+        }
+
+class ParametrosForm(forms.ModelForm):
+    class Meta:
+        model = Parametros
+        fields = ['Elementos', 'Unidad', 'VA', 'DS', 'Min', 'Max']
+        widgets = {
+            'Elementos': forms.CheckboxSelectMultiple,
+        }
+
+class EstandarForm(forms.ModelForm):
+    class Meta:
+        model = Estandar
+        fields = ['Nombre', 'cliente', 'parametros']
+        widgets = {
+            'parametros': forms.CheckboxSelectMultiple,
+        }
+
+class HojaTrabajoForm(forms.ModelForm):
+    class Meta:
+        model = HojaTrabajo
+        fields = ['odt', 'Estandar', 'MetodoAnalisis', 'MuestraMasificada', 'Tipo', 'Duplicado']
+        widgets = {
+            'Estandar': forms.CheckboxSelectMultiple,
+            'Tipo': forms.Select(choices=[('M', 'Muestra'), ('S', 'Estandar'), ('D', 'Duplicado'), ('B', 'Blanco')]),
+        }
+
+
+class HojaTrabajoGeneralForm(forms.ModelForm):
+    class Meta:
+        model = HojaTrabajo
+        fields = ['ID_HDT', 'odt', 'Estandar', 'MetodoAnalisis', 'Tipo', 'Duplicado']
+        widgets = {
+            'Estandar': forms.CheckboxSelectMultiple,
+            'Tipo': forms.Select(choices=[('M', 'Muestra'), ('S', 'Estandar'), ('D', 'Duplicado'), ('B', 'Blanco')]),
+        }
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        id_hdt_value = self.cleaned_data['ID_HDT']
+        odt = self.cleaned_data['odt']
+        metodo_analisis = instance.MetodoAnalisis
+        muestras = MuestraMasificada.objects.filter(odt=odt)
+        
+        hojas_trabajo = []
+        count = 0
+        
+        elementos = metodo_analisis.elementos.all()
+        
+        for muestra in muestras:
+            # Crear la hoja de trabajo para cada muestra
+            if count == 0:
+                hoja_trabajo = instance
+                hoja_trabajo.MuestraMasificada = muestra
+                hoja_trabajo.save()  # Guarda la primera hoja de trabajo
+            else:
+                hoja_trabajo = HojaTrabajo(
+                    ID_HDT=id_hdt_value,
+                    odt=odt,
+                    MetodoAnalisis=instance.MetodoAnalisis,
+                    Tipo=instance.Tipo,
+                    Duplicado=instance.Duplicado,
+                    MuestraMasificada=muestra
+                )
+                hoja_trabajo.save()  # Guarda la hoja de trabajo
+                hoja_trabajo.Estandar.set(self.cleaned_data['Estandar'])  # Establece los valores de 'Estandar'
+            
+            hojas_trabajo.append(hoja_trabajo)
+            count += 1
+
+            for elemento in elementos:
+                curvatura = CurvaturaElementos.objects.filter(
+                    cliente=metodo_analisis.cliente,
+                    elemento=elemento
+                ).first()
+                
+                curvatura_valor = curvatura.curvatura if curvatura else 1
+                print(f"Elemento: {elemento.nombre} - Curvatura: {curvatura_valor}")
+                
+                for index in range(1, curvatura_valor + 1):
+                    muestra_instance = Muestra(
+                        nombre=f"{elemento.nombre} - Muestra {index}",
+                        proyecto=odt.Proyecto,
+                        fecha_emision=timezone.now(),
+                        elemento=elemento.nombre,
+                        nbo=f"NBO-{index}", 
+                        ident=f"ID-{index}",
+                        indexCurv=index,
+                        hoja_trabajo=hoja_trabajo,  
+                        muestraMasificada=muestra,
+                        t="M", 
+                        peso_m=0.0, 
+                        v_ml=0.0, 
+                        l_ppm=0.0, 
+                        l_ppm_bk=0.0,  
+                        porcentaje=0.0  
+                    )
+                    muestra_instance.save() 
+
+                resultado_instance = Resultado(
+                    elemento=elemento, 
+                    muestra=muestra, 
+                    hoja_trabajo=hoja_trabajo,
+                    resultadoAnalisis=0, 
+                    fecha_emision=timezone.now()
+                )
+                resultado_instance.save() 
+
+        if commit:
+            instance.save()
+        
+        return instance
+    
+class CurvaturaForm(forms.ModelForm):
+    class Meta:
+        model = CurvaturaElementos
+        fields = '__all__'

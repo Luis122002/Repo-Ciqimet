@@ -171,6 +171,12 @@
                 {% elif action == 'mod' %}
                     Modificar Orden de Trabajo
                 {% endif %}
+            {% elif contexModel == 'curv' %}
+                {% if action == 'add' %}
+                    Añadir Curvatura de Elemento
+                {% elif action == 'mod' %}
+                    Modificar Curvatura de Elemento
+                {% endif %}
             {% elif contexModel == 'analytic' %}
                 {% if action == 'add' %}
                     Añadir Análisis de Trabajo
@@ -209,13 +215,15 @@
                     {% endif %}
                 </div>
             {% endfor %}
-            Analysis-Manager
             <button type="submit" class="btn btn-primary btn-submit">Agregar</button>
-            <button type="button" class="btn btn-secondary" onclick="window.location.href='{% if contexModel == 'element' %}/Elements-Manager/{% elif contexModel == 'ODT' %}/ODT/{% elif contexModel == 'analytic' %}/Analysis-Manager/{% endif %}'">Cancelar</button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='{% if contexModel == 'element' %}/Elements-Manager/{% elif contexModel == 'curv' %}/Elements-Manager/{% elif contexModel == 'ODT' %}/ODT/{% elif contexModel == 'analytic' %}/Analysis-Manager/{% endif %}'">Cancelar</button>
         </form>
     <br/>
     {% if id != "-1" %}
-        <button class="btn btn-primary btn-alert" onclick='OnDeleteRegister()'>Borrar</button>
+    <div class="text-center">
+        <button class="btn btn-danger btn-lg btn-alert" onclick='OnDeleteRegister()'>Borrar</button>
+    </div>
+        <br/><br/>
     {% endif %}
         {% else %}
             <div class="alert alert-warning" role="alert">
@@ -239,66 +247,10 @@
 {% include 'Footer.html' %}
 
 <script>
-    document.getElementById('open-alert')?.addEventListener('click', function() {
-        Swal.fire({
-            title: 'Añadir Símbolo',
-            html: `
-                <div class="formula-editor">
-                    <div class="editor-buttons">
-                        <button onclick="addToFormula('¹')">¹</button>
-                        <button onclick="addToFormula('²')">²</button>
-                        <button onclick="addToFormula('³')">³</button>
-                        <button onclick="addToFormula('⁴')">⁴</button>
-                        <button onclick="addToFormula('⁵')">⁵</button>
-                        <button onclick="addToFormula('⁶')">⁶</button>
-                        <button onclick="addToFormula('⁷')">⁷</button>
-                        <button onclick="addToFormula('⁸')">⁸</button>
-                        <button onclick="addToFormula('⁹')">⁹</button>
-                        <br/>
-                        <button onclick="addToFormula('₁')">₁</button>
-                        <button onclick="addToFormula('₂')">₂</button>
-                        <button onclick="addToFormula('₃')">₃</button>
-                        <button onclick="addToFormula('₄')">₄</button>
-                        <button onclick="addToFormula('₅')">₅</button>
-                        <button onclick="addToFormula('₆')">₆</button>
-                        <button onclick="addToFormula('₇')">₇</button>
-                        <button onclick="addToFormula('₈')">₈</button>
-                        <button onclick="addToFormula('₉')">₉</button>
-                    </div>
-                    <div class="textarea-wrapper">
-                        <textarea id="formula" class="swal2-textarea" placeholder="Ej. CO₂, H₂SO₄" rows="4"></textarea>
-                    </div>
-                </div>
-            `,
-            focusConfirm: false,
-            preConfirm: () => {
-                const formula = Swal.getPopup().querySelector('#formula').value;
-                
-                if (!formula) {
-                    Swal.showValidationMessage('Por favor ingrese la fórmula');
-                    return false;
-                }
-                
-                return {
-                    formula: formula
-                }
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const { formula } = result.value;
-                const numeroElementoField = document.querySelector('input[name="numero_elemento"]');
-                if (numeroElementoField) {
-                    numeroElementoField.value = formula;
-                }
-                Swal.fire(`Fórmula química creada: ${formula}`);
-            }
-        });
-    });
+    
 
     function OnDeleteRegister() {
-        console.log("ID: {{ id }}");
-        console.log("Contexto: {{ contexModel }}");
-        
+               
         Swal.fire({
             title: '¿Estás seguro que quieres eliminar este registro?',
             text: "Esta acción no se puede deshacer.",
@@ -330,15 +282,7 @@
                         'stade': stade
                     },
                     success: function(response) {
-                        // Manejar la respuesta aquí
-                        Swal.fire(
-                            'Eliminado!',
-                            'El registro ha sido eliminado.',
-                            'success'
-                        ).then(() => {
-                            // Redireccionar si es necesario
-                            window.location.href = response.redirect_url;
-                        });
+                        window.location.href = response.redirect_url;
                     },
                     error: function(xhr, status, error) {
                         Swal.fire(

@@ -1,65 +1,128 @@
 from django.contrib import admin
-from .models import User, Cliente, Proyecto, ODT, Analisis, Elementos, OT
+from .models import (
+    User, Proyecto, Cliente, Muestra, AnalisisCuTFeZn, AnalisisCuS4FeS4MoS4, AnalisisMulti,
+    AnalisisCuS10FeS10MoS10, AnalisisCuSCuSFe, AnalisisCuTestConsH, Resultado, ODT, MuestraMasificada,
+    Elementos, MetodoAnalisis, Parametros, Estandar, HojaTrabajo, CurvaturaElementos
+)
+from .forms import (
+    CustomUserCreationForm, ProyectoForm, ClienteForm, MuestraForm, AnalisisCuTFeZnForm,
+    AnalisisCuS4FeS4MoS4Form, AnalisisMultiForm, AnalisisCuS10FeS10MoS10Form, AnalisisCuSCuSFeForm,
+    AnalisisCuTestConsHForm, ResultadoForm, ODTForm, MuestraMasificadaForm, ElementosForm,
+    MetodoAnalisisForm, ParametrosForm, EstandarForm, HojaTrabajoForm, HojaTrabajoGeneralForm, CurvaturaForm
+)
 
-# Registrar el modelo User (si no lo has hecho ya)
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
-class UserCreationFormCustom(UserCreationForm):
-    class Meta(UserCreationForm.Meta):
-        model = User
-
-class UserChangeFormCustom(UserChangeForm):
-    class Meta(UserChangeForm.Meta):
-        model = User
-
-class UserAdmin(BaseUserAdmin):
-    form = UserChangeFormCustom
-    add_form = UserCreationFormCustom
-    list_display = ('username', 'email', 'rolname', 'is_staff')
-    list_filter = ('is_staff', 'is_superuser', 'is_active', 'rolname')
-    fieldsets = (
-        (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('first_name', 'last_name', 'email', 'rolname')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-        ('Important dates', {'fields': ('last_login', 'date_joined')}),
-    )
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('username', 'email', 'password1', 'password2', 'rolname'),
-        }),
-    )
-    search_fields = ('username', 'email')
-    ordering = ('username',)
-
-admin.site.register(User, UserAdmin)
-
+@admin.register(User)
+class CustomUserAdmin(admin.ModelAdmin):
+    form = CustomUserCreationForm
+    list_display = ('username', 'first_name', 'last_name', 'rolname', 'turno')
 
 
 @admin.register(Proyecto)
 class ProyectoAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'cliente')
-    search_fields = ('nombre', 'cliente__user__username')
-    list_filter = ('cliente',)
+    form = ProyectoForm
+    list_display = ('nombre', 'cliente', 'fecha_emision')
 
-# Registrar otros modelos si es necesario
+
+@admin.register(Cliente)
+class ClienteAdmin(admin.ModelAdmin):
+    form = ClienteForm
+    list_display = ('nombre', 'rut', 'direccion', 'telefono', 'email')
+
+
+
+
+
+@admin.register(AnalisisCuTFeZn)
+class AnalisisCuTFeZnAdmin(admin.ModelAdmin):
+    form = AnalisisCuTFeZnForm
+    list_display = ('l_ppm_fe', 'l_ppm_bk_fe', 'fe', 'l_ppm_zn', 'l_ppm_bk_zn', 'zn')
+
+
+@admin.register(AnalisisCuS4FeS4MoS4)
+class AnalisisCuS4FeS4MoS4Admin(admin.ModelAdmin):
+    form = AnalisisCuS4FeS4MoS4Form
+    list_display = ('control1_cut_cus', 'l_ppm_cus_fe', 'fes4', 'control2_cut_fes4')
+
+
+@admin.register(AnalisisMulti)
+class AnalisisMultiAdmin(admin.ModelAdmin):
+    form = AnalisisMultiForm
+    list_display = ('l_ppm_ag', 'l_ppm_as', 'l_ppm_mo', 'l_ppm_pb', 'l_ppm_cu')
+
+
+@admin.register(AnalisisCuS10FeS10MoS10)
+class AnalisisCuS10FeS10MoS10Admin(admin.ModelAdmin):
+    form = AnalisisCuS10FeS10MoS10Form
+    list_display = ('control_cut_cus', 'cut', 'cus10')
+
+
+@admin.register(AnalisisCuSCuSFe)
+class AnalisisCuSCuSFeAdmin(admin.ModelAdmin):
+    form = AnalisisCuSCuSFeForm
+    list_display = ('l_ppm_cus_fe', 'cus_fe', 'cut')
+
+
+@admin.register(AnalisisCuTestConsH)
+class AnalisisCuTestConsHAdmin(admin.ModelAdmin):
+    form = AnalisisCuTestConsHForm
+    list_display = ('control1_cut_cutest', 'cut', 'cut_test', 'gaston_ml')
+
+
+@admin.register(Resultado)
+class ResultadoAdmin(admin.ModelAdmin):
+    form = ResultadoForm
+    list_display = ('elemento', 'muestra', 'hoja_trabajo', 'hoja_trabajo', 'resultadoAnalisis', 'fecha_emision')
+
+
 @admin.register(ODT)
 class ODTAdmin(admin.ModelAdmin):
-    list_display = ('Nro_OT', 'Fec_Recep', 'Proyecto', 'Despacho', 'Envio', 'Prefijo', 'Comentarios', 'InicioCodigo', 'FinCodigo', 'Cant_Muestra', 'Turno')
-    search_fields = ('Nro_OT', 'Prefijo', 'Referencia', 'Proyecto')
+    form = ODTForm
+    list_display = ('Fec_Recep', 'Fec_Finalizacion', 'id', 'Cliente', 'Proyecto', 'Prioridad', 'TipoMuestra')
 
-@admin.register(Analisis)
-class AnalisisAdmin(admin.ModelAdmin):
-    list_display = ('Analisis_metodo', 'descripcion', 'Formula')
-    search_fields = ('Analisis_metodo', 'descripcion')
+
+@admin.register(MuestraMasificada)
+class MuestraMasificadaAdmin(admin.ModelAdmin):
+    form = MuestraMasificadaForm
+    list_display = ('odt', 'Prefijo', 'tipoMuestra', 'fecha_creacion')
+
+@admin.register(Muestra)
+class MuestrasAdmin(admin.ModelAdmin):
+    form = MuestraForm
+    list_display = ('nombre', 'proyecto', 'fecha_emision', 'elemento', 'nbo', 'ident', 'indexCurv', 't', 'peso_m', 'v_ml', 'l_ppm', 'l_ppm_bk', 'porcentaje')
+
 
 @admin.register(Elementos)
 class ElementosAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'descripcion', 'tipo', 'enabled', 'simbolo', 'numero_atomico', 'masa_atomica')
-    search_fields = ('nombre', 'tipo', 'descripcion')
+    
+    form = ElementosForm
+    list_display = ('nombre', 'gramos', 'miligramos')
 
-@admin.register(OT)
-class OTAdmin(admin.ModelAdmin):
-    list_display = ('id_muestra', 'peso_muestra', 'volumen', 'dilucion', 'odt')
-    search_fields = ('id_muestra', 'odt__Nro_OT')
+
+@admin.register(MetodoAnalisis)
+class MetodoAnalisisAdmin(admin.ModelAdmin):
+    form = MetodoAnalisisForm
+    list_display = ('cliente', 'nombre')
+
+
+@admin.register(Parametros)
+class ParametrosAdmin(admin.ModelAdmin):
+    form = ParametrosForm
+    list_display = ('Unidad', 'VA', 'DS', 'Min', 'Max')
+
+
+@admin.register(Estandar)
+class EstandarAdmin(admin.ModelAdmin):
+    form = EstandarForm
+    list_display = ('Nombre', 'cliente')
+
+
+@admin.register(HojaTrabajo)
+class HojaTrabajoAdmin(admin.ModelAdmin):
+    form = HojaTrabajoGeneralForm
+    list_display = ('ID_HDT','odt', 'MetodoAnalisis', 'Tipo')
+
+@admin.register(CurvaturaElementos)
+class CurvaturaAdmin(admin.ModelAdmin):
+    form = CurvaturaForm
+    list_display = ('cliente','elemento', 'curvatura')

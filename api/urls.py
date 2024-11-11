@@ -5,15 +5,45 @@ from . import views, viewsReact
 urlpatterns = [
 
 
-    path('', views.requestAcces, name="Acces"),
+    path('', views.Sitio_Web),
 
-    # USUARIOS
+       # USUARIOS
+    path('api/unlogin/', viewsReact.logout_user, name='logout'),
     path('api/register/', viewsReact.register_user, name='register'),
     path('api/login/', viewsReact.login_user, name='login'),
-    path('api/unlogin/', viewsReact.logout_user, name='logout'),
-
     path('api/users/', viewsReact.users_list, name='users'),
     path('api/users/delete/<int:id>/', viewsReact.users_delete, name='users_delete'),
+    
+    # CLIENTE
+    path('api/clientes/', viewsReact.clientes_list, name='clientes'),
+    path('api/registerCliente/', viewsReact.register_cliente, name='register_cliente'),
+    
+    # PROYECTOS
+    path('api/proyectos/', viewsReact.proyectos_list, name='proyectos'),
+    path('api/registerProyectos/', viewsReact.register_proyectos, name='register_proyectos'),
+    
+    # GESTION LABORATORIO
+    path('api/laboratorio/', viewsReact.laboratorio, name='laboratorio'),
+    path('api/muestras/', viewsReact.muestras, name='muestras'),
+    path('api/registerMuestra/', viewsReact.register_muestra, name='register_muestra'),
+    path('api/CuTFeZn/', viewsReact.CutFeZn, name='CutFeZn'),
+    path('api/registerCuTFeZn/', viewsReact.register_CutFeZn, name='register_CutFeZn'),
+    path('api/CuS4FeS4MoS4/', viewsReact.CuS4FeS4MoS4, name='CuS4FeS4MoS4'),
+    path('api/registerCuS4FeS4MoS4/', viewsReact.register_CuS4FeS4MoS4, name='register_CuS4FeS4MoS4'),
+    path('api/Multi/', viewsReact.Multi, name='multi'),
+    path('api/registerMulti/', viewsReact.register_Multi, name='register_Multi'),
+    
+    # ODT
+    path('api/registerODT/', viewsReact.register_ODT, name='registerODT'),
+    path('api/ODT/', viewsReact.get_ODT, name='get_ODT'),
+    path('api/ODTDetails/<str:id>/', viewsReact.get_ODTDetails, name='get_ODTDetails'),
+   
+   # TRABAJO/Metodo de analisis
+    path('api/method/', viewsReact.get_method, name='method'),
+    
+    #Estandar de empresa
+    path('registerEstandar/', viewsReact.register_Estandar, name='registerEstandar'),
+    path('Estandar/', viewsReact.get_Estandar, name='get_Estandar'),
 
 
     path('login/', views.login_view, name='login_View'),
@@ -38,7 +68,6 @@ urlpatterns = [
 
 
     path('MasterData/', views.Master_def, name='master_def'),
-
     path('Puesto-trabajo/', views.PT_Module),
     path('Balanza/', views.Balanza_Module),
     path('Puesto-Absorcion/', views.PI_Module),

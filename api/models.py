@@ -1,61 +1,133 @@
-import uuid
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
-from datetime import date
-import datetime
 from django.db import models
+from django.forms import ValidationError
 from django.utils.translation import gettext as _
-
-
-def validate_length(value):
-    if len(str(value)) != 8:  # Aquí defines la lógica de validación
-        raise ValidationError(f'El número {value} debe tener exactamente 8 dígitos.')
-
-
+from django.core.validators import MinValueValidator
 
 # Modelo para almacenar los usuarios
 class User(AbstractUser):
     class Role(models.TextChoices):
-            CLIENTE = 'Cliente', _('Cliente')
             SUPERVISOR = 'Supervisor', _('Supervisor')
             ADMINISTRADOR = 'Administrador', _('Administrador')
-            QUIMICO_A = 'QuimicoA', _('Químico A')
-            QUIMICO_B = 'QuimicoB', _('Químico B')
-            QUIMICO_C = 'QuimicoC', _('Químico C')
+            QUIMICO = 'Quimico', _('Químico')
+    
+    class Turno(models.TextChoices):
+        DIA = 'Dia', _('Dia')
+        NOCHE = 'Noche', _('Noche')
+            
     username = models.EmailField(_('Correo'), unique=True, null=False, blank=False)
-    rut = models.CharField(max_length=200, unique=True, null=False, blank=False, default="00000000-0")
+    rut = models.CharField(max_length=200, unique=True, null=False, blank=False)
     token = models.CharField(max_length=200, null=True, blank=True)  # Único campo opcional
-    is_administrador = models.BooleanField('Administrador', default=False)
-    is_supervisor = models.BooleanField('Supervisor', default=False)
-    is_quimico = models.BooleanField('Químico', default=False)
-    is_new_user = models.CharField(max_length=200, null=True, blank=True)
-    date_joined = models.DateTimeField(_('Fecha de ingreso'), auto_now_add=True)
     rolname = models.CharField(max_length=200, choices=Role.choices)
-
-
-    def __str__(self):
+    turno = models.CharField(max_length=200, choices=Turno.choices)
+    date_joined = models.DateTimeField(_('Fecha de ingreso'), auto_now_add=True)
+    
+    def _str_(self):
         name = self.first_name + ' ' + self.last_name
         return name
-
-
+    
 # Modelo para almacenar los clientes y proyectos
 class Proyecto(models.Model):
     nombre = models.CharField(max_length=100, null=False, blank=False)
-    cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE, null=True, blank=False)
-    fecha_emision = models.DateField(null=False, blank=False, default=datetime.date.today)
-    volVal = models.FloatField(blank=True, null=True)
+    cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE, null=False, blank=False)
+    fecha_emision = models.DateField(null=False, blank=False)
+    
+    ### <
     def __str__(self):
-        return self.cliente.nombre
+        return self.nombre
+    ### <
 
 class Cliente(models.Model):
-    nombre = models.CharField(max_length=100, null=False, blank=False, default="Desconocido")
-    rut = models.CharField(max_length=100, null=False, blank=False, default="Desconocido")
-    direccion = models.CharField(max_length=100, null=False, blank=False, default="Desconocido")
-    telefono = models.CharField(max_length=100, null=False, blank=False, default="Desconocido")
-    email = models.EmailField(null=False, blank=False, default="Desconocido")
+    nombre = models.CharField(max_length=100, null=False, blank=False)
+    rut = models.CharField(max_length=100, null=False, blank=False)
+    direccion = models.CharField(max_length=100, null=False, blank=False)
+    telefono = models.CharField(max_length=100, null=False, blank=False)
+    email = models.EmailField(null=False, blank=False)
     
     def __str__(self):
         return self.nombre
+
+
+# Modelos específicos para los diferentes tipos de análisis
+class AnalisisCuTFeZn(models.Model):
+    l_ppm_fe = models.FloatField(verbose_name="L. ppm Fe", null=False, blank=False)
+    l_ppm_bk_fe = models.FloatField(verbose_name="L. ppm-BK Fe", null=False, blank=False)
+    fe = models.FloatField(verbose_name="Fe (%)", null=False, blank=False)
+    l_ppm_zn = models.FloatField(verbose_name="L. ppm Zn", null=False, blank=False)
+    l_ppm_bk_zn = models.FloatField(verbose_name="L. ppm-BK Zn", null=False, blank=False)
+    zn = models.FloatField(verbose_name="Zn (%)", null=False, blank=False)
+    
+    def __str__(self):
+        return f"Análisis CuT-Fe-Zn"
+
+class AnalisisCuS4FeS4MoS4(models.Model):
+    control1_cut_cus = models.FloatField(verbose_name="Control1 CuT-CuS", null=False, blank=False)
+    l_ppm_cus_fe = models.FloatField(verbose_name="L. ppm CusFe", null=False, blank=False)
+    l_ppm_bk_fes4 = models.FloatField(verbose_name="L. ppm-BK FeS4", null=False, blank=False)
+    fes4 = models.FloatField(verbose_name="FeS4 (%)", null=False, blank=False)
+    control2_cut_fes4 = models.FloatField(verbose_name="Control2 CuT-FeS4", null=False, blank=False)
+    
+    def __str__(self):
+        return f"Análisis CuS4-FeS4-MoS4"
+
+class AnalisisMulti(models.Model):
+    l_ppm_ag = models.FloatField(verbose_name="L. ppm Ag", null=False, blank=False)
+    l_ppm_ag_bk = models.FloatField(verbose_name="L. ppm Ag-bk", null=False, blank=False)
+    ag = models.FloatField(verbose_name="Ag (ppm)", null=False, blank=False)
+    l_ppm_as = models.FloatField(verbose_name="L. ppm As", null=False, blank=False)
+    l_ppm_as_bk = models.FloatField(verbose_name="L. ppm As-bk", null=False, blank=False)
+    analisis_as = models.FloatField(verbose_name="As (%)", null=False, blank=False)
+    l_ppm_mo = models.FloatField(verbose_name="L. ppm Mo", null=False, blank=False)
+    l_ppm_mo_bk = models.FloatField(verbose_name="L. ppm Mo-bk", null=False, blank=False)
+    mo = models.FloatField(verbose_name="Mo (%)", null=False, blank=False)
+    l_ppm_pb = models.FloatField(verbose_name="L. ppm Pb", null=False, blank=False)
+    l_ppm_pb_bk = models.FloatField(verbose_name="L. ppm Pb-Bk", null=False, blank=False)
+    pb = models.FloatField(verbose_name="Pb (%)", null=False, blank=False)
+    l_ppm_cu = models.FloatField(verbose_name="L. ppm Cu", null=False, blank=False)
+    l_ppm_cu_bk = models.FloatField(verbose_name="L. ppm Cu-bk", null=False, blank=False)
+    cu = models.FloatField(verbose_name="Cu (%)", null=False, blank=False)
+    
+    def __str__(self):
+        return f"Análisis Multi"
+
+class AnalisisCuS10FeS10MoS10(models.Model):
+    control_cut_cus = models.FloatField(verbose_name="Control CuT-CuS", null=False, blank=False)
+    cut = models.FloatField(verbose_name="CuT", null=False, blank=False)
+    cus10 = models.FloatField(verbose_name="CuS10", null=False, blank=False)
+    
+    def __str__(self):
+        return f"Análisis CuS10-FeS10-MoS10"
+
+class AnalisisCuSCuSFe(models.Model):
+    l_ppm_cus_fe = models.FloatField(verbose_name="L. ppm CuSFe", null=False, blank=False)
+    l_ppm_bk_cus_fe = models.FloatField(verbose_name="L. ppm-Bk CuSFe", null=False, blank=False)
+    cus_fe = models.FloatField(verbose_name="CuSFe (%)", null=False, blank=False)
+    control2_cut_cus_fe = models.FloatField(verbose_name="Control2 CuT-CuSFe", null=False, blank=False)
+    cut = models.FloatField(verbose_name="CuT", null=False, blank=False)
+    cus_c = models.FloatField(verbose_name="CuSC", null=False, blank=False)
+    cus_fe_2 = models.FloatField(verbose_name="CuSFe", null=False, blank=False)
+    
+    def __str__(self):
+        return f"Análisis CuS3-CuSFe"
+
+class AnalisisCuTestConsH(models.Model):
+    control1_cut_cutest = models.FloatField(verbose_name="Control1 CuT-CuTest", null=False, blank=False)
+    cut = models.FloatField(verbose_name="CuT", null=False, blank=False)
+    cut_test = models.FloatField(verbose_name="CuTest", null=False, blank=False)
+    gaston_ml = models.FloatField(verbose_name="Gaston mL", null=False, blank=False)
+    gasto_bk_ml = models.FloatField(verbose_name="Gasto Bk mL", null=False, blank=False)
+    n_naco3 = models.FloatField(verbose_name="N NaCO3", null=False, blank=False)
+    alicuota = models.FloatField(verbose_name="Alicuota", null=False, blank=False)
+    consumo_h = models.FloatField(verbose_name="Consumo H+", null=False, blank=False)
+    
+    def __str__(self):
+        return f"Análisis CuTest-ConsH"
+
+
+
+def validate_length(value):
+    if len(str(value)) != 9:
+        raise ValidationError('El número debe tener exactamente 9 dígitos.')
 
 
 class ODT(models.Model):
@@ -69,140 +141,152 @@ class ODT(models.Model):
         MEDIA = 'Media', _('Media')
         BAJA = 'Baja', _('Baja')
 
-    id = models.AutoField(primary_key=True)
-    Nro_OT = models.CharField(_("Código de ODT"), max_length=200, unique=True)
     Fec_Recep = models.DateField()
-    Cliente = models.ForeignKey(Cliente, null=True, blank=True, on_delete=models.CASCADE)
-    Proyecto = models.ForeignKey(Proyecto, null=True, blank=True, on_delete=models.CASCADE)
-    Despacho = models.CharField(_("Despacho"), max_length=200, blank=True, null=True)
-    Envio = models.ForeignKey(User, limit_choices_to={'rolname__in': [User.Role.QUIMICO_A, User.Role.QUIMICO_B, User.Role.QUIMICO_C]}, on_delete=models.CASCADE, related_name='envios', verbose_name=_("Responsable de envío"))
-    Prefijo = models.PositiveIntegerField(_("Codigo de muestras"),validators=[validate_length], unique=True, blank=True, null=True)
-    Comentarios = models.CharField(max_length=255, blank=True)
-    Turno = models.CharField(_("Turno"), max_length=10, choices=[('DIA', _('Día')), ('NOCHE', _('Noche'))], default='DIA')
-    InicioCodigo = models.PositiveIntegerField(_("Inicio Código"), blank=True, null=True)
-    FinCodigo = models.PositiveIntegerField(_("Fin Código"), blank=True, null=True)
-    Cant_Muestra = models.PositiveIntegerField(_("Cantidad de Muestras"), blank=True, null=True)
+    Fec_Finalizacion = models.DateField()
+    id = models.CharField(_("Número de OT"), max_length=200, unique=True, primary_key=True)
+    Prefijo = models.CharField("Muestra inicial", max_length=200, blank=True, null=True)
+    Cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE, null=False, blank=False)
+    Proyecto = models.ForeignKey('Proyecto', on_delete=models.CASCADE, null=False, blank=False)
+    Responsable = models.CharField(_("Responsable envío"), max_length=200, blank=True, null=True)
     Prioridad = models.CharField(_("Prioridad"), max_length=200, choices=PrioridadChoice.choices, blank=True)
     TipoMuestra = models.CharField(_("Tipo de Muestra"), max_length=200, choices=T_MUESTRA.choices, blank=True)
     Referencia = models.PositiveIntegerField(_("Batch"), blank=True, null=True)
+    Comentarios = models.CharField(max_length=255, blank=True)
+    Cant_Muestra = models.PositiveIntegerField(_("Cantidad de Muestras"), blank=True, null=True)
 
-    Analisis = models.ForeignKey('Analisis', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Análisis"))
-    updated_at = models.DateTimeField(auto_now=True)  
     def save(self, *args, **kwargs):
-        if not self.Nro_OT:
-            last_odt = ODT.objects.order_by('id').last()
+        if self._state.adding and not self.id:
+            last_odt = ODT.objects.order_by('-id').first()
             if last_odt:
-                last_ot_number = int(last_odt.Nro_OT.split('OT')[-1]) 
-                self.Nro_OT = f"OT{last_ot_number + 1:06d}"
+                try:
+                    last_number = int(last_odt.id[3:])
+                    new_number = last_number + 1
+                except ValueError:
+                    new_number = 1
             else:
-                self.Nro_OT = "OT000001"
-
-        if not self.Prefijo and self.InicioCodigo and self.FinCodigo:
-            self.Prefijo = f"M-{self.InicioCodigo}-{self.FinCodigo}"
-
-        if self.Proyecto and self.Proyecto.cliente:
-            self.Cliente = self.Proyecto.cliente
-
+                new_number = 1
+            self.id = f'WSS{new_number:06d}'
+        
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.Nro_OT
+        return f'WSS{ self.id}'
+        
+    
+class MuestraMasificada(models.Model):
+    odt = models.ForeignKey(ODT, on_delete=models.CASCADE, related_name='masificaciones')
+    Prefijo = models.CharField(max_length=200,unique=True , primary_key=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    tipoMuestra = models.CharField(max_length=200 ,default='M')
 
     def __str__(self):
-        return self.Nro_OT
-
-    def save(self, *args, **kwargs):
-        if self.pk is None:
-            if self.InicioCodigo is not None and self.FinCodigo is not None:
-                self.Cant_Muestra = self.FinCodigo - self.InicioCodigo + 1
-        super().save(*args, **kwargs)
-
+        return f'Muestra {self.Prefijo} para ODT {self.odt.id}'
+    
     def clean(self):
-        super().clean()
-        if self.InicioCodigo is not None and self.FinCodigo is not None:
-            if self.FinCodigo < self.InicioCodigo:
-                raise ValidationError('El número final del código debe ser mayor o igual al número inicial.')
-        if self.Prefijo and self.InicioCodigo is not None and self.FinCodigo is not None:
-            overlapping_records = ODT.objects.exclude(id=self.id).filter(
-                Prefijo=self.Prefijo,
-                InicioCodigo__lte=self.FinCodigo,
-                FinCodigo__gte=self.InicioCodigo
-            )
-            if overlapping_records.exists():
-                raise ValidationError(
-                    'El rango de códigos de muestra ({0}-{1}) se solapa con un rango existente para el código de muestra {2}.'.format(
-                        self.InicioCodigo, self.FinCodigo, self.Prefijo
-                    )
-                )
-        if self.Prefijo and self.InicioCodigo is not None and self.FinCodigo is not None:
-            for codigo in range(self.InicioCodigo, self.FinCodigo + 1):
-                expected_id_muestra = f"{self.Prefijo}-{codigo:03d}"
-                if OT.objects.filter(id_muestra=expected_id_muestra).exists():
-                    raise ValidationError(
-                        f'El código de muestra {expected_id_muestra} ya existe en OT.'
-                    )
-                
-
-
-
-
-
-
-
-class Analisis(models.Model):
-    id = models.AutoField(primary_key=True)
-    Analisis_metodo = models.CharField(_("Método de análisis"), max_length=200)
-    Nro_Analisis = models.CharField(_("Código de análisis"), max_length=200, unique=True, null=True)
-    descripcion = models.CharField(max_length=255)
-    Formula = models.CharField(max_length=255)
-    Elementos = models.ManyToManyField('Elementos', verbose_name=_("Elementos"), blank=True)  # Relación con Elementos
-    updated_at = models.DateTimeField(auto_now=True)  # Fecha de última modificación
-    enabled = models.BooleanField(_("Activo"), default=True)
-
-    def __str__(self):
-        return self.Analisis_metodo
+    # Asegurarse de que Prefijo es una cadena
+        if not isinstance(self.Prefijo, str):
+            raise ValidationError("El campo Prefijo debe ser una cadena.")
 
 class Elementos(models.Model):
-    id = models.AutoField(primary_key=True)
-    nombre = models.CharField(_("Nombre"), max_length=200)
-    tipo = models.CharField(max_length=200)
-    simbolo = models.CharField(max_length=5, blank=True, null=True)
-    numero_atomico = models.IntegerField(blank=True, null=True) 
-    masa_atomica = models.FloatField(blank=True, null=True)
-    enabled = models.BooleanField(_("Activo"), default=True)
-    descripcion = models.TextField(max_length=255, blank=True)
-    updated_at = models.DateTimeField(auto_now=True)  # Fecha de última modificación
+    nombre = models.CharField(max_length=200 , unique=True)
+    gramos = models.FloatField()
+    miligramos = models.FloatField()
 
     def __str__(self):
-        return self.nombre
+        return f"{self.nombre} ({self.gramos}g / {self.miligramos}ml)"
 
-class OT(models.Model):
-    id = models.AutoField(primary_key=True)
-    id_muestra = models.CharField(_("ID Muestra"), max_length=50, unique=True)
-    peso_muestra = models.FloatField(_("Peso Muestra"))
-    volumen = models.FloatField(_("Volumen"))
-    dilucion = models.FloatField(_("Dilución"))
-    odt = models.ForeignKey(ODT, on_delete=models.CASCADE, related_name="ots")
-    updated_at = models.DateTimeField(auto_now=True)  # Fecha de última modificación
+class MetodoAnalisis(models.Model):
+    cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE, related_name="cliente")
+    nombre = models.CharField(max_length=200)
+    metodologia = models.TextField()
+    elementos = models.ManyToManyField(Elementos, related_name="elementos")
+    
+    def __str__(self):
+        return f"Metodo {self.nombre}"
+    
+
+ ### >   
+class CurvaturaElementos(models.Model):
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE) 
+    elemento = models.ForeignKey(Elementos, on_delete=models.CASCADE, related_name="elemento")  
+    curvatura = models.IntegerField(
+        "Curvatura de análisis", 
+        default=1, 
+        validators=[MinValueValidator(1)]
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['cliente', 'elemento'], name='unique_cliente_elemento')
+        ]
 
     def __str__(self):
-        return self.id_muestra
+        return f"{self.cliente.nombre} | {self.elemento.nombre} | Curvatura: {self.curvatura}"
+### <
 
+class Parametros(models.Model):
+    Elementos = models.ManyToManyField(Elementos, related_name="Elementos")
+    Unidad = models.CharField(max_length=200)
+    VA = models.FloatField()
+    DS = models.FloatField()
+    Min = models.FloatField()
+    Max = models.FloatField()
 
-
+class Estandar(models.Model):
+    Nombre = models.CharField(max_length=200, unique=True)
+    cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE, related_name="Clientes")
+    parametros = models.ManyToManyField('Parametros', related_name="Parametro")
 
 class HojaTrabajo(models.Model):
-    id_ht = models.AutoField(primary_key=True)
-    nro_ht = models.CharField(max_length=100)
-    fec_ht = models.DateField(auto_now=True)
-    analisis = models.TextField()
-    cant_muestras = models.ForeignKey(ODT, on_delete=models.CASCADE, related_name="hojas_trabajo")  # Cambiado el related_name
-    ot_cliente = models.CharField(max_length=100)
-    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name="hojas_trabajo_cliente")  # Cambiado el related_name
-    odt = models.ForeignKey(ODT, on_delete=models.CASCADE, related_name="hojas_odt")  # Cambiado el related_name
-    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name="hojas_proyecto")  # Cambiado el related_name
-    envio = models.BooleanField(default=False)
-    en_uso_por = models.CharField(max_length=255, null=True, blank=True)
+    ### >
+    ID_HDT = models.CharField(_("Nro Hoja de trabajo"), max_length=200, blank=False, null=False)
+    confirmar_balanza = models.BooleanField(default=False, verbose_name="Confirmar Balanza")
+    ### <
+    odt = models.ForeignKey('ODT', on_delete=models.CASCADE, related_name='hojas_trabajo')
+    Estandar = models.ManyToManyField('Estandar', related_name="Estandar")
+    MetodoAnalisis = models.ForeignKey('MetodoAnalisis', on_delete=models.CASCADE, related_name="Metodo_de_Analisis")
+    MuestraMasificada = models.ForeignKey('MuestraMasificada', on_delete=models.CASCADE, related_name="MuestraMasificada")
+    Tipo = models.CharField(max_length=200, default='M')  # 'S' para estandar, 'D' para duplicado, 'B' para blanco
+    Duplicado = models.CharField(max_length=200, blank=True, null=True)
 
-    def str(self):
-        return self.nro_ht
+    
+
+# Modelo general para almacenar asociadas a una muestra de análisis
+class Muestra(models.Model):
+    nombre = models.CharField(max_length=100, null=False, blank=False)
+    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, null=False, blank=False)
+    fecha_emision = models.DateField(null=False, blank=False)
+    elemento = models.CharField(max_length=100, null=False, blank=False)
+    nbo = models.CharField(max_length=100, null=False, blank=False)
+    ident = models.CharField(max_length=100, null=False, blank=False)
+    
+    ### >
+    indexCurv = models.IntegerField("posisión de curvatura",default=1, validators=[MinValueValidator(1)] )
+    hoja_trabajo = models.ForeignKey(HojaTrabajo, on_delete=models.CASCADE, related_name="hoja_de_trabajo")
+    muestraMasificada = models.ForeignKey(MuestraMasificada, on_delete=models.CASCADE, related_name="muestra_masificada", default=None, null=False, blank=True)
+    ### <
+    t = models.CharField(max_length=100, null=False, blank=False)
+    peso_m = models.FloatField(verbose_name="PesoM. (g)", null=False, blank=False)
+    v_ml = models.FloatField(verbose_name="V. mL", null=False, blank=False)
+    l_ppm = models.FloatField(verbose_name="L. ppm", null=False, blank=False)
+    l_ppm_bk = models.FloatField(verbose_name="L. ppm-BK", null=False, blank=False)
+    porcentaje = models.FloatField(verbose_name="Porcentaje (%)", null=False, blank=False)
+    
+    def __str__(self):
+        return f"Muestra {self.nombre} de {self.elemento}"
+    
+
+class LotesAbsorción(models.Model):
+    ID_HDT = models.CharField(_("Nro de Lote"), max_length=200, blank=False, null=False)
+    muestra = models.ForeignKey(Muestra, on_delete=models.CASCADE, related_name="muestra_de_analisis")
+
+
+# Modelo para almacenar los resultados
+### >
+class Resultado(models.Model):
+    elemento = models.ForeignKey(Elementos, on_delete=models.CASCADE, related_name="resultados")
+    muestra = models.ForeignKey(MuestraMasificada, on_delete=models.CASCADE, related_name="resultados")
+    hoja_trabajo = models.ForeignKey(HojaTrabajo, on_delete=models.CASCADE, related_name="resultados")
+    resultadoAnalisis = models.IntegerField(verbose_name="Resultado de Análisis", null=False, blank=False)
+    fecha_emision = models.DateField(verbose_name="Fecha de Emisión", null=False, blank=False)
+### <

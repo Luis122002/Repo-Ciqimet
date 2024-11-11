@@ -11,12 +11,17 @@ from django.shortcuts import render, redirect
 from api import models, forms
 from django.urls import reverse
 from django.db import IntegrityError, transaction, connection
-from django.db.models import Q
+from django.db.models import Q, Min
 
 
 def requestAcces(request):
 
     return redirect("/index")
+
+
+def Sitio_Web(request):
+    
+    return render(request, "Inicio.html")
 
 
 def login_view(request):
@@ -64,20 +69,7 @@ def logout_View(request):
 @login_required(login_url='/login/')
 def Main(request):
 
-    odts = models.ODT.objects.all()
-    analisis_list = models.Analisis.objects.all()
-    ots = models.OT.objects.all()
-    elementos = models.Elementos.objects.all()
-
-    # Pasar los datos al contexto de la plantilla
-    context = {
-        'odts': odts,
-        'analisis_list': analisis_list,
-        'ots': ots,
-        'elementos': elementos,
-    }
-    
-    return render(request, 'index.html', context)
+    return render(request, 'index.html')
        
     
 
@@ -91,15 +83,17 @@ def ODT_Module(request):
     odts = models.ODT.objects.all()
 
     odts = odts.filter(
-        Q(Nro_OT__icontains=search_query) |
-        Q(Proyecto__nombre__icontains=search_query) |  # Acceder al nombre del proyecto
+        Q(id__icontains=search_query) |
+        Q(Proyecto__nombre__icontains=search_query) |
         Q(Prefijo__icontains=search_query) |
         Q(Cant_Muestra__icontains=search_query) |
-        Q(Despacho__icontains=search_query) |
-        Q(Envio__username__icontains=search_query) |  # Acceder al nombre de usuario del envío
-        Q(Turno__icontains=search_query)
+        Q(Prioridad__icontains=search_query) |
+        Q(TipoMuestra__icontains=search_query) | 
+        Q(Referencia__icontains=search_query) |
+        Q(Cliente__nombre__icontains=search_query) |
+        Q(Proyecto__nombre__icontains=search_query) |
+        Q(Responsable__icontains=search_query)
     )
-    
     
     if filter_year:
         odts = odts.filter(Fec_Recep__year=filter_year)
@@ -239,21 +233,28 @@ def ModODT(request):
 
 def HT_Module(request):
     search_query = request.GET.get('search', '')
+    estado_filter = request.GET.get('estado', '')  # Obtenemos el filtro del estado
 
-    hts = models.ODT.objects.all()
+    hts = (models.HojaTrabajo.objects
+           .values('ID_HDT')
+           .annotate(min_id=Min('id'))
+           .values('min_id'))
+    
+    hts = models.HojaTrabajo.objects.filter(id__in=[ht['min_id'] for ht in hts])
 
+    # Filtro por estado (Pendiente, Cerrado, o Todas)
+    if estado_filter == 'Pendiente':
+        hts = hts.filter(confirmar_balanza=False)  # Filtrar por Pendiente (False)
+    elif estado_filter == 'Cerrado':
+        hts = hts.filter(confirmar_balanza=True)  # Filtrar por Cerrado (True)
+
+    # Filtro de búsqueda por palabra clave
     if search_query:
         hts = hts.filter(
-            Q(nro_hticontains=search_query) |
-            Q(fec_hticontains=search_query) |
-            Q(analisisicontains=search_query) |
-            Q(cant_muestrasicontains=search_query) |
-            Q(ot_clienteicontains=search_query) |
-            Q(clienteicontains=search_query) |
-            Q(odticontains=search_query) |
-            Q(proyectoicontains=search_query)|
-            Q(envioicontains=search_query)|
-            Q(en_uso_poricontains=search_query)
+            Q(ID_HDT__icontains=search_query) |
+            Q(odt__id__icontains=search_query) |
+            Q(MuestraMasificada__Prefijo__icontains=search_query) |
+            Q(MetodoAnalisis__nombre__icontains=search_query)
         )
 
     context = {
@@ -282,54 +283,10 @@ def ODT_Info(request):
     if request.method == 'POST':
         odt_id = request.POST.get('odt_id')
         odt = models.ODT.objects.get(id=odt_id)
-        ots = models.OT.objects.filter(odt=odt)
+        muestras_M = models.MuestraMasificada.objects.filter(odt=odt)
 
-        # Obtener el análisis basado en el método de análisis de la ODT
-        analisis = models.Analisis.objects.get(Analisis_metodo=odt.Analisis)
-
-        # Obtener los elementos asociados al análisis
-        elementos = analisis.Elementos.all()
-
-        # Imprimir cada elemento asociado al análisis (opcional)
-        print("Elementos asociados al análisis:")
-        for elemento in elementos:
-            print(f"Nombre: {elemento.nombre}, Símbolo: {elemento.simbolo}, Número Atómico: {elemento.numero_atomico}")
-
-        # Ordenar los objetos OT por el id_muestra original
-        ots_sorted = sorted(ots, key=lambda ot: ot.id_muestra)
-
-        # Crear una nueva lista con id_muestra sin el último guion e incluir los elementos
-        new_ots = []
-        for ot in ots_sorted:
-            cleaned_id_muestra = str(ot.id_muestra).replace("-", "")
-            
-            # Crear una lista de diccionarios con los detalles de cada elemento asociado al análisis
-            elementos_data = [
-                {
-                    'nombre': elemento.nombre,
-                    'simbolo': elemento.simbolo,
-                    'numero_atomico': elemento.numero_atomico,
-                    'masa_atomica': elemento.masa_atomica,
-                }
-                for elemento in elementos
-            ]
-            
-            new_ots.append({
-                'id': ot.id,
-                'id_muestra': ot.id_muestra,
-                'id_muestraInput': cleaned_id_muestra,
-                'peso_muestra': ot.peso_muestra,
-                'volumen': ot.volumen,
-                'dilucion': ot.dilucion,
-                'odt': ot.odt,
-                'updated_at': ot.updated_at,
-                'elementos': elementos_data  # Agregar la lista de elementos aquí
-            })
-
-        context = {
-            "odt": odt,
-            "ots": new_ots,
-        }
+     
+        context = {"odt": odt, "Muestras": muestras_M}
 
         return render(request, 'ODT-Info.html', context)
     else:
@@ -415,68 +372,30 @@ def ODT_Info_Request(request):
 
 def Elements_Section(request):
     elementos = models.Elementos.objects.all()
-    tipos_unicos = models.Elementos.objects.values_list('tipo', flat=True).distinct()
+
     tipo_filtrado = request.GET.get('tipo', '')
     if tipo_filtrado:
-        elementos = elementos.filter(tipo__iexact=tipo_filtrado)
-    enabled_filtrado = request.GET.get('enabled', '')
-    if enabled_filtrado:
-        if enabled_filtrado.lower() == 'true':
-            elementos = elementos.filter(enabled=True)
-        elif enabled_filtrado.lower() == 'false':
-            elementos = elementos.filter(enabled=False)
-    if request.method == 'POST':
-        action = request.POST.get('action', '')
-        element_id = request.POST.get('id', '')
-        if action and element_id:
-            try:
-                elemento = models.Elementos.objects.get(pk=element_id)
-                if action == 'Activar':
-                    elemento.enabled = True
-                elif action == 'Desactivar':
-                    elemento.enabled = False
-                elemento.save()
-                return JsonResponse({'success': True})
-            except models.Elementos.DoesNotExist:
-                return JsonResponse({'success': False, 'error': 'Elemento no encontrado'})
+        elementos = elementos.filter(nombre__icontains=tipo_filtrado)
+
+    for elemento in elementos:
+        elemento.curvaturas = models.CurvaturaElementos.objects.filter(elemento=elemento)
+
     context = {
         'elementos': elementos,
-        'tipos_unicos': tipos_unicos,
     }
+
     return render(request, "Elements.html", context)
 
 
-
 def Analysis_Section(request):
-    analisis = models.Analisis.objects.all()
-    tipos_unicos = models.Analisis.objects.values_list('Analisis_metodo', flat=True).distinct()
-    tipo_filtrado = request.GET.get('Analisis_metodo', '')
-    if tipo_filtrado:
-        analisis = analisis.filter(Analisis_metodo__iexact=tipo_filtrado)
-    enabled_filtrado = request.GET.get('enabled', '')
-    if enabled_filtrado:
-        if enabled_filtrado.lower() == 'true':
-            analisis = analisis.filter(enabled=True)
-        elif enabled_filtrado.lower() == 'false':
-            analisis = analisis.filter(enabled=False)
-    if request.method == 'POST':
-        action = request.POST.get('action', '')
-        ID_Targe = request.POST.get('id', '')
-    
-        if action and ID_Targe:
-            try:
-                Target = models.Analisis.objects.get(pk=ID_Targe)
-                if action == 'Activar':
-                    Target.enabled = True
-                elif action == 'Desactivar':
-                    Target.enabled = False
-                Target.save()
-                return JsonResponse({'success': True})
-            except models.Analisis.DoesNotExist:
-                return JsonResponse({'success': False, 'error': 'Análisis no encontrado'})
+    analisis = models.MetodoAnalisis.objects.all()
+    query = request.GET.get('search', '') 
+    if query:
+        analisis = analisis.filter(nombre__icontains=query)  
+
     context = {
         'analisis': analisis,
-        'metodos_unicos': tipos_unicos,
+        'query': query, 
     }
     return render(request, "analysis.html", context)
 
@@ -502,146 +421,123 @@ def general_form(request, token):
         # Verificar el estado
         if stade != "acces":
             return HttpResponseForbidden("Acceso no autorizado.")
-
         # Validar contexto y acción
-        if context not in ['element', 'analytic', 'ODT', 'Read']:
+        if context not in ['element', 'analytic', 'ODT', 'Read', 'curv']:
             return HttpResponseForbidden("Contexto no válido.")
         if action not in ['add', 'mod', 'del']:
             return HttpResponseForbidden("Acción no válida.")
         # Procesar según el contexto y la acción
         if context == 'element':
             if action == 'add':
-                form = forms.FormElements()
+                form = forms.ElementosForm()
                 if request.method == 'POST':
-                    form = forms.FormElements(request.POST)
+                    form = forms.ElementosForm(request.POST)
                     if form.is_valid():
                         form.save()
                         return redirect(reverse('elements_manager'))
             elif action == 'mod':
                 # Lógica para modificar un elemento
                 model = models.Elementos.objects.get(id=target_ID)
-                form = forms.FormElements(instance = model)
+                form = forms.ElementosForm(instance = model)
                 if request.method == 'POST':
-                    form = forms.FormElements(request.POST, instance=model)
+                    form = forms.ElementosForm(request.POST, instance=model)
+                    if form.is_valid():
+                        form = form.save()
+                        return redirect(reverse('elements_manager'))
+            elif action == 'del':
+                model = models.Elementos.objects.get(id=target_ID)
+                if request.method == "GET":
+                    model.delete()
+                    messages.add_message(request=request, level=messages.SUCCESS, message='Elemento eliminado con exito')
+                    return redirect(reverse('elements_manager'))
+                
+        if context == 'ODT':
+            if action == 'add':
+                form = forms.ODTForm()
+                if request.method == 'POST':
+                    form = forms.ODTForm(request.POST)
+                    if form.is_valid():
+                        form.save()
+                        return redirect(reverse('Main_ODT'))
+            elif action == 'mod':
+                model = models.ODT.objects.get(id=target_ID)
+                form = forms.ODTForm(instance = model)
+                model.Fec_Recep = model.Fec_Recep.strftime('%Y-%m-%d')
+                model.Fec_Finalizacion = model.Fec_Finalizacion.strftime('%Y-%m-%d')
+                form = forms.ODTForm(instance = model)
+                if request.method == 'POST':
+                    form = forms.ODTForm(request.POST, instance=model)
+                    if form.is_valid():
+                        form = form.save()
+                        return redirect(reverse('Main_ODT'))
+            elif action == 'del':
+                model = models.ODT.objects.get(id=target_ID)
+                if request.method == "GET":
+                    Muestra_M = models.MuestraMasificada.objects.filter(odt=model)
+                    Muestras_HDT = models.Muestra.objects.filter(muestraMasificada__in=Muestra_M)   
+                    if Muestras_HDT.exists():
+                        messages.add_message(request=request, level=messages.ERROR, message='Algunas muestras estan operativas en una hoja de trabajo, eliminalas antes de aplicar esta acción')
+                        return redirect(reverse('Main_ODT'))
+                    else:
+                        model.delete()
+                        messages.add_message(request=request, level=messages.SUCCESS, message='Se eliminó la orden de trabajo con exito')
+                        return redirect(reverse('Main_ODT'))
+
+
+        if context == 'curv':
+            if action == 'add':
+                form = forms.CurvaturaForm()
+                if request.method == 'POST':
+                    form = forms.CurvaturaForm(request.POST)
+                    if form.is_valid():
+                        form.save()
+                        return redirect(reverse('elements_manager'))
+            elif action == 'mod':
+                # Lógica para modificar un elemento
+                model = models.CurvaturaElementos.objects.get(id=target_ID)
+                form = forms.CurvaturaForm(instance = model)
+                if request.method == 'POST':
+                    form = forms.CurvaturaForm(request.POST, instance=model)
                     if form.is_valid():
                         form = form.save()
                         return redirect(reverse('elements_manager'))
                         
             elif action == 'del':
-                model = models.Elementos.objects.get(id=target_ID)
+                model = models.CurvaturaElementos.objects.get(id=target_ID)
                 if request.method == "GET":
                     model.delete()
                     return redirect(reverse('elements_manager'))
+
         
         elif context == 'analytic':
             if action == 'add':
-                form = forms.FormAnalisis()
+                form = forms.MetodoAnalisisForm()
                 if request.method == 'POST':
-                    form = forms.FormAnalisis(request.POST)
+                    form = forms.MetodoAnalisisForm(request.POST)
                     if form.is_valid():
                         form.save()
                         return redirect(reverse('analisis_manager'))
             elif action == 'mod':
                 # Lógica para modificar un elemento
-                model = models.Analisis.objects.get(id=target_ID)
-                form = forms.FormAnalisis(instance = model)
+                model = models.MetodoAnalisis.objects.get(id=target_ID)
+                form = forms.MetodoAnalisisForm(instance = model)
                 if request.method == 'POST':
-                    form = forms.FormAnalisis(request.POST, instance=model)
+                    form = forms.MetodoAnalisisForm(request.POST, instance=model)
                     if form.is_valid():
                         form = form.save()
                         return redirect(reverse('analisis_manager'))
                         
             elif action == 'del':
-                model = models.Analisis.objects.get(id=target_ID)
+                model = models.MetodoAnalisis.objects.get(id=target_ID)
                 if request.method == "GET":
                     model.delete()
                     return redirect(reverse('analisis_manager'))
-        elif context == 'ODT':
-            if action == 'add':
-                form = forms.FormODT(request.POST or None)
-                if request.method == 'POST':
-                    if form.is_valid():
-                        try:
-                            # Guardar la instancia de ODT
-                            odt_instance = form.save(commit=False)
-                            odt_instance.Cliente = odt_instance.Proyecto.cliente
-                            odt_instance.save()
-                            odt_instance.save()
-                            ProyectDis = odt_instance.Proyecto.volVal
-                            if(odt_instance.Proyecto.volVal == None):
-                                ProyectDis = 0
-                            muestra_codigo = odt_instance.Prefijo
-                            inicio_codigo = odt_instance.InicioCodigo
-                            fin_codigo = odt_instance.FinCodigo
-                            
-                            if inicio_codigo is not None and fin_codigo is not None:
-                                if fin_codigo < inicio_codigo:
-                                    form.add_error(None, 'El número final del código debe ser mayor o igual al número inicial.')
-                                else:
-                                    for codigo in range(inicio_codigo, fin_codigo + 1):
-                                        codigo_completo = f"{muestra_codigo}-{codigo:02d}"
-                                        
-                                        # Verificar si el código ya existe antes de crear el registro
-                                        if models.OT.objects.filter(id_muestra=codigo_completo).exists():
-                                            form.add_error(None, f'El código de muestra {codigo_completo} ya existe en OT.')
-                                            break  # Salir del bucle si encontramos un duplicado
-                                        
-                                        # Crear el registro en OT
-                                        models.OT.objects.create(
-                                            id_muestra=codigo_completo,
-                                            odt=odt_instance,
-                                            peso_muestra=0.0,
-                                            volumen=ProyectDis,
-                                            dilucion=0.0
-                                        )
-                                        print(codigo_completo)
 
-                                    if not form.errors:
-                                        return redirect(reverse('Main_ODT'))
-                            else:
-                                form.add_error(None, 'Debe especificar el rango de códigos de muestra.')
-                        except IntegrityError as e:
-                            # Manejar errores de unicidad
-                            if 'duplicate key value violates unique constraint' in str(e):
-                                form.add_error(None, 'Uno o más códigos de muestra ya existen. Por favor, revise los códigos e intente de nuevo.')
-                            else:
-                                form.add_error(None, 'Error al guardar el registro. Por favor, intente de nuevo.')
-                            print(e)  # Para depuración
-                    else:
-                        messages.add_message(request=request, level=messages.ERROR, message='El usuario no tiene permiso para acceder aquí')
-                        print(form.errors)
-            elif action == 'mod':
-                print("Modificar ODTs")
-                model = models.ODT.objects.get(id=target_ID)
-                form = forms.FormODT(instance = model)
-                if request.method == 'POST':
-                    form = forms.FormODT(request.POST, instance=model)
-                    if form.is_valid():
-                        odt_instance = form.save(commit=False)
-                        odt_instance.Cliente = odt_instance.Proyecto.cliente
-                        odt_instance.save()
-                        MuestrasOT = models.OT.objects.filter(odt = odt_instance)                        
-                        for muestra in MuestrasOT:
-                            # Extraer la última parte del ID después del último '-'
-                            id_string = muestra.id_muestra  # Asumimos que el campo ID de la muestra tiene el formato 'M-54b8d539-11'
-                            # Extraemos el valor que está después del último '-'
-                            numero = id_string.split('-')[-1]
 
-                            # Concatenar con el valor de `Muestra` de la instancia `odt_instance`
-                            muestra.id_muestra = f"{odt_instance.Prefijo}-{numero}"
 
-                            # Guardar el cambio en la base de datos
-                            muestra.save()
 
-                        return redirect(reverse('Main_ODT'))
-                    
-            elif action == 'del':
-                print("EIMINAR ODT")
-                model = models.ODT.objects.get(id=target_ID)
-                models.OT.objects.filter(odt=model).delete()
-                model.delete()
-                print("Deleted")
-                return redirect(reverse('Main_ODT'))
+
+
         
         elif context == 'Read':
             # Lógica para 'Read'
@@ -691,6 +587,15 @@ def Master_def(request):
     return JsonResponse({'redirect_url': redirect_url, 'message': 'Datos recibidos correctamente'})
 
 
+
+
+
+
+
+
+
+
+
 def get_proyectos(request):
     cliente_id = request.GET.get('cliente_id')
     proyectos = models.Proyecto.objects.filter(cliente_id=cliente_id)
@@ -707,8 +612,6 @@ def check_db_connection(request):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': f'Failed to connect to the database: {str(e)}'})
     
-
-@login_required
 def get_user_data(request):
     user = request.user
 

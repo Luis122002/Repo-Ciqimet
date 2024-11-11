@@ -71,20 +71,24 @@
         <div id="OdtInfoPanel">
             <div class="content-container">
                 <div class="card-body">
-                    <h2 class="mb-4">Detalles de Orden de Trabajo (Nro OT: {{ odt.Nro_OT }})</h2>
-                    <h5 class="card-title">Información de ODT</h5>
+                    <td>{{ M.Prefijo }}</td>
+                    <h2 class="mb-4">Información de la Orden de Trabajo WSS{{ odt.id }}</h2>
+                    <br/>
                     <p><strong>Fecha de Recepción:</strong> <span class="Fec_Recep">{{ odt.Fec_Recep }}</span></p>
+                    <p><strong>Fecha de Finalización:</strong> <span class="Fec_Finalizacion">{{ odt.Fec_Finalizacion }}</span></p>
                     <p><strong>Cantidad de Muestra:</strong> <span class="Cant_Muestra">{{ odt.Cant_Muestra }}</span></p>
+                    <p><strong>Prioridad:</strong> <span class="Prioridad">{{ odt.Prioridad }}</span></p>
+                    <p><strong>Tipo de Muestra:</strong> <span class="TipoMuestra">{{ odt.TipoMuestra }}</span></p>
                     <p><strong>Cliente:</strong> <span class="Cliente">{{ odt.Cliente }}</span></p>
                     <p><strong>Proyecto:</strong> <span class="Proyecto">{{ odt.Proyecto }}</span></p>
-                    <p><strong>Despacho:</strong> <span class="Despacho">{{ odt.Despacho }}</span></p>
-                    <p><strong>Envío:</strong> <span class="Envio">{{ odt.Envio }}</span></p>
-                    <p><strong>ID de muestras:</strong> <span class="Muestra">{{ odt.Prefijo }}</span></p>
-                    <p><strong>Análisis:</strong> <span class="Analisis">{{ odt.Analisis.Analisis_metodo }}</span></p>
+                    <p><strong>Referencia:</strong> <span class="Referencia">{{ odt.Referencia }}</span></p>
+                    <p><strong>codigo de muestras:</strong> <span class="Muestra">{{ odt.Prefijo }}</span></p>
+                    <p><strong>Responsable:</strong> <span class="Responsable">{{ odt.Responsable }}</span></p>
                     <p><strong>Comentarios:</strong> <span class="Comentarios">{{ odt.Comentarios }}</span></p>
+
                 </div>
             </div>
-            <button class="btn btn-info OdtInfoPanel-Button" onclick="ShowDataInfo()">ShowDataInfo</button>
+            <button class="btn btn-info OdtInfoPanel-Button" onclick="ShowDataInfo()">Ocultar</button>
         </div>
 
         <div class="card mb-4"></div>
@@ -94,25 +98,19 @@
             <table class="table table table-striped mb-0">
                 <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
                     <tr>
-                        <th>ID Código</th>
-                        <th>Peso de muestra (Gr)</th>
-                        <th>Volumen (Ml)</th>
-                        <th>Dilución</th>
-                        <th>Elemento</th>
+                        <th>ID de muestra</th>
+                        <th>Id de ODT</th>
+                        <th>Fecha de creación</th>
+                        <th>Tipo de muestra</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for ot in ots %}
-                    <tr class="sample-row" data-id="{{ ot.id_muestra }}">
-                        <td>{{ ot.id_muestraInput }}</td>
-                        <td>{{ ot.peso_muestra }}</td>
-                        <td>{{ ot.volumen }}</td>
-                        <td>{{ ot.dilucion }}</td>
-                        <td>
-                            {% for elemento in ot.elementos %}
-                                {{ elemento.nombre }} ({{ elemento.simbolo }})<br>
-                            {% endfor %}
-                        </td>
+                    {% for M in Muestras %}
+                    <tr class="sample-row" data-id="{{ M.id_muestra }}">
+                        <td>{{ M.Prefijo }}</td>
+                        <td>{{ M.odt }}</td>
+                        <td>{{ M.fecha_creacion }}</td>
+                        <td>{{ M.tipoMuestra }}</td>
                     </tr>
                     {% empty %}
                     <tr>

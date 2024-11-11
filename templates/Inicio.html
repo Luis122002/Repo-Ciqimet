@@ -1,0 +1,351 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    {% include 'public_header.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyecto LIMS</title>
+    <!-- Estilos de Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Biblioteca de iconos de Bootstrap -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        /* Fondo general de la página con ligero tono gris */
+        body {
+            background-color: #f2f2f2; /* Blanco suave con ligero gris */
+        }
+
+        /* Estilos del carrusel */
+        .carousel-caption.custom-caption {
+            top: 40%; /* Baja el texto un poco más */
+            left: 10%; /* Ajusta el valor para cambiar la posición horizontal */
+            transform: translateY(-50%);
+            text-align: left;
+        }
+
+        .carousel-caption.custom-caption h2 {
+            font-size: 3rem; /* Tamaño de fuente ajustado para el título */
+            font-weight: bold;
+        }
+
+        .carousel-caption.custom-caption p {
+            font-size: 1.2rem; /* Tamaño de fuente ajustado para el texto */
+        }
+
+        .carousel-caption.custom-caption .btn-warning {
+            background-color: #FFB347; /* Color amarillo principal */
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .carousel-caption.custom-caption .btn-warning:hover {
+            background-color: #e6a338; /* Color amarillo oscuro en el hover */
+        }
+
+        .carousel-caption.custom-caption .btn-outline-light {
+            color: #fff;
+            border: 2px solid #fff;
+            font-weight: bold;
+        }
+
+        .carousel-caption.custom-caption .btn-outline-light:hover {
+            background-color: #fff;
+            color: #000;
+        }
+
+        /* Estilos para la sección Sobre Ciquimet */
+        #about h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #FF914D;
+        }
+        #about p {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #4A4A4A; /* Color gris oscuro */
+        }
+        #about .btn-outline-warning {
+            border: 1px solid #FF914D;
+            color: #FF914D;
+            padding: 8px 20px;
+            font-weight: bold;
+        }
+        #about .btn-outline-warning:hover {
+            background-color: #FF914D;
+            color: #fff;
+        }
+
+        /* Ajuste del tamaño de la imagen */
+        .about-image {
+            max-width: 70%;
+            height: auto;
+            max-height: 400px;
+            object-fit: cover;
+        }
+
+        /* Animaciones de entrada en cascada */
+        .animate-fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .animate-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Estilos para la sección Servicios */
+        #services h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        #services .card-header {
+            background-color: #FFB347; /* Color amarillo principal */
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+        #services .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        #services .card-text {
+            font-size: 0.95rem;
+        }
+        #services a.text-primary {
+            text-decoration: none;
+        }
+        #services a.text-primary:hover {
+            text-decoration: underline;
+        }
+        #services .btn-warning {
+            background-color: #FFB347; /* Color amarillo principal */
+            color: #fff;
+            font-weight: bold;
+        }
+        #services .btn-warning:hover {
+            background-color: #e6a338; /* Color amarillo oscuro en el hover */
+        }
+
+        /* Estilos de la imagen para un tamaño fijo */
+        .resource-img {
+            height: 250px; /* Ajusta este valor según la altura deseada */
+            object-fit: cover;
+        }
+
+        /* Animaciones de entrada en cascada */
+        .animate-fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .animate-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Efecto hover para mostrar que las tarjetas son seleccionables */
+        .card {
+            cursor: pointer;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Estilo del botón debajo de los recursos */
+        .btn-warning {
+            font-weight: bold;
+            background-color: #FFB347; /* Color amarillo principal */
+            color: #fff;
+        }
+
+        .btn-warning:hover {
+            background-color: #e6a338; /* Color amarillo oscuro en el hover */
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Carrusel con video -->
+    <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <!-- Video en el carrusel -->
+            <div class="carousel-item active">
+                <video class="d-block w-100" autoplay loop muted playsinline style="max-height: 855px; object-fit: cover;">
+                    <source src="https://ciquimet.cl/wp-content/uploads/2023/01/ciquimed-corto.mp4" type="video/mp4">
+                    Tu navegador no soporta la reproducción de video.
+                </video>
+                <div class="carousel-caption d-md-block text-left custom-caption">
+                    <h2>CIQUIMET CHILE LTDA</h2>
+                    <p>Centro de Investigación Química y Metalúrgica.</p>
+                    <a href="#" class="btn btn-warning me-2">Servicios</a>
+                    <a href="#" class="btn btn-outline-light">Recursos</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sobre Ciquimet -->
+    <section id="about" class="container my-5">
+        <div class="row align-items-center">
+            <!-- Columna de texto -->
+            <div class="col-md-6 animate-fade-in about-section">
+                <h2 class="text-uppercase">Sobre Ciquimet</h2>
+                <p>
+                    Centro de Investigación Química y Metalúrgica, el cual cuenta con un laboratorio propio ubicado en la ciudad de Calama y su representante legal es Don Francisco Carmona Carmona, quien es su propietario y Gerente General. Su correo electrónico es fcarmona@ciquimet.cl, y su número de contacto es +56 9 90107071.
+                </p>
+                <p>
+                    Esta empresa nace en el año 2012 como un pequeño emprendimiento por lo que no ha estado exenta de altos y bajos durante sus años de funcionamiento. Ciquimet es un <strong>"Centro de Investigación"</strong> en donde se realizan servicios de <strong>"análisis de concentrado de mineral"</strong>, principalmente dirigido tanto a la pequeña, mediana y gran minería presente en el norte grande del país.
+                </p>
+
+                <!-- Iconos y valores -->
+                <div class="d-flex align-items-center mt-3">
+                    <div class="me-3 text-warning">
+                        <i class="bi bi-check-circle"></i> Confianza
+                    </div>
+                    <div class="me-3 text-warning">
+                        <i class="bi bi-check-circle"></i> Excelencia
+                    </div>
+                    <div class="text-warning">
+                        <i class="bi bi-check-circle"></i> Profesionalismo
+                    </div>
+                </div>
+
+                <!-- Botón Leer Más -->
+                <div class="mt-4">
+                    <a href="#" class="btn btn-outline-warning text-uppercase">Leer Más</a>
+                </div>
+            </div>
+
+            <!-- Columna de imagen -->
+            <div class="col-md-6 text-center animate-fade-in about-section">
+                <img src="{% static 'rest_framework/img/favicon.png' %}" alt="Sobre Ciquimet" class="img-fluid rounded shadow about-image">
+            </div>
+        </div>
+    </section>
+
+    <!-- Servicios -->
+    <section id="services" class="container my-5">
+        <h2 class="text-center mb-4">Servicios</h2>
+        <div class="row">
+            <!-- Tarjeta de servicio -->
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm border-0 service-card animate-fade-in">
+                    <div class="card-header bg-warning text-center p-3">
+                        <i class="bi bi-geo-alt" style="font-size: 2rem; color: #fff;"></i>
+                    </div>
+                    <div class="card-body text-center">
+                        <h5 class="card-title text-primary">Geoquímica</h5>
+                        <p class="card-text text-muted">Minería y materias primas</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjeta de servicio -->
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm border-0 service-card animate-fade-in">
+                    <div class="card-header bg-warning text-center p-3">
+                        <i class="bi bi-tools" style="font-size: 2rem; color: #fff;"></i>
+                    </div>
+                    <div class="card-body text-center">
+                        <h5 class="card-title text-primary">Metalurgia</h5>
+                        <p class="card-text text-muted">Minería y materias primas</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjeta de servicio -->
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm border-0 service-card animate-fade-in">
+                    <div class="card-header bg-warning text-center p-3">
+                        <i class="bi bi-droplet" style="font-size: 2rem; color: #fff;"></i>
+                    </div>
+                    <div class="card-body text-center">
+                        <h5 class="card-title text-primary">Calidad del agua</h5>
+                        <p class="card-text text-muted">Ensayos Ambientales</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botón "Ver Todo" -->
+        <div class="text-center mt-4">
+            <a href="#" class="btn btn-warning text-uppercase">Ver Todo</a>
+        </div>
+    </section>
+
+<!-- Sección de Recursos -->
+<section id="resources" class="container my-5">
+    <h2 class="text-center mb-4">Recursos</h2>
+    <div class="row">
+        <!-- Área Muestrera -->
+        <div class="col-md-3 mb-4 animate-fade-in">
+            <div class="card border-0 shadow-sm overflow-hidden" onclick="window.location.href='#';">
+                <div class="card-img-overlay d-flex align-items-end p-0">
+                    <div class="w-100 p-3" style="background: rgba(0, 0, 0, 0.5);">
+                        <h5 class="text-white">Área Muestrera</h5>
+                        <p class="text-white-50 mb-0 small">Espacio dedicado a la recepción y preparación de muestras para análisis.</p>
+                    </div>
+                </div>
+                <img src="{% static 'rest_framework/img/Re1.jpeg' %}" alt="Área Muestrera" class="card-img resource-img">
+            </div>
+        </div>
+
+        <!-- Área Laboratorio Químico -->
+        <div class="col-md-3 mb-4 animate-fade-in">
+            <div class="card border-0 shadow-sm overflow-hidden" onclick="window.location.href='#';">
+                <div class="card-img-overlay d-flex align-items-end p-0">
+                    <div class="w-100 p-3" style="background: rgba(0, 0, 0, 0.5);">
+                        <h5 class="text-white">Área Laboratorio Químico</h5>
+                        <p class="text-white-50 mb-0 small">Realización de análisis químicos con instrumentos especializados.</p>
+                    </div>
+                </div>
+                <img src="{% static 'rest_framework/img/Re2.jpeg' %}" alt="Área Laboratorio Químico" class="card-img resource-img">
+            </div>
+        </div>
+
+        <!-- Área Laboratorio Metalúrgico Concentración -->
+        <div class="col-md-3 mb-4 animate-fade-in">
+            <div class="card border-0 shadow-sm overflow-hidden" onclick="window.location.href='#';">
+                <div class="card-img-overlay d-flex align-items-end p-0">
+                    <div class="w-100 p-3" style="background: rgba(0, 0, 0, 0.5);">
+                        <h5 class="text-white">Área Laboratorio Metalúrgico Concentración</h5>
+                        <p class="text-white-50 mb-0 small">Área dedicada a la concentración de minerales a través de procesos avanzados.</p>
+                    </div>
+                </div>
+                <img src="{% static 'rest_framework/img/Re3.jpg' %}" alt="Área Laboratorio Metalúrgico Concentración" class="card-img resource-img">
+            </div>
+        </div>
+
+        <!-- Área Laboratorio Metalúrgico Lixiviación -->
+        <div class="col-md-3 mb-4 animate-fade-in">
+            <div class="card border-0 shadow-sm overflow-hidden" onclick="window.location.href='#';">
+                <div class="card-img-overlay d-flex align-items-end p-0">
+                    <div class="w-100 p-3" style="background: rgba(0, 0, 0, 0.5);">
+                        <h5 class="text-white">Área Laboratorio Metalúrgico Lixiviación</h5>
+                        <p class="text-white-50 mb-0 small">Procesos de lixiviación para la extracción de minerales mediante soluciones químicas.</p>
+                    </div>
+                </div>
+                <img src="{% static 'rest_framework/img/Re4.jpeg' %}" alt="Área Laboratorio Metalúrgico Lixiviación" class="card-img resource-img">
+            </div>
+        </div>
+    </div>
+
+    <!-- Botón debajo de la sección de recursos -->
+    <div class="text-center mt-4">
+        <a href="#" class="btn btn-warning text-uppercase">Ver Todos los Recursos</a>
+    </div>
+</section>
+
+    <!-- Scripts de Bootstrap y jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+{% include 'public_footer.html' %}

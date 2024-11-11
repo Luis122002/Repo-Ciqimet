@@ -1,0 +1,162 @@
+<style>
+            /* Estilos de la sección de contacto */
+            #contact {
+            color: #ffffff;
+        }
+
+        #contact h2 {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        #contact p {
+            font-size: 1.1rem;
+        }
+
+        #contact ul {
+            font-size: 1rem;
+        }
+
+        /* Estilos de la tarjeta de formulario */
+        .card {
+            border: none;
+        }
+
+        .card-title {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .btn-primary {
+            background-color: #FFB347; /* Color amarillo principal */
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #e6a338; /* Color amarillo oscuro en el hover */
+        }
+
+        /* Estilos para la animación de cascada */
+        .animate-fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .animate-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* Estilos del formulario */
+        .form-control, .form-label {
+            color: #333; /* Color oscuro para el texto del formulario */
+        }
+
+        .form-control::placeholder {
+            color: #777; /* Color gris para los placeholders */
+        }
+
+        .form-control:focus {
+            border-color: #c44c01;
+            box-shadow: 0 0 5px rgba(255, 145, 77, 0.5);
+        }
+</style>
+<!-- Pie de página -->
+<footer >
+    <!-- Sección de Contacto -->
+<section id="contact" class="py-5" style="background-color: #214c67;">
+    <div class="container">
+        <div class="row align-items-center">
+            <!-- Columna de texto de contacto -->
+            <div class="col-lg-6 text-white mb-4 mb-lg-0 animate-fade-in">
+                <h2 class="display-5 font-weight-bold">¿Tienes alguna pregunta?</h2>
+                <p class="lead">Estamos aquí para ayudarte. Completa el formulario y nos pondremos en contacto contigo lo antes posible.</p>
+                <ul class="list-unstyled mt-4">
+                    <li class="mb-3">
+                        <i class="bi bi-geo-alt-fill me-2"></i> Dirección: Juan Nicolas Saldivar N° 15 mz E, Calama
+                    </li>
+                    <li class="mb-3">
+                        <i class="bi bi-envelope-fill me-2"></i> Email: fcarmona@ciquimet.cl
+                    </li>
+                    <li>
+                        <i class="bi bi-telephone-fill me-2"></i> Teléfono: +56 9 90107071
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Columna de formulario de contacto -->
+            <div class="col-lg-6 animate-fade-in">
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+                        <h3 class="card-title mb-4" style="font-size: 2rem; color: #464646;">Envíanos un mensaje</h3>
+                        <form>
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="message" class="form-label">Mensaje</label>
+                                <textarea class="form-control" id="message" rows="4" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Enviar Mensaje</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <p style="text-align:center; padding-top: 25px;">&copy; 2024 Proyecto LIMS. Todos los derechos reservados.</p>
+    <hr>
+</section>
+</footer>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const serviceCards = document.querySelectorAll('.service-card');
+        const aboutSections = document.querySelectorAll('.about-section');
+
+        const observerOptions = {
+            threshold: 0.1 // Elemento es visible cuando el 10% de su altura es visible
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-visible');
+                } else {
+                    entry.target.classList.remove('animate-visible'); // Resetea la animación cuando sale de la vista
+                }
+            });
+        }, observerOptions);
+
+        // Observa tanto las tarjetas de servicio como las secciones de "Sobre Ciquimet"
+        serviceCards.forEach(card => {
+            observer.observe(card);
+        });
+
+        aboutSections.forEach(section => {
+            observer.observe(section);
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const elements = document.querySelectorAll('.animate-fade-in');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-visible');
+                } else {
+                    entry.target.classList.remove('animate-visible'); // Resetea la animación cuando sale de la vista
+                }
+            });
+        });
+
+        elements.forEach(el => observer.observe(el));
+    });
+</script>
+

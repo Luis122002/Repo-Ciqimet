@@ -6,20 +6,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tabla Periódica</title>
-    <style>
-        .inactive {
-            background-color: #e2e3e5; /* Fondo gris claro para elementos inactivos */
-            color: #6c757d; /* Texto gris oscuro para elementos inactivos */
-        }
-        .active {
-            background-color: #a1e3a1; /* Verde intenso para elementos activos */
-            color: #155724; /* Texto verde oscuro para elementos activos */
-        }
-    </style>
+    <title>Elementos</title>
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="table-container">
         <!-- Filtros -->
         <h1 class="custom-title">Registros de elementos</h1>
         <div class="row mb-3">
@@ -28,25 +18,15 @@
                 <input id="search-box" type="text" class="form-control" placeholder="Buscar elementos...">
             </div>
             <div class="col-md-4">
-                <label for="filter-type">Tipos de elementos:</label>
-                <select id="filter-type" class="form-control">
-                    <option value="">Todos los tipos</option>
-                    {% for tipo in tipos_unicos %}
-                        <option value="{{ tipo }}" {% if request.GET.tipo == tipo %}selected{% endif %}>{{ tipo }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label for="filter-enabled">Estado:</label>
-                <select id="filter-enabled" class="form-control">
-                    <option value="">Todos los estados</option>
-                    <option value="true" {% if request.GET.enabled == 'true' %}selected{% endif %}>Activos</option>
-                    <option value="false" {% if request.GET.enabled == 'false' %}selected{% endif %}>Inactivos</option>
-                </select>
                 <br/>
                 <button class="btn btn-success" onclick="addElement()">
                     Añadir elementos
                 </button>
+
+                <button class="btn btn-success" onclick="addCurv()">
+                    Añadir curvatura
+                </button>
+                
                 <button class="btn btn-info" onclick="window.location.href = '/ODT'">
                     Atrás
                 </button>
@@ -56,37 +36,50 @@
         <br/>
         <!-- Verificar si hay elementos -->
         {% if elementos %}
-            <table class="table table-striped mb-0">
-                <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
-                    <tr>
-                        <th scope="col">Simbolo</th>
-                        <th scope="col">Nombre</th>
-                        <th scope="col">Descripción</th>
-                        <th scope="col">Tipo</th>
-                        <th scope="col">Estado</th>
-                        <th scope="col">Acciones</th>
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
+                <tr>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Gramos</th>
+                    <th scope="col">Miligramos</th>
+                    <th scope="col">Curvatura de Cliente</th>
+                    <th scope="col">Acción</th>
+                </tr>
+            </thead>
+            <tbody id="element-table-body">
+                {% for item in elementos %}
+                    <tr class="{% if item.enabled %}active{% else %}inactive{% endif %}">
+                        <td><h3>{{ item.nombre }}</h3></td>
+                        <td><h3>{{ item.gramos|floatformat:0 }}</h3></td>
+                        <td><h3>{{ item.miligramos|floatformat:0 }}</h3></td>
+                        <td class="text-align-left">
+                            {% for curvatura in item.curvaturas %}
+                                <div class="align-items-left">
+                                    <span class="text-align-left">{{ curvatura.cliente.nombre }}: C-{{ curvatura.curvatura }}</span>
+                                    <button class="btn btn-primary btn-sm curvatura-btn" 
+                                            data-curvatura-id="{{ curvatura.id }}">
+                                        Modificar
+                                    </button>
+                                    <br/><br/>
+                                </div>
+                            {% empty %}
+                                <div>No tiene curvaturas asociadas</div>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <button class="btn btn-primary action-btn" data-id="{{ item.id }}">Modificar</button>
+                        </td>
                     </tr>
-                </thead>
-                <tbody id="element-table-body">
-                    {% for item in elementos %}
-                        <tr class="{{ item.enabled|yesno:"active,inactive" }}">
-                            <td>{{ item.simbolo }}</td>
-                            <td>{{ item.nombre }}</td>
-                            <td>{{ item.descripcion }}</td>
-                            <td>{{ item.tipo }}</td>
-                            <td>{{ item.enabled|yesno:"Activo,Inactivo" }}</td>
-                            <td>
-                                <button class="btn btn-primary action-btn" data-id="{{ item.id }}">Acción</button>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <div class="alert alert-warning" role="alert">
-                Sin elementos asignados al sistema.
-            </div>
-        {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="alert alert-warning" role="alert">
+        Sin elementos asignados al sistema.
+    </div>
+{% endif %}
     </div>
 
     <script>
@@ -105,73 +98,76 @@
             });
         
             $('.action-btn').on('click', function() {
-                const elementIdTARGET = $(this).data('id');
-                Swal.fire({
-                    title: '¿Qué acción quieres aplicar?',
-                    text: 'Elige una acción para el elemento seleccionado. Puedes cerrar este mensaje haciendo clic fuera de él o presionando el botón de cancelar.',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Activar',
-                    cancelButtonText: 'Desactivar',
-                    footer: `
-                        <button id="modify-btn" class="btn btn-secondary">Modificar</button>
-                    `,
-                    customClass: {
-                        confirmButton: 'btn-success',
-                        cancelButton: 'btn-danger'
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        performAction(elementIdTARGET, 'Activar');
-                    } else if (result.dismiss === Swal.DismissReason.cancel) {
-                        performAction(elementIdTARGET, 'Desactivar');
+                const elementId = $(this).data('id');;
+                const urlDat = '/MasterData/';
+                const Token = csrfToken;
+                const context = 'element'; 
+                const action = 'mod'; 
+                const stade = "acces"; 
+                $.ajax({
+                    url: urlDat,
+                    type: 'POST',
+                    headers: {
+                        'X-CSRFToken': Token
+                    },
+                    data: {
+                        'id': elementId,
+                        'context': context,
+                        'action': action,
+                        'stade': stade
+                    },
+                    success: function(response) {
+                        if (response.redirect_url) {
+                            window.location.href = response.redirect_url; 
+                        } else {
+                            console.log(response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Error al enviar datos:', xhr.responseText);
                     }
                 });
-        
-                $(document).off('click', '#modify-btn').on('click', '#modify-btn', function() {
-                    const elementId = elementIdTARGET;
-                    const urlDat = '/MasterData/';
-                    const Token = csrfToken;
-                    const context = 'element'; 
-                    const action = 'mod'; 
-                    const stade = "acces"; 
-                    $.ajax({
-                        url: urlDat,
-                        type: 'POST',
-                        headers: {
-                            'X-CSRFToken': Token
-                        },
-                        data: {
-                            'id': elementId,
-                            'context': context,
-                            'action': action,
-                            'stade': stade
-                        },
-                        success: function(response) {
-                            if (response.redirect_url) {
-                                window.location.href = response.redirect_url; 
-                            } else {
-                                console.log(response.message);
-                            }
-                        },
-                        error: function(xhr) {
-                            console.error('Error al enviar datos:', xhr.responseText);
+              
+            });
+
+            $('.curvatura-btn').on('click', function() {
+                const curvaturaId = $(this).data('curvatura-id');
+                const urlDat = '/MasterData/';
+                const Token = csrfToken;
+                const context = 'curv'; 
+                const action = 'mod'; 
+                const stade = "acces"; 
+                $.ajax({
+                    url: urlDat,
+                    type: 'POST',
+                    headers: {
+                        'X-CSRFToken': Token
+                    },
+                    data: {
+                        'id': curvaturaId,
+                        'context': context,
+                        'action': action,
+                        'stade': stade
+                    },
+                    success: function(response) {
+                        if (response.redirect_url) {
+                            window.location.href = response.redirect_url; 
+                        } else {
+                            console.log(response.message);
                         }
-                    });
-                
-
-
+                    },
+                    error: function(xhr) {
+                        console.error('Error al enviar datos:', xhr.responseText);
+                    }
                 });
             });
+
         });
 
         function filterElements() {
             const typeFilter = $('#filter-type').val();
-            const enabledFilter = $('#filter-enabled').val();
-
             const url = new URL(window.location.href);
             url.searchParams.set('tipo', typeFilter);
-            url.searchParams.set('enabled', enabledFilter);
             window.location.href = url.toString();
         }
 
@@ -184,31 +180,7 @@
             });
         }
 
-        function performAction(elementId, action) {
-            $.ajax({
-                url: '/Elements-Manager/',
-                type: 'POST',
-                data: {
-                    id: elementId,
-                    action: action,
-                    csrfmiddlewaretoken: '{{ csrf_token }}'
-                },
-                success: function(response) {
-                    if (response.success) {
-                        Swal.fire('Éxito', 'Acción realizada correctamente.', 'success').then(() => {
-                            window.location.reload(); 
-                        });
-                    } else {
-                        Swal.fire('Error', 'No se pudo aplicar la acción.', 'error');
-                    }
-                },
-                error: function() {
-                    Swal.fire('Error', 'Error en la solicitud.', 'error');
-                }
-            });
-        }
-
-
+    
         function addElement()
         {
             const elementId = -1;
@@ -241,6 +213,41 @@
                 }
             });
         }
+
+        function addCurv()
+        {
+            const elementId = -1;
+            const urlDat = '/MasterData/';
+            const Token = csrfToken;
+            const context = 'curv'; 
+            const action = 'add'; 
+            const stade = "acces"; 
+            $.ajax({
+                url: urlDat,
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': Token
+                },
+                data: {
+                    'id': elementId,
+                    'context': context,
+                    'action': action,
+                    'stade': stade
+                },
+                success: function(response) {
+                    if (response.redirect_url) {
+                        window.location.href = response.redirect_url; 
+                    } else {
+                        console.log(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Error al enviar datos:', xhr.responseText);
+                }
+            });
+        }
+
+
 
     </script>
 </body>
