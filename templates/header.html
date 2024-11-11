@@ -788,7 +788,10 @@
                 showCancelButton: true,
                 confirmButtonText: 'Plataforma de Administrador',
                 cancelButtonText: 'Cancelar',
-                footer: '<button id="intranetButton" class="swal2-confirm btn btn-secondary">Intranet</button>',
+                footer: `
+                    <button id="intranetButton" class="swal2-confirm btn btn-secondary">Intranet</button>
+                    <button id="publicSiteButton" class="swal2-confirm btn btn-secondary">Sitio Público</button>
+                `,
                 buttonsStyling: false, 
                 customClass: {
                     confirmButton: 'swal2-confirm btn btn-primary', 
@@ -797,15 +800,27 @@
                 },
                 allowOutsideClick: false,
                 allowEscapeKey: false,
+                didRender: () => {
+                    // Listener para el botón "Intranet"
+                    const intranetButton = document.getElementById('intranetButton');
+                    if (intranetButton) {
+                        intranetButton.addEventListener('click', () => {
+                            window.location.href = LocalPath + "/index/";
+                        });
+                    }
+                    
+                    // Listener para el botón "Sitio Público"
+                    const publicSiteButton = document.getElementById('publicSiteButton');
+                    if (publicSiteButton) {
+                        publicSiteButton.addEventListener('click', () => {
+                            window.location.href = LocalPath;
+                        });
+                    }
+                }
             }).then((result) => {
                 if (result.isConfirmed) {
                     window.location.href = RedirecPath + "/admin/";
-                } else if (result.dismiss === Swal.DismissReason.cancel) {
                 }
-            });
-        
-            document.getElementById('intranetButton').addEventListener('click', () => {
-                window.location.href = LocalPath; 
             });
         }
                 const style = document.createElement('style');
