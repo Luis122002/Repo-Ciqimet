@@ -12,30 +12,37 @@ from api import models, forms
 from django.urls import reverse
 from django.db import IntegrityError, transaction, connection
 from django.db.models import Q, Min
+from decimal import Decimal
 
 
+@login_required(login_url='/login')
 def requestAcces(request):
-
     return redirect("/index")
 
 
 def Sitio_Web(request):
-    
     return render(request, "Inicio.html")
+
 
 
 def login_view(request):
 
-    if settings.ENABLED_LOGIN_LOCAL == False: 
-
+    if not settings.ENABLED_LOGIN_LOCAL:
         return HttpResponseRedirect(settings.URL_REACT)
 
+    if request.user.is_authenticated:
+        return redirect('/index')
+    
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect('/index')
+            
+            if request.user.is_authenticated:
+                return redirect('/index')
+            else:
+                return render(request, "login.html", {'form': form, 'error': "Error de autenticación."})
     else:
         form = AuthenticationForm()
     
@@ -66,13 +73,12 @@ def logout_View(request):
     
 
 
-@login_required(login_url='/login/')
+@login_required(login_url='/login')
 def Main(request):
-
     return render(request, 'index.html')
        
     
-
+@login_required(login_url='/login')
 def ODT_Module(request):
     search_query = request.GET.get('search', '')
     filter_year = request.GET.get('year', '')
@@ -114,7 +120,7 @@ def ODT_Module(request):
 
     return render(request, 'ODT-Site.html', context)
 
-
+@login_required(login_url='/login')
 def ModMuestras(request):
     if request.method == 'POST':
         Contex = request.POST.get('contex')
@@ -168,7 +174,7 @@ def ModMuestras(request):
 
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-
+@login_required(login_url='/login')
 def ModODT(request):
     if request.method == 'POST':
         try:
@@ -230,7 +236,7 @@ def ModODT(request):
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 
-
+@login_required(login_url='/login')
 def HT_Module(request):
     search_query = request.GET.get('search', '')
     estado_filter = request.GET.get('estado', '')  # Obtenemos el filtro del estado
@@ -263,22 +269,171 @@ def HT_Module(request):
 
     return render(request, 'Hoja_Trabajo.html', context)
 
-def Balanza_Module(request):
 
+
+def Request_HT(request):
+    if request.method == 'GET':
+        id_hdt = request.GET.get('id')
+        muestras = models.HojaTrabajo.objects.filter(ID_HDT=id_hdt)
+        data = []
+        
+        for muestra in muestras:
+            elementos_data = [
+                {
+                    'nombre': elemento.nombre,
+                    'gramos': elemento.gramos,
+                    'miligramos': elemento.miligramos
+                }
+                for elemento in muestra.MetodoAnalisis.elementos.all()
+            ]
+            muestras_filtradas = models.Muestra.objects.filter(hoja_trabajo=muestra, indexCurv=1)
+
+            pesos_elementos = {}
+            for m in muestras_filtradas:
+                elemento_nombre = m.elemento
+                if elemento_nombre in pesos_elementos:
+                    pesos_elementos[elemento_nombre] += m.peso_m
+                else:
+                    pesos_elementos[elemento_nombre] = m.peso_m
+            peso_elemento_text = ', '.join(f"Peso de {elemento}: {peso}g" for elemento, peso in pesos_elementos.items())
+            data.append({
+                'id': muestra.id,
+                'ID_HDT': muestra.ID_HDT,
+                'estado': 'Cerrado' if muestra.confirmar_balanza else 'Pendiente',
+                'estandar': ', '.join(estandar.Nombre for estandar in muestra.Estandar.all()),
+                'metodo_analisis': muestra.MetodoAnalisis.nombre,
+                'muestra_masificada': muestra.MuestraMasificada.Prefijo,
+                'tipo': muestra.Tipo,
+                'duplicado': muestra.Duplicado,
+                'elementos': elementos_data,
+                'peso_elemento': peso_elemento_text
+            })
+        
+        return JsonResponse({'muestras': data})
+    
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+
+
+@login_required(login_url='/login')
+def Balanza_Module(request):
+    if request.method == 'POST':
+        id_hdt = request.POST.get('id')
+        print(f'ID recibido en Balanza: {id_hdt}')
+
+        # Obtener todas las hojas de trabajo que tengan el mismo ID_HDT
+        hojas_trabajo = models.HojaTrabajo.objects.filter(ID_HDT=id_hdt)
+
+        if not hojas_trabajo.exists():
+            return HttpResponse("No se encontró ninguna Hoja de Trabajo con el ID especificado.", status=404)
+
+        # Obtener la primera muestra asociada a las hojas de trabajo filtradas
+        primera_muestra = models.Muestra.objects.filter(hoja_trabajo__in=hojas_trabajo, indexCurv=1).first()
+
+        if primera_muestra is None:
+            return HttpResponse("No se encontraron muestras para la Hoja de Trabajo especificada.", status=404)
+
+        # Filtrar las muestras con el mismo tipo de 'elemento' que la primera muestra
+        tipo_elemento = primera_muestra.elemento
+        muestras_balanza = models.Muestra.objects.filter(
+            hoja_trabajo__in=hojas_trabajo,
+            elemento=tipo_elemento,
+            indexCurv=1
+        )
+
+        context = {'muestras_balanza': muestras_balanza}
+        return render(request, 'Balanza.html', context)
 
     return render(request, 'Balanza.html')
+    
 
+def Save_M(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)  # Los datos se envían en formato JSON
+            muestras = data.get('muestras', [])
+            
+            # Iterar sobre las muestras recibidas
+            for muestra_data in muestras:
+                prefijo = muestra_data.get('prefijo')
+                peso_m = muestra_data.get('peso_m')
+
+                # Filtrar la muestra por Prefijo (muestraMasificada.Prefijo)
+                muestra = models.Muestra.objects.filter(muestraMasificada__Prefijo=prefijo).first()
+                
+                if muestra:
+                    # Reemplazar el punto (.) por una coma (,) en el peso
+                    peso_m = Decimal(str(peso_m).replace(',', '.'))
+                    
+                    # Actualizar el valor de peso_m
+                    muestra.peso_m = peso_m
+                    muestra.save()
+
+                    print(f"Actualizado - Prefijo: {prefijo}, Peso: {peso_m}")
+
+            return JsonResponse({'success': True})
+
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'message': 'Error al procesar los datos'}, status=400)
+    
+    return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
+
+def Confirm_M(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            muestras = data.get('muestras', [])
+            
+            for muestra_data in muestras:
+                prefijo = muestra_data.get('prefijo')
+                peso_m = muestra_data.get('peso_m')
+
+                muestra = models.Muestra.objects.filter(muestraMasificada__Prefijo=prefijo).first()
+                
+                if muestra:
+
+                    peso_m = Decimal(str(peso_m).replace(',', '.'))
+                    
+                    muestra.peso_m = peso_m
+                    muestra.save()
+
+                    hoja_trabajo = muestra.hoja_trabajo
+                    if hoja_trabajo:
+                        hoja_trabajo.confirmar_balanza = True
+                        hoja_trabajo.save()
+
+                    print(f"Confirmada - Prefijo: {prefijo}, Confirmar Balanza: {hoja_trabajo.confirmar_balanza}")
+
+            return JsonResponse({'success': True})
+
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'message': 'Error al procesar los datos'}, status=400)
+    
+    return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
+        
+
+@login_required(login_url='/login')
 def PI_Module(request):
-
-
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        id_hdt = data.get('id')
+        print(f'ID recibido en Absorción: {id_hdt}')
+        
+        return JsonResponse({'success': True})
+    
     return render(request, 'Puesto-Absorcion.html')
 
+
+
+
+@login_required(login_url='/login')
 def PT_Module(request):
 
 
     return render(request, 'Puesto-Trabajo.html')
 
 
+@login_required(login_url='/login')
 def ODT_Info(request):
     if request.method == 'POST':
         odt_id = request.POST.get('odt_id')
@@ -292,7 +447,7 @@ def ODT_Info(request):
     else:
         return HttpResponse(status=405)
     
-
+@login_required(login_url='/login')
 def ODT_Info_Request(request):
     if request.method == 'POST':
         odt_id = request.POST.get('odt_id')
@@ -370,6 +525,8 @@ def ODT_Info_Request(request):
     else:
         return HttpResponse(status=405)
 
+
+@login_required(login_url='/login')
 def Elements_Section(request):
     elementos = models.Elementos.objects.all()
 
@@ -386,7 +543,7 @@ def Elements_Section(request):
 
     return render(request, "Elements.html", context)
 
-
+@login_required(login_url='/login')
 def Analysis_Section(request):
     analisis = models.MetodoAnalisis.objects.all()
     query = request.GET.get('search', '') 
@@ -400,7 +557,7 @@ def Analysis_Section(request):
     return render(request, "analysis.html", context)
 
 
-
+@login_required(login_url='/login')
 def general_form(request, token):
     try:
         decoded_data = base64.urlsafe_b64decode(token.encode()).decode()
@@ -555,7 +712,7 @@ def general_form(request, token):
 
 
 
-
+@login_required(login_url='/login')
 def Master_def(request):
     if request.method != 'POST':
         return HttpResponseForbidden("Método no permitido.")
@@ -589,13 +746,6 @@ def Master_def(request):
 
 
 
-
-
-
-
-
-
-
 def get_proyectos(request):
     cliente_id = request.GET.get('cliente_id')
     proyectos = models.Proyecto.objects.filter(cliente_id=cliente_id)
@@ -623,3 +773,24 @@ def get_user_data(request):
         'LocalURL':settings.URL_LOCAL          
     }
     return JsonResponse(user_data)
+
+
+
+def servicios(request):
+    return render(request, 'servicios.html')
+
+
+def sobre_nosostros(request):
+    return render(request, 'sobre_nosotros.html')
+
+
+def recursos(request):
+    return render(request, 'recursos.html')
+
+
+def noticias(request):
+    return render(request, 'noticias.html')
+
+
+def contacto(request):
+    return render(request, 'contacto.html')

@@ -55,6 +55,13 @@
             justify-content: center;
             width: 200px; /* Tamaño fijo menor */
         }
+
+        .big-swal {
+            max-width: 1000px; /* Tamaño máximo */
+            width: 90%; /* Ancho adaptable */
+            overflow: auto; /* Asegurar que no se corte el contenido */
+        }
+
     </style>
 </head>
 <body>
@@ -62,17 +69,6 @@
 
     <div class="container">
         <div class="row">
-        
-            <!-- Columna de acciones (más pequeña) -->
-            <div class="col actions">
-                <!-- Botones de análisis y gestión -->
-                <div class="button-grid">
-                    <!-- Botón -->
-                    <a href="" class="btn btn-primary">
-                        Exportar documento
-                    </a>
-                </div>
-            </div>
             <!-- Columna de filtros (más grande y centrada) -->
             <div class="col filters">
                 <!-- Filtros -->
@@ -103,13 +99,7 @@
                     </div>
                 </div>
             </div>
-            <!-- Columna para añadir ODT (sin cambios) -->
-            <div class="col add-odt">
-                <!-- Botón para añadir ODT -->
-                <button class="btn btn-primary" onclick="AddODT()">
-                    Añadir Hoja de Trabajo
-                </button>
-            </div>
+           
         </div>
     </div>
 
@@ -130,7 +120,7 @@
             </thead>
             <tbody>
                 {% for ht in hts %}
-                <tr data-ht-id="{{ ht.id }}">
+                <tr data-ht-id="{{ ht.ID_HDT }}">
                     <td>{{ ht.id }}</td>
                     <td>{{ ht.ID_HDT }}</td>
                     <td>
@@ -143,7 +133,7 @@
                     <td>{{ ht.odt }}</td>
                     <td>
                         {% for estandar in ht.Estandar.all %}
-                            {{ estandar }}{% if not forloop.last %}, {% endif %}
+                            {{ estandar.Nombre }}{% if not forloop.last %}, {% endif %}
                         {% endfor %}
                     </td>
                     <td>{{ ht.MetodoAnalisis }}</td>
@@ -158,66 +148,149 @@
     {% include 'Footer.html' %}
     
     <script>
-        
-
-        // Script para manejar clic en filas de la tabla
-
         var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-        // Script para manejar clic en filas de la tabla
-        document.addEventListener('DOMContentLoaded', function () {
-            const rows = document.querySelectorAll('tbody tr');
-            rows.forEach(row => {
-                row.addEventListener('click', function () {
-                    const odtId = this.getAttribute('data-odt-id');
-                    if (odtId) {
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = '/ODT-info/';
-                        form.style.display = 'none'; // Para evitar que el formulario se vea
-                        form.innerHTML = `<input type="hidden" name="odt_id" value="${odtId}">
-                                            <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">`;
-                        document.body.appendChild(form);
-                        form.submit();
+        
+        document.querySelectorAll('tr[data-ht-id]').forEach(row => {
+            row.addEventListener('click', function () {
+                var htId = this.getAttribute('data-ht-id');
+        
+                // Muestra el SweetAlert con tres opciones
+                Swal.fire({
+                    title: 'Selecciona una opción',
+                    text: '¿Qué deseas hacer con esta hoja de trabajo?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonText: 'Ver Información',
+                    footer: `
+                        <button id="balanzaButton" class="swal2-confirm btn btn-primary" style="margin-right: 10px;">Balanza</button>
+                        <button id="absorcionButton" class="swal2-confirm btn btn-secondary">Absorción</button>
+                    `,
+                    customClass: {
+                        actions: 'swal2-actions'
+                    },
+                    willOpen: () => {
+                
+                        document.getElementById('balanzaButton').addEventListener('click', function () {
+
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = '/Balanza/';
+        
+                            const csrfInput = document.createElement('input');
+                            csrfInput.type = 'hidden';
+                            csrfInput.name = 'csrfmiddlewaretoken';
+                            csrfInput.value = csrfToken;
+                            form.appendChild(csrfInput);
+                        
+                            const idInput = document.createElement('input');
+                            idInput.type = 'hidden';
+                            idInput.name = 'id';
+                            idInput.value = htId;
+                            form.appendChild(idInput);
+                        
+                            document.body.appendChild(form);
+                            form.submit(); 
+                        });
+                
+                        document.getElementById('absorcionButton').addEventListener('click', function () {
+                            // Hacer solicitud POST con el ID de absorción
+                            fetch('/Puesto-Absorcion/', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': csrfToken // El token CSRF es necesario para la protección
+                                },data: {
+                                    'id': id_hdt
+                                },
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                // Redirigir a la página después de recibir la respuesta
+                                if (data.success) {
+                                    window.location.href = '/Puesto-Absorcion/';
+                                }
+                            })
+                            .catch(error => console.error('Error:', error));
+                        });
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Realizar la petición AJAX para obtener la información de la hoja de trabajo
+                        fetch(`/Get-HDT/?id=${htId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.muestras && data.muestras.length > 0) {
+                                    let tablaHTML = `
+                                        <div style="overflow-x: auto;"> <!-- Contenedor con desplazamiento -->
+                                            <table class="table table-bordered table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Muestra Masificada</th>
+                                                        <th>Estado</th>
+                                                        <th>Estandar</th>
+                                                        <th>Método de Análisis</th>
+                                                        <th>Tipo</th>
+                                                        <th>Duplicado</th>
+                                                        <th>Elementos</th>
+                                                        <th>Peso y Elemento</th> <!-- Nueva columna para el peso y el elemento -->
+                                                    </tr>
+                                                </thead>
+                                                <tbody>`;
+
+                                    // Agregar cada fila de datos
+                                    data.muestras.forEach(muestra => {
+                                        // Concatenar los elementos en una sola línea de texto con salto de línea
+                                        let elementosText = muestra.elementos.map(elemento => 
+                                            `${elemento.nombre} (${elemento.gramos}g / ${elemento.miligramos}ml)`
+                                        ).join('<br/>'); // Usa <br/> para salto de línea entre elementos
+
+                                        // Agregar salto de línea en peso y elemento
+                                        let pesoElementoText = muestra.peso_elemento.split(', ').join('<br/>');
+
+                                        tablaHTML += `
+                                            <tr>
+                                                <td>${muestra.muestra_masificada}</td>
+                                                <td>${muestra.estado}</td>
+                                                <td>${muestra.estandar}</td>
+                                                <td>${muestra.metodo_analisis}</td>
+                                                <td>${muestra.tipo}</td>
+                                                <td>${muestra.duplicado}</td>
+                                                <td>${elementosText}</td>
+                                                <td>${pesoElementoText}</td> <!-- Mostrar el peso y el elemento con salto de línea -->
+                                            </tr>`;
+                                    });
+
+                                    tablaHTML += `</tbody></table></div>`;
+    
+        
+                                    // Mostrar la tabla dentro de un SweetAlert2 responsivo
+                                    Swal.fire({
+                                        title: 'Información de la Hoja de Trabajo ' + htId,
+                                        html: tablaHTML,
+                                        width: '80%',
+                                        showCancelButton: true,
+                                        confirmButtonText: 'Cerrar',
+                                        customClass: {
+                                            popup: 'big-swal', // Clase personalizada para el popup grande
+                                        }
+                                    });
+                                } else {
+                                    Swal.fire('No se encontraron datos', 'No se encontraron muestras para esta Hoja de Trabajo.', 'warning');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error al obtener la información:', error);
+                                Swal.fire('Error', 'Hubo un problema al obtener la información. Intenta nuevamente.', 'error');
+                            });
                     }
                 });
             });
         });
 
 
-        function AddODT()
-        {
-            const elementId = -1;
-            const urlDat = '/MasterData/';
-            const Token = csrfToken;
-            const context = 'ODT'; 
-            const action = 'add'; 
-            const stade = "acces"; 
-            $.ajax({
-                url: urlDat,
-                type: 'POST',
-                headers: {
-                    'X-CSRFToken': Token
-                },
-                data: {
-                    'id': elementId,
-                    'context': context,
-                    'action': action,
-                    'stade': stade
-                },
-                success: function(response) {
-                    if (response.redirect_url) {
-                        window.location.href = response.redirect_url; 
-                    } else {
-                        console.log(response.message);
-                    }
-                },
-                error: function(xhr) {
-                    console.error('Error al enviar datos:', xhr.responseText);
-                }
-            });
-        }
-
+    
         function applyFilters() {
             var search = document.getElementById('search-box').value;
             var estado = document.querySelector('input[name="estado"]:checked') ? document.querySelector('input[name="estado"]:checked').value : ''; // Obtener el valor del radio seleccionado

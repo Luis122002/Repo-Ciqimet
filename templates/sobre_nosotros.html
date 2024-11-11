@@ -1,0 +1,244 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    {% include 'public_header.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sobre Nosotros - Ciquimet</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Biblioteca de íconos de Bootstrap -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        /* Fondo general */
+        body {
+            background-color: #f8f9fa;
+        }
+
+        /* Estilos para el carrusel */
+        #services-carousel .carousel-item {
+            max-height: 300px;
+            overflow: hidden;
+        }
+
+        #services-carousel .carousel-caption {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background-color: rgba(33, 76, 103, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        #services-carousel .carousel-caption h2 {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #ffffff;
+            margin: 0;
+        }
+
+        /* Estilos de la sección Acerca de CIQUIMET */
+        .about-section {
+            background-color: #ffffff;
+            padding: 4rem 0;
+        }
+
+        .about-section h2 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #214c67;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .about-card {
+            background-color: #f8f9fa;
+            border-left: 5px solid #FF914D;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .about-section h3 {
+            font-size: 1.8rem;
+            color: #FF914D;
+            font-weight: bold;
+            margin-top: 2rem;
+        }
+
+        .about-section p {
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Estilos para la sección Valores */
+        .valores-section {
+            padding: 4rem 0;
+            background-color: #ffffff;
+        }
+
+        .valores-section h2 {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.8rem;
+            color: #914D24;
+            margin-bottom: 3rem;
+        }
+
+        .valor-card {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            background-color: #ffffff;
+            height: 100%;
+            min-height: 300px;
+        }
+
+        .valor-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .valor-icon {
+            font-size: 3rem;
+            color: #214c67;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .valor-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #914D24;
+            margin-bottom: 1rem;
+        }
+
+        .valor-text {
+            font-size: 0.95rem;
+            color: #5A5A5A;
+        }
+        .valor-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #914D24;
+        margin-bottom: 1rem;
+    }
+    .short-line {
+        width: 100px;
+        height: 2px;
+        background-color: #FF0000; /* Línea roja */
+    }
+    </style>
+</head>
+
+<body>
+
+    <!-- Carrusel para la imagen principal -->
+    <div id="services-carousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="{% static 'rest_framework/img/fondo-ciquimet.jpg' %}" class="d-block w-100" alt="Servicios de Ciquimet" style="object-fit: cover; opacity: 0.6;">
+                <div class="carousel-caption d-flex justify-content-center align-items-center">
+                    <h2>Sobre Nosotros</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección Acerca de CIQUIMET -->
+    <section class="about-section py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="about-card">
+                        <h2>Acerca de CIQUIMET</h2>
+                        <p>CIQUIMET CHILE LTDA. es un Centro de Investigación Química y Metalúrgica, con un laboratorio propio ubicado en la ciudad de Calama. Su representante legal y gerente general, Don Francisco Carmona Carmona, se compromete con la excelencia en los servicios de análisis de concentrado de mineral. Para contactar, su correo es fcarmona@ciquimet.cl.</p>
+                        <p>Fundada en 2012, CIQUIMET se dedica principalmente al servicio de análisis de concentrados para la pequeña, mediana y gran minería en el norte del país. Con un enfoque en la innovación y el profesionalismo, CIQUIMET se ha posicionado como un referente en soluciones Geo-Minero-Metalúrgicas en Chile.</p>
+
+                        <h3>Visión</h3>
+                        <p>Es ser una empresa referente y reconocida por su capacidad de encontrar soluciones adecuadas a cada proyecto, independiente de su nivel de complejidad, concentrando nuestros esfuerzos en lo esencial, para cumplir plenamente con las expectativas de nuestros clientes.</p>
+
+                        <h3>Misión</h3>
+                        <p>Proporcionar soluciones integrales de alta calidad técnica, empleando desarrollos propios y herramientas tecnológicas avanzadas, soportadas por la amplia experiencia de sus profesionales, con el propósito de agregar valor a los proyectos Geo-Minero-Metalúrgicos de nuestros mandantes, cumpliendo con excelencia y rigurosidad, con las normativas de seguridad, calidad y sustentabilidad ambiental.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<!-- Sección de Valores -->
+<section class="valores-section">
+    <div class="container">
+        <h2 class="text-center mb-5">VALORES</h2>
+        <div class="row">
+            <!-- Valor 1: Confianza -->
+            <div class="col-md-4 d-flex">
+                <div class="valor-card w-100 text-center p-4 border rounded shadow-sm">
+                    <span class="valor-icon mb-3"><i class="bi bi-people"></i></span>
+                    <h3 class="valor-title">Confianza</h3>
+                    <hr class="short-line mx-auto my-2">
+                    <p class="valor-text">Mantener una relación de diálogo con nuestros clientes para asegurar su satisfacción y ofrecer un excelente servicio, calidad y compromiso.</p>
+                </div>
+            </div>
+            <!-- Valor 2: Experiencia -->
+            <div class="col-md-4 d-flex">
+                <div class="valor-card w-100 text-center p-4 border rounded shadow-sm">
+                    <span class="valor-icon mb-3"><i class="bi bi-journal-text"></i></span>
+                    <h3 class="valor-title">Experiencia</h3>
+                    <hr class="short-line mx-auto my-2">
+                    <p class="valor-text">Contar con personal con alta formación, competencia, motivación y sensibilización en su trabajo, mejorando los procesos de los servicios ofrecidos.</p>
+                </div>
+            </div>
+            <!-- Valor 3: Profesionalismo -->
+            <div class="col-md-4 d-flex">
+                <div class="valor-card w-100 text-center p-4 border rounded shadow-sm">
+                    <span class="valor-icon mb-3"><i class="bi bi-award"></i></span>
+                    <h3 class="valor-title">Profesionalismo</h3>
+                    <hr class="short-line mx-auto my-2">
+                    <p class="valor-text">Asumir un comportamiento riguroso y profesional en el cumplimiento de todos los requisitos, normas y según la Legislación vigente.</p>
+                </div>
+            </div>
+            <!-- Valor 4: Innovación -->
+            <div class="col-md-4 d-flex mt-4">
+                <div class="valor-card w-100 text-center p-4 border rounded shadow-sm">
+                    <span class="valor-icon mb-3"><i class="bi bi-lightning-fill"></i></span>
+                    <h3 class="valor-title">Innovación</h3>
+                    <hr class="short-line mx-auto my-2">
+                    <p class="valor-text">Implementar constantemente tecnologías y métodos innovadores para ofrecer soluciones más eficientes y efectivas.</p>
+                </div>
+            </div>
+            <!-- Valor 5: Sustentabilidad -->
+            <div class="col-md-4 d-flex mt-4">
+                <div class="valor-card w-100 text-center p-4 border rounded shadow-sm">
+                    <span class="valor-icon mb-3"><i class="bi bi-globe2"></i></span>
+                    <h3 class="valor-title">Sustentabilidad</h3>
+                    <hr class="short-line mx-auto my-2">
+                    <p class="valor-text">Fomentar prácticas que protejan el medio ambiente y promuevan un desarrollo sostenible en nuestras operaciones.</p>
+                </div>
+            </div>
+            <!-- Valor 6: Compromiso -->
+            <div class="col-md-4 d-flex mt-4">
+                <div class="valor-card w-100 text-center p-4 border rounded shadow-sm">
+                    <span class="valor-icon mb-3"><i class="bi bi-heart-fill"></i></span>
+                    <h3 class="valor-title">Compromiso</h3>
+                    <hr class="short-line mx-auto my-2">
+                    <p class="valor-text">Nos comprometemos a cumplir con los objetivos de nuestros proyectos, garantizando la satisfacción y confianza de nuestros clientes.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <!-- Pie de página -->
+    {% include 'public_footer.html' %}
+
+    <!-- Bootstrap JS y dependencias -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

@@ -69,10 +69,23 @@ urlpatterns = [
 
     path('MasterData/', views.Master_def, name='master_def'),
     path('Puesto-trabajo/', views.PT_Module),
-    path('Balanza/', views.Balanza_Module),
+    path('Balanza/', views.Balanza_Module, name='balanza_module'),
+
+    path('Save-M/', views.Save_M),
+    path('Confirm-M/', views.Confirm_M),
+
     path('Puesto-Absorcion/', views.PI_Module),
     path('Hoja-Trabajo/', views.HT_Module),
+    path('Get-HDT/', views.Request_HT, name='obtener_informacion_hoja_trabajo'),
 
     path('api/status/', views.check_db_connection, name='check_db_connection'),
     path('api/get-user-data/', views.get_user_data, name='get_user_data'),
+
+    path('Servicio/', views.servicios, name='Servicio'),
+    path('Sobre-Nosotros/', views.sobre_nosostros, name='Sobre-Nosotros'),
+    path('Recursos/', views.recursos, name='Recursos'),
+    path('Noticias/', views.noticias, name='Noticias'),
+    path('Contacto/', views.contacto, name='Contacto'),
+
+
 ]

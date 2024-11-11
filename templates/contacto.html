@@ -1,0 +1,301 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    {% include 'public_header.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacto - Ciquimet</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Biblioteca de íconos de Bootstrap -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        /* Fondo general */
+        body {
+            background-color: #f7f7f7;
+        }
+
+        /* Estilos del carrusel */
+        #services-carousel .carousel-item {
+            max-height: 300px; /* Altura máxima del carrusel */
+            overflow: hidden;
+        }
+
+        #services-carousel .carousel-caption {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background-color: rgba(33, 76, 103, 0.8); /* Fondo azul con transparencia */
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        #services-carousel .carousel-caption h2 {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #ffffff;
+            margin: 0;
+        }
+
+        /* Estilos para los elementos de contacto */
+        .contact-container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+        }
+
+        .contact-item {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .contact-item i {
+            font-size: 2rem;
+            color: #8B4513;
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-item h5 {
+            font-weight: bold;
+            color: #8B4513;
+            margin: 0;
+        }
+
+        .contact-item p {
+            color: #666;
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        /* Estilos para el mapa */
+        .map-container {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+        }
+
+                /* Estilos de la sección de contacto */
+                #contact {
+            color: #ffffff;
+        }
+
+        #contact h2 {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        #contact p {
+            font-size: 1.1rem;
+        }
+
+        #contact ul {
+            font-size: 1rem;
+        }
+
+        /* Estilos de la tarjeta de formulario */
+        .card {
+            border: none;
+        }
+
+        .card-title {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .btn-primary {
+            background-color: #FFB347; /* Color amarillo principal */
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #e6a338; /* Color amarillo oscuro en el hover */
+        }
+
+        /* Estilos para la animación de cascada */
+        .animate-fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .animate-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* Estilos del formulario */
+        .form-control, .form-label {
+            color: #333; /* Color oscuro para el texto del formulario */
+        }
+
+        .form-control::placeholder {
+            color: #777; /* Color gris para los placeholders */
+        }
+
+        .form-control:focus {
+            border-color: #c44c01;
+            box-shadow: 0 0 5px rgba(255, 145, 77, 0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Carrusel para la imagen principal -->
+    <div id="services-carousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="{% static 'rest_framework/img/fondo-ciquimet.jpg' %}" class="d-block w-100" alt="Servicios de Ciquimet" style="object-fit: cover; opacity: 0.6;">
+                <div class="carousel-caption d-flex justify-content-center align-items-center">
+                    <h2>Contacto</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Contacto -->
+    <section class="container my-5">
+        <div class="contact-container">
+            <div class="row justify-content-center">
+                <!-- Elementos de contacto alineados horizontalmente y centrados -->
+                <div class="col-md-3 contact-item">
+                    <i class="bi bi-geo-alt"></i>
+                    <h5>Dirección</h5>
+                    <p>Juan Nicolas Saldivar N° 15 mz E, Calama</p>
+                </div>
+                <div class="col-md-3 contact-item">
+                    <i class="bi bi-telephone"></i>
+                    <h5>Teléfono</h5>
+                    <p>+56 9 90107071</p>
+                </div>
+                <div class="col-md-3 contact-item">
+                    <i class="bi bi-envelope"></i>
+                    <h5>Correo electrónico</h5>
+                    <p>fcarmona@ciquimet.cl</p>
+                </div>
+                <div class="col-md-3 contact-item">
+                    <i class="bi bi-clock"></i>
+                    <h5>Horarios</h5>
+                    <p>Lun - Jue: 08:30 – 17:30<br>Vie: 08:30 – 15:30</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mapa de Google Maps centrado debajo de los elementos de contacto -->
+        <div class="map-container mt-4">
+            <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3559.037252619457!2d-68.9342!3d-22.4631!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x96adc47229a2f6e3%3A0xa1f159c9c68230d!2sJuan%20Nicolas%20Saldivar%20N%C2%B015%2C%20Calama%2C%20Chile!5e0!3m2!1ses!2scl!4v1234567890" 
+                width="100%" 
+                height="400" 
+                style="border:0;" 
+                allowfullscreen="" 
+                loading="lazy" 
+                referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+        </div>
+    </section>
+
+    <!-- Sección de Contacto -->
+    <section id="contact" class="py-5" style="background-color: #214c67;">
+        <div class="container">
+            <div class="row align-items-center">
+                <!-- Columna de texto de contacto -->
+                <div class="col-lg-6 text-white mb-4 mb-lg-0 animate-fade-in">
+                    <h2 class="display-5 font-weight-bold">¿Tienes alguna pregunta?</h2>
+                    <p class="lead">Estamos aquí para ayudarte. Completa el formulario y nos pondremos en contacto contigo lo antes posible.</p>
+                    <ul class="list-unstyled mt-4">
+                        <li class="mb-3">
+                            <i class="bi bi-geo-alt-fill me-2"></i> Dirección: Juan Nicolas Saldivar N° 15 mz E, Calama
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-envelope-fill me-2"></i> Email: fcarmona@ciquimet.cl
+                        </li>
+                        <li>
+                            <i class="bi bi-telephone-fill me-2"></i> Teléfono: +56 9 90107071
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Columna de formulario de contacto -->
+                <div class="col-lg-6 animate-fade-in">
+                    <div class="card shadow-sm">
+                        <div class="card-body p-4">
+                            <h3 class="card-title mb-4" style="font-size: 2rem; color: #464646;">Envíanos un mensaje</h3>
+                            <form>
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Nombre</label>
+                                    <input type="text" class="form-control" id="name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="message" class="form-label">Mensaje</label>
+                                    <textarea class="form-control" id="message" rows="4" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Enviar Mensaje</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pie de página -->
+    {% include 'public_footer.html' %}
+
+    <!-- Bootstrap JS y dependencias -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const serviceCards = document.querySelectorAll('.service-card');
+        const aboutSections = document.querySelectorAll('.about-section');
+
+        const observerOptions = {
+            threshold: 0.1 // Elemento es visible cuando el 10% de su altura es visible
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-visible');
+                } else {
+                    entry.target.classList.remove('animate-visible'); // Resetea la animación cuando sale de la vista
+                }
+            });
+        }, observerOptions);
+
+        // Observa tanto las tarjetas de servicio como las secciones de "Sobre Ciquimet"
+        serviceCards.forEach(card => {
+            observer.observe(card);
+        });
+
+        aboutSections.forEach(section => {
+            observer.observe(section);
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const elements = document.querySelectorAll('.animate-fade-in');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-visible');
+                } else {
+                    entry.target.classList.remove('animate-visible'); // Resetea la animación cuando sale de la vista
+                }
+            });
+        });
+
+        elements.forEach(el => observer.observe(el));
+    });
+</script>

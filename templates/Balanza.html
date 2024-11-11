@@ -60,35 +60,112 @@
 <body>
     <h1 class="custom-title">Balanza</h1>
 
+    <div class="container">
+        <div class="row">
+            <div class="col add-odt">
+                <div class="button-grid">
+                    {% for muestra in muestras_balanza %}
+                        {% if forloop.first %}
+                            <!-- Muestra de la primera muestra con los valores necesarios -->
+                            <p><strong>ODT: </strong>{{ muestra.muestraMasificada.Prefijo }}</p>
+                            <p><strong>Hoja de Trabajo: </strong>{{ muestra.hoja_trabajo.ID_HDT }}</p>
+                            <p><strong>Estado de la Hoja de Trabajo: </strong>
+                                {% if muestra.hoja_trabajo.confirmar_balanza %}
+                                    Cerrada
+                                {% else %}
+                                    Abierta
+                                {% endif %}
+                            </p>
+                            
+                            
+                        {% endif %}
+                    {% endfor %} 
+                </div>
+            </div>
+            <!-- Columna de filtros (más grande y centrada) -->
+            <div class="col filters">
+                <!-- Filtros -->
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3">
+                        <label for="search-box">Buscar:</label>
+                        <div class="input-group">
+                            <input id="search-box" type="text" class="form-control" placeholder="Buscar Nro Hoja...">
+                        </div>
+                    </div>
+            
+                    <div class="col-md-6 mb-3">
+                        <label>&nbsp;</label>
+                        <div class="input-group">
+                            <button class="btn btn-primary" onclick="Get_Muestra()">Abrir hoja de trabajo</button>
+                        </div>
+                        <br/>
+                        <label for="usar-maquina-balanza">máquina de balanza</label>
+
+                        <input class="form-check-input" type="checkbox" id="usar-maquina-balanza" name="usar_maquina_balanza">
+                            <label class="form-check-label" for="usar-maquina-balanza">
+                        <br/>
+                    </div>
+                </div>
+            </div>
+            <div class="col add-odt">
+                <div class="button-grid">   
+                    {% for muestra in muestras_balanza %}
+                        {% if forloop.first %}
+                                <button class="btn btn-success" onclick="GuardarMuestras()">Guardar</button>
+                                <button class="btn btn-dark" onclick="confirmarMuestras()">Terminar</button>
+                            {% endif %}
+                        {% endfor %} 
+                    <button class="btn btn-info" onclick="window.location.href = '/'">
+                        Atrás
+                    </button>
+                </div>
+            </div>
+           
+        </div>
+    </div>
+
     <div class="table-container table-responsive">
-                                            <table class="table table-bordered">
-                                                <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
-                                                    <tr>
-                                                        <th scope="col">Sec</th>
-                                                        <th scope="col">Id Muestra</th>
-                                                        <th scope="col">Tipo</th>
-                                                        <th scope="col">Peso de muestra (Gr)</th>
-                                                        <th scope="col">Volumen de Aforo (M)</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {% for odt in odts %}
-                                                    <tr data-odt-id="{{ odt.id }}">
-                                                        <td>{{ odt.id_ht }}</td>
-                                                        <td>{{ odt.nro_ht }}</td>
-                                                        <td>{{ odt.fec_ht }}</td>
-                                                        <td>{{ odt.analisis }}</td>
-                                                        <td>{{ odt.cant_muestras }}</td>
-                                                        <td>{{ odt.ot_cliente }}</td>
-                                                        <td>{{ odt.cliente }}</td>
-                                                        <td>{{ odt.odt }}</td>
-                                                        <td>{{ odt.proyecto }}</td>
-                                                        <td>{{ odt.envio }}</td>
-                                                        <td>{{ odt.en_uso_por }}</td>
-                                                    </tr>
-                                                    {% endfor %}
-                                                </tbody>
-                                            </table>
+        <table class="table table-bordered">
+            <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
+                <tr>
+                    <th scope="col">Id muestra</th>
+                    <th scope="col">Proyecto</th>
+                    <th scope="col">Fecha Emisión</th>
+                    <th scope="col">NBO</th>
+                    <th scope="col">Ident</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Peso de muestra (Gr)</th>
+                    <th scope="col">Volumen de Aforo (M)</th>
+                    <th scope="col">L. ppm</th>
+                    <th scope="col">L. ppm-BK</th>
+                    <th scope="col">Porcentaje (%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for muestra in muestras_balanza %}
+                <tr>
+                    <td>{{ muestra.muestraMasificada.Prefijo }}</td>
+                    <td>{{ muestra.proyecto }}</td>
+                    <td>{{ muestra.fecha_emision }}</td>
+                    <td>{{ muestra.nbo }}</td>
+                    <td>{{ muestra.ident }}</td>
+                    <td>{{ muestra.t }}</td>
+                    <td>
+                        {% if confirmar_balanza %}
+                            <input type="number" value="{{ muestra.peso_m }}" readonly>
+                        {% else %}
+                        <input type="text" name="peso_m_{{ muestra.id }}" value="{{ muestra.peso_m }}" oninput="validateDecimal(this)" value = 0>
+                        {% endif %}
+                    </td>
+                
+                    <td>{{ muestra.v_ml }}</td>
+                    <td>{{ muestra.l_ppm }}</td>
+                    <td>{{ muestra.l_ppm_bk }}</td>
+                    <td>{{ muestra.porcentaje }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
     {% include 'Footer.html' %}
     
@@ -120,49 +197,184 @@
         });
 
 
-        function AddODT()
-        {
-            const elementId = -1;
-            const urlDat = '/MasterData/';
-            const Token = csrfToken;
-            const context = 'ODT'; 
-            const action = 'add'; 
-            const stade = "acces"; 
-            $.ajax({
-                url: urlDat,
-                type: 'POST',
-                headers: {
-                    'X-CSRFToken': Token
-                },
-                data: {
-                    'id': elementId,
-                    'context': context,
-                    'action': action,
-                    'stade': stade
-                },
-                success: function(response) {
-                    if (response.redirect_url) {
-                        window.location.href = response.redirect_url; 
-                    } else {
-                        console.log(response.message);
-                    }
-                },
-                error: function(xhr) {
-                    console.error('Error al enviar datos:', xhr.responseText);
-                }
-            });
+
+        function Get_Muestra() {
+            event.preventDefault();
+    
+            // Obtén el valor de búsqueda del input
+            var search = document.getElementById('search-box').value;
+    
+            // Crea el formulario de envío
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/Balanza/';
+    
+            // Agrega el token CSRF al formulario
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
+    
+            // Agrega el valor de búsqueda al formulario
+            const idInput = document.createElement('input');
+            idInput.type = 'hidden';
+            idInput.name = 'id';
+            idInput.value = search;  // Usa el valor de búsqueda
+            form.appendChild(idInput);
+    
+            // Agrega el formulario al documento y envíalo
+            document.body.appendChild(form);
+            form.submit(); 
         }
 
-        function applyFilters() {
-            // Obtener los valores de los filtros
-            var search = document.getElementById('search-box').value;
+        function validateDecimal(input) {
+            let value = input.value;
         
-            // Construir la URL de la solicitud con los parámetros de búsqueda y filtro
-            var url = new URL(window.location.href);
-            url.searchParams.set('search', search);
+            // Reemplazar cualquier carácter no numérico, excepto números, punto y coma
+            value = value.replace(/[^0-9.,]/g, "");
         
-            // Redirigir a la nueva URL con los parámetros de filtro aplicados
-            window.location.href = url.toString();
+            // Si hay más de un punto o coma, eliminar el extra
+            const decimalCount = (value.match(/[.,]/g) || []).length;
+            if (decimalCount > 1) {
+                // Si hay más de un separador decimal, quedarnos solo con el primero
+                let parts = value.split(/[, .]/);
+                value = parts[0] + (parts[1] ? '.' + parts[1] : '');
+            }
+        
+            // Si el valor contiene una coma, la reemplazamos por un punto para normalizar
+            if (value.includes(',')) {
+                value = value.replace(',', '.');
+            }
+        
+            // Si el valor es vacío o no es un número válido, restablecer a 0
+            if (isNaN(value) || value === "" || parseFloat(value) < 0) {
+                value = "0";
+            }
+        
+            // Asignar el valor corregido al campo de entrada
+            input.value = value;
+        }
+
+        function GuardarMuestras() {
+            // Crear un array para almacenar los datos a enviar
+            let muestrasData = [];
+    
+            // Recorrer todas las filas de la tabla
+            document.querySelectorAll("table tbody tr").forEach(function(row) {
+                // Obtener el Prefijo (ID de muestra) y el peso_m
+                let prefijo = row.cells[0].textContent.trim();  // Prefijo
+                let peso_m = row.querySelector("input[name^='peso_m_']").value.trim();  // Peso de la muestra
+    
+                // Agregar los datos al array
+                muestrasData.push({
+                    prefijo: prefijo,
+                    peso_m: peso_m
+                });
+            });
+    
+            // Enviar los datos a la URL "Save-M"
+            fetch('/Save-M/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value // CSRF token
+                },
+                body: JSON.stringify({
+                    muestras: muestrasData
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Usar SweetAlert2 para mostrar un mensaje de éxito
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Muestras guardadas',
+                        text: 'Las muestras se guardaron correctamente.',
+                        confirmButtonText: 'OK'
+                    });
+                } else {
+                    // Usar SweetAlert2 para mostrar un mensaje de error
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Hubo un error al guardar las muestras.',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Usar SweetAlert2 para manejar errores en la solicitud
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de comunicación',
+                    text: 'Hubo un problema al intentar enviar los datos.',
+                    confirmButtonText: 'OK'
+                });
+            });
+        }
+    
+        // Función para confirmar las muestras
+        function confirmarMuestras() {
+            // Crear un array para almacenar los datos a enviar
+            let muestrasData = [];
+    
+            // Recorrer todas las filas de la tabla
+            document.querySelectorAll("table tbody tr").forEach(function(row) {
+                // Obtener el Prefijo (ID de muestra) y el peso_m
+                let prefijo = row.cells[0].textContent.trim();  // Prefijo
+                let peso_m = row.querySelector("input[name^='peso_m_']").value.trim();  // Peso de la muestra
+    
+                // Agregar los datos al array
+                muestrasData.push({
+                    prefijo: prefijo,
+                    peso_m: peso_m
+                });
+            });
+    
+            // Enviar los datos a la URL "Confirm-M"
+            fetch('/Confirm-M/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value // CSRF token
+                },
+                body: JSON.stringify({
+                    muestras: muestrasData
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Usar SweetAlert2 para mostrar un mensaje de éxito
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Muestras confirmadas',
+                        text: 'Las muestras fueron confirmadas correctamente.',
+                        confirmButtonText: 'OK'
+                    });
+                } else {
+                    // Usar SweetAlert2 para mostrar un mensaje de error
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Hubo un error al confirmar las muestras.',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Usar SweetAlert2 para manejar errores en la solicitud
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de comunicación',
+                    text: 'Hubo un problema al intentar enviar los datos.',
+                    confirmButtonText: 'OK'
+                });
+            });
         }
 
     </script>

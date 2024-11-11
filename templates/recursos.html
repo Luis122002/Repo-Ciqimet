@@ -1,0 +1,218 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    {% include 'public_header.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recursos - Ciquimet</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        /* Fondo general de la página */
+        body {
+            background-color: #f2f2f2;
+        }
+
+        /* Estilos del carrusel */
+        #services-carousel .carousel-item {
+            max-height: 300px;
+            overflow: hidden;
+        }
+
+        #services-carousel .carousel-caption {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background-color: rgba(33, 76, 103, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        #services-carousel .carousel-caption h2 {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #ffffff;
+            margin: 0;
+        }
+
+        /* Estilos para las tarjetas de recursos */
+        .resource-section {
+            padding: 4rem 0;
+        }
+
+        .resource-card {
+            display: flex;
+            align-items: center;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .resource-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .resource-card img {
+            width: 100%;
+            height: 380px; /* Establecer una altura fija para las imágenes */
+            object-fit: cover;
+            border-radius: 8px 0 0 8px;
+            max-width: 40%; /* Asegura que las imágenes no se estiren */
+        }
+
+        .resource-content {
+            padding: 1.5rem;
+            max-width: 60%;
+            text-align: left;
+        }
+
+        .resource-content h5 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #214c67;
+            margin-bottom: 1rem;
+        }
+
+        .resource-content p {
+            font-size: 1rem;
+            color: #555555;
+            line-height: 1.6;
+        }
+
+        .resource-btn {
+            margin-top: 1rem;
+            padding: 0.5rem 1.5rem;
+            background-color: #214c67;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .resource-btn:hover {
+            background-color: #ffb347;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Carrusel de ejemplo -->
+    <div id="services-carousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="{% static 'rest_framework/img/fondo-ciquimet.jpg' %}" class="d-block w-100" alt="Servicios de Ciquimet" style="object-fit: cover; opacity: 0.6;">
+                <div class="carousel-caption d-flex justify-content-center align-items-center">
+                    <h2>Recursos</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Recursos -->
+    <section class="resource-section">
+        <div class="container">
+            <div class="row">
+                <!-- Área Muestrera -->
+                <div class="col-md-12">
+                    <div class="resource-card">
+                        <img src="{% static 'rest_framework/img/Re1.jpeg' %}" alt="Área Muestrera">
+                        <div class="resource-content">
+                            <h5>Área Muestrera</h5>
+                            <ul>
+                                <li>Chancadores</li>
+                                <li>Pulverizadores</li>
+                                <li>Balanzas analíticas y de precisión</li>
+                                <li>Harneros 1/2” y 3/4”</li>
+                                <li>Harneros vibratorios 10#</li>
+                                <li>Estufas de secado</li>
+                                <li>Divisor rotatorio (tipo carrousel) de muestras</li>
+                                <li>Rotap con serie de tamices Tyler y US standard</li>
+                                <li>Colector de polvo</li>
+                                <li>Grupo Electrógeno</li>
+                            </ul>
+                            <a href="mailto:fcarmona@ciquimet.cl" class="resource-btn">Contáctanos</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Área Laboratorio Químico -->
+                <div class="col-md-12">
+                    <div class="resource-card">
+                        <img src="{% static 'rest_framework/img/Re2.jpeg' %}" alt="Laboratorio Químico">
+                        <div class="resource-content">
+                            <h5>Área Laboratorio Químico</h5>
+                            <ul>
+                                <li>Balanzas analíticas</li>
+                                <li>Campana perclórica</li>
+                                <li>Placas calefactoras</li>
+                                <li>Agitador orbital de temperatura controlada</li>
+                                <li>Mufla</li>
+                                <li>Equipos de absorción atómica</li>
+                                <li>Scrubber (lavador de gases)</li>
+                            </ul>
+                            <a href="mailto:fcarmona@ciquimet.cl" class="resource-btn">Contáctanos</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Área Laboratorio Metalúrgico Concentración -->
+                <div class="col-md-12">
+                    <div class="resource-card">
+                        <img src="{% static 'rest_framework/img/Re3.jpg' %}" alt="Laboratorio Metalúrgico Concentración">
+                        <div class="resource-content">
+                            <h5>Área Laboratorio Metalúrgico Concentración</h5>
+                            <ul>
+                                <li>Balanzas analíticas y de precisión</li>
+                                <li>Banco de rodillos para 4 molinos</li>
+                                <li>Molinos de laboratorio</li>
+                                <li>Collares de bolas diferente distribución</li>
+                                <li>Máquinas de flotación de laboratorio Flsmith (ESSA)</li>
+                                <li>Celdas de flotación acrílico diferentes capacidades</li>
+                                <li>Equipamiento para pruebas de sedimentación convencionales y alta capacidad, monitoreo de VDS en línea</li>
+                                <li>Filtros de presión de 6” Y 8”</li>
+                            </ul>
+                            <a href="mailto:fcarmona@ciquimet.cl" class="resource-btn">Contáctanos</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Área Laboratorio Metalúrgico Lixiviación -->
+                <div class="col-md-12">
+                    <div class="resource-card">
+                        <img src="{% static 'rest_framework/img/Re4.jpeg' %}" alt="Laboratorio Metalúrgico Lixiviación">
+                        <div class="resource-content">
+                            <h5>Área Laboratorio Metalúrgico Lixiviación</h5>
+                            <ul>
+                                <li>Balanzas analíticas y de precisión</li>
+                                <li>Agitadores con VDF, desde 1 a 500 L</li>
+                                <li>Equipamiento para test de Iso-pH</li>
+                                <li>Columnas de lixiviación de laboratorio</li>
+                                <li>Columnas de Lixiviación Piloto de distintos diámetros y altura</li>
+                                <li>Filtros de presión de 6” Y 8”</li>
+                                <li>Celda de electro tensión</li>
+                            </ul>
+                            <a href="mailto:fcarmona@ciquimet.cl" class="resource-btn">Contáctanos</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Pie de página -->
+    {% include 'public_footer.html' %}
+
+    <!-- Bootstrap JS y dependencias -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

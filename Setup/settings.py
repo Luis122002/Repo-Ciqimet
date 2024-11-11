@@ -193,3 +193,6 @@ SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 
 
+SESSION_COOKIE_AGE = 18000  # Dos semanas en segundos
+SESSION_SAVE_EVERY_REQUEST = True  # Renueva la sesión con cada solicitud
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Mantener la sesión abierta aunque el navegador se cierre

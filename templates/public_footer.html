@@ -1,162 +1,119 @@
-<style>
-            /* Estilos de la sección de contacto */
-            #contact {
-            color: #ffffff;
-        }
-
-        #contact h2 {
-            font-size: 2.5rem;
-            font-weight: bold;
-        }
-
-        #contact p {
-            font-size: 1.1rem;
-        }
-
-        #contact ul {
-            font-size: 1rem;
-        }
-
-        /* Estilos de la tarjeta de formulario */
-        .card {
-            border: none;
-        }
-
-        .card-title {
-            font-weight: bold;
-            font-size: 1.5rem;
-        }
-
-        .btn-primary {
-            background-color: #FFB347; /* Color amarillo principal */
-            border: none;
-        }
-
-        .btn-primary:hover {
-            background-color: #e6a338; /* Color amarillo oscuro en el hover */
-        }
-
-        /* Estilos para la animación de cascada */
-        .animate-fade-in {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
-        }
-
-        .animate-visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        /* Estilos del formulario */
-        .form-control, .form-label {
-            color: #333; /* Color oscuro para el texto del formulario */
-        }
-
-        .form-control::placeholder {
-            color: #777; /* Color gris para los placeholders */
-        }
-
-        .form-control:focus {
-            border-color: #c44c01;
-            box-shadow: 0 0 5px rgba(255, 145, 77, 0.5);
-        }
-</style>
-<!-- Pie de página -->
-<footer >
-    <!-- Sección de Contacto -->
-<section id="contact" class="py-5" style="background-color: #214c67;">
+{% load static %}
+<!-- Footer -->
+<footer class="py-5" style="background-color: #0d2235; color: #ffffff;">
     <div class="container">
-        <div class="row align-items-center">
-            <!-- Columna de texto de contacto -->
-            <div class="col-lg-6 text-white mb-4 mb-lg-0 animate-fade-in">
-                <h2 class="display-5 font-weight-bold">¿Tienes alguna pregunta?</h2>
-                <p class="lead">Estamos aquí para ayudarte. Completa el formulario y nos pondremos en contacto contigo lo antes posible.</p>
-                <ul class="list-unstyled mt-4">
-                    <li class="mb-3">
-                        <i class="bi bi-geo-alt-fill me-2"></i> Dirección: Juan Nicolas Saldivar N° 15 mz E, Calama
+        <div class="row">
+            <!-- Logo y Derechos -->
+            <div class="col-md-3 text-center text-md-start mb-4">
+                <img src="{% static 'rest_framework/img/Logocapture-removebg-preview.png' %}" alt="Logo de Ciquimet" class="img-fluid mb-2" style="max-width: 250px;">
+                <p class="small">&copy; 2024 CIQUIMET Chile LTDA.<br> Todos los Derechos Reservados.</p>
+            </div>
+
+            <!-- Menú Rápido -->
+            <div class="col-md-3 mb-4">
+                <h6 class="text-uppercase text-light">Menú</h6>
+                <hr class="bg-light" style="opacity: 0.2;">
+                <ul class="list-unstyled mt-3">
+                    <li><a href="#" class="footer-link">Inicio</a></li>
+                    <li><a href="#" class="footer-link">Servicios</a></li>
+                    <li><a href="#" class="footer-link">Sobre Nosotros</a></li>
+                    <li><a href="#" class="footer-link">Recursos</a></li>
+                    <li><a href="#" class="footer-link">Noticias</a></li>
+                    <li><a href="#" class="footer-link">Contacto</a></li>
+                </ul>
+            </div>
+
+            <!-- Contacto -->
+            <div class="col-md-3 mb-4">
+                <h6 class="text-uppercase text-light">Contacto</h6>
+                <hr class="bg-light" style="opacity: 0.2;">
+                <ul class="list-unstyled mt-3">
+                    <li class="mb-2 d-flex align-items-center">
+                        <i class="bi bi-envelope-fill me-2"></i>
+                        <a href="mailto:fcarmona@ciquimet.cl" class="footer-link">fcarmona@ciquimet.cl</a>
+                        <button class="btn btn-link text-light p-0 ms-2" onclick="copyToClipboard('fcarmona@ciquimet.cl')" title="Copiar correo">
+                            <i class="bi bi-clipboard"></i>
+                        </button>
                     </li>
-                    <li class="mb-3">
-                        <i class="bi bi-envelope-fill me-2"></i> Email: fcarmona@ciquimet.cl
+                    <li class="mb-2 d-flex align-items-center">
+                        <i class="bi bi-telephone-fill me-2"></i>
+                        <a href="tel:+56990107071" class="footer-link">+569 90107071</a>
+                        <button class="btn btn-link text-light p-0 ms-2" onclick="copyToClipboard('+56990107071')" title="Copiar teléfono">
+                            <i class="bi bi-clipboard"></i>
+                        </button>
                     </li>
-                    <li>
-                        <i class="bi bi-telephone-fill me-2"></i> Teléfono: +56 9 90107071
+                    <li class="d-flex align-items-center">
+                        <i class="bi bi-geo-alt-fill me-2"></i>
+                        <a href="https://www.google.com/maps/search/?api=1&query=Juan+Nicolas+Saldivar+N+15+mz+E,+Calama" target="_blank" class="footer-link">Juan Nicolas Saldivar N° 15 mz E, Calama</a>
                     </li>
                 </ul>
             </div>
-            
-            <!-- Columna de formulario de contacto -->
-            <div class="col-lg-6 animate-fade-in">
-                <div class="card shadow-sm">
-                    <div class="card-body p-4">
-                        <h3 class="card-title mb-4" style="font-size: 2rem; color: #464646;">Envíanos un mensaje</h3>
-                        <form>
-                            <div class="mb-3">
-                                <label for="name" class="form-label">Nombre</label>
-                                <input type="text" class="form-control" id="name" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="message" class="form-label">Mensaje</label>
-                                <textarea class="form-control" id="message" rows="4" required></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100">Enviar Mensaje</button>
-                        </form>
-                    </div>
+
+            <!-- Redes Sociales -->
+            <div class="col-md-3 text-center text-md-start mb-4">
+                <h6 class="text-uppercase text-light">Síguenos</h6>
+                <hr class="bg-light" style="opacity: 0.2;">
+                <div class="d-flex justify-content-center justify-content-md-start mt-3">
+                    <a href="https://m.facebook.com/profile.php?id=100087536900830" target="_blank" class="social-icon me-2">
+                        <i class="bi bi-facebook"></i>
+                    </a>
+                    <a href="https://www.instagram.com/ciquimet.cl/" target="_blank" class="social-icon me-2">
+                        <i class="bi bi-instagram"></i>
+                    </a>
+                    <a href="https://cl.linkedin.com/in/ciquimet-chile-843b7525b/" target="_blank" class="social-icon">
+                        <i class="bi bi-linkedin"></i>
+                    </a>
                 </div>
             </div>
         </div>
+        <hr class="bg-light" style="opacity: 0.2;">
+        <div class="text-center small text-light mt-3">
+            <p>Sitio realizado por Equipo Siete</p>
+        </div>
     </div>
-    <p style="text-align:center; padding-top: 25px;">&copy; 2024 Proyecto LIMS. Todos los derechos reservados.</p>
-    <hr>
-</section>
 </footer>
+
+<!-- Scripts -->
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const serviceCards = document.querySelectorAll('.service-card');
-        const aboutSections = document.querySelectorAll('.about-section');
-
-        const observerOptions = {
-            threshold: 0.1 // Elemento es visible cuando el 10% de su altura es visible
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('animate-visible');
-                } else {
-                    entry.target.classList.remove('animate-visible'); // Resetea la animación cuando sale de la vista
-                }
-            });
-        }, observerOptions);
-
-        // Observa tanto las tarjetas de servicio como las secciones de "Sobre Ciquimet"
-        serviceCards.forEach(card => {
-            observer.observe(card);
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            alert('¡Copiado al portapapeles!');
+        }, function(err) {
+            console.error('Error al copiar: ', err);
         });
-
-        aboutSections.forEach(section => {
-            observer.observe(section);
-        });
-    });
-</script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const elements = document.querySelectorAll('.animate-fade-in');
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('animate-visible');
-                } else {
-                    entry.target.classList.remove('animate-visible'); // Resetea la animación cuando sale de la vista
-                }
-            });
-        });
-
-        elements.forEach(el => observer.observe(el));
-    });
+    }
 </script>
 
+<style>
+    .footer-link {
+        color: #ffffff;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+    .footer-link:hover {
+        color: #ffb347; /* Efecto hover amarillo */
+    }
+    .social-icon {
+        width: 40px;
+        height: 40px;
+        background-color: #ffffff;
+        color: #0d2235;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background-color 0.3s, color 0.3s;
+    }
+    .social-icon:hover {
+        background-color: #ffb347;
+        color: #ffffff;
+    }
+    .footer-link:hover .bi-clipboard {
+        color: #ffb347; /* Hover para icono de copiar */
+    }
+    @media (max-width: 768px) {
+        .logo-footer {
+            max-width: 150px; /* Tamaño reducido en pantallas más pequeñas */
+        }
+    }
+</style>

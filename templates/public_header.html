@@ -71,7 +71,7 @@
             <div class="container-fluid">
                 <!-- Logo de la empresa, desplazado hacia la derecha con margen izquierdo adicional -->
                 <a class="navbar-brand" href="#">
-                    <img src="{% static 'rest_framework/img/Logocapture-removebg-preview.png' %}" alt="Logo de la marca" onclick="returnMenu()">
+                    <img src="{% static 'rest_framework/img/Logocapture-removebg-preview.png' %}" alt="Logo de la marca" onclick="window.location.href='/'">
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -89,13 +89,13 @@
                             <a class="nav-link" href="#about">Sobre Nosotros</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#resources">Recursos</a>
+                            <a class="nav-link" href="/Recursos/">Recursos</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#news">Noticias</a>
+                            <a class="nav-link" href="/Noticias/">Noticias</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#contact">Contacto</a>
+                            <a class="nav-link" href="/Contacto/">Contacto</a>
                         </li>
                     </ul>
                     <!-- Menú de perfil y login alineado a la derecha -->
@@ -104,7 +104,7 @@
                             <a class="nav-link" href="#"><span class="bi bi-person-circle"></span> Perfil</a>
                         </li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" onclick="window.location.href='/login'" id="navbarDropdownLogin" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="nav-link dropdown-toggle" onclick="window.location.href='/login/'" id="navbarDropdownLogin" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <span class="bi bi-box-arrow-in-right"></span> Login / Register
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownLogin">
