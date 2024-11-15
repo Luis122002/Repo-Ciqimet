@@ -12,7 +12,7 @@
             position: fixed;
             top: 0;
             left: -100%;
-            background-color: #333;
+            background-color: #214c50;
             color: white;
             transition: 0.3s ease;
             width: 100%;
@@ -62,11 +62,10 @@
     <div class="container mt-5">
         <h1 class="custom-title">Orden de trabajo - {{ odt.Nro_OT }}</h1>
         <h5 class="mb-3 secondary-title">Plantilla de muestras </h5>
-        <button class="btn btn-info" onclick="ShowDataInfo()">Mostrar detalles</button>
-        <button class="btn btn-info" onclick="DeleteODT()">Eliminar ODT</button>
         <a href="/ODT/" class="btn btn-primary">Atras</a>
-        <button class="btn btn-success" onclick="AddMuestra()">Añadir muestra</button>
-        <button class="btn btn-info" onclick="EditODT()">Modificar ODT</button>
+        <button class="btn btn-info" onclick="ShowDataInfo()">Mostrar detalles</button>
+        <button class="btn btn-warning" onclick="EditODT()">Modificar ODT</button>
+        <button class="btn btn-danger" onclick="DeleteODT()">Eliminar ODT</button>
 
         <div id="OdtInfoPanel">
             <div class="content-container">
@@ -82,10 +81,19 @@
                     <p><strong>Cliente:</strong> <span class="Cliente">{{ odt.Cliente }}</span></p>
                     <p><strong>Proyecto:</strong> <span class="Proyecto">{{ odt.Proyecto }}</span></p>
                     <p><strong>Referencia:</strong> <span class="Referencia">{{ odt.Referencia }}</span></p>
-                    <p><strong>codigo de muestras:</strong> <span class="Muestra">{{ odt.Prefijo }}</span></p>
+                    <p><strong>Codigo de muestras:</strong> <span class="Muestra">{{ odt.Prefijo }}</span></p>
                     <p><strong>Responsable:</strong> <span class="Responsable">{{ odt.Responsable }}</span></p>
                     <p><strong>Comentarios:</strong> <span class="Comentarios">{{ odt.Comentarios }}</span></p>
-
+                    <p><strong>Hojas de trabajo:</strong></p>
+                    <div>
+                        {% if HDT_Quimico %}
+                            {% for hdt in HDT_Quimico %}
+                                <button type="button" class="btn btn-primary mb-2" onclick="Get_HDT('{{ hdt.ID_HDT }}')">{{ hdt.ID_HDT }}</button>
+                            {% endfor %}
+                        {% else %}
+                            <p>Sin hojas de trabajo</p>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
             <button class="btn btn-info OdtInfoPanel-Button" onclick="ShowDataInfo()">Ocultar</button>
@@ -140,13 +148,12 @@
     }
 
     function DeleteODT() {
-        const elementId = {{ odt.id }};
+        const elementId = idODT;
         const urlDat = '/MasterData/';
         const Token = csrfToken;
         const context = 'ODT'; 
         const action = 'del'; 
         const stade = "acces"; 
-    
         Swal.fire({
             title: '¿Seguro que quieres borrar la orden de trabajo junto con los campos de muestras?',
             text: "Esta acción no se puede deshacer.",
@@ -185,187 +192,7 @@
         });
     }
 
-    function AddEventsTouch()
-    {
-
-        document.querySelectorAll('.sample-row').forEach(row => {
-            row.addEventListener('click', function() {
-                const sampleId = this.getAttribute('data-id');
-                const completID = this.querySelector('td:nth-child(1)').textContent;
-
-                
-                
-                Swal.fire({
-                    title: 'Información de la Muestra',
-                    text: 'ID de la muestra: ' + completID,
-                    icon: 'info',
-                    showCancelButton: true,
-                    showDenyButton: true,
-                    confirmButtonText: 'Modificar',
-                    denyButtonText: 'Eliminar',
-                    cancelButtonText: 'Cerrar'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Obtén los valores actuales para los campos
-                        const pesoMuestra = this.querySelector('td:nth-child(2)').textContent;
-                        const volumen = this.querySelector('td:nth-child(3)').textContent;
-                        const dilucion = this.querySelector('td:nth-child(4)').textContent;
-                        
-                        Swal.fire({
-                            title: 'Modificar Muestra',
-                            html: `
-                                <div style="text-align: center; margin-bottom: 15px;">
-                                    <label for="id_muestra" style="display: block; margin-bottom: 5px;">ID Muestra</label>
-                                    <input type="number" id="id_muestra" class="swal2-input" placeholder="ID Muestra" value="${sampleId.split('-').pop()}" />
-                                </div>
-                                <div style="text-align: center; margin-bottom: 15px;">
-                                    <label for="peso_muestra" style="display: block; margin-bottom: 5px;">Peso Muestra</label>
-                                    <input type="number" id="peso_muestra" class="swal2-input" placeholder="Peso Muestra" step="any" value="${pesoMuestra}" />
-                                </div>
-                                <div style="text-align: center; margin-bottom: 15px;">
-                                    <label for="volumen" style="display: block; margin-bottom: 5px;">Volumen</label>
-                                    <input type="number" id="volumen" class="swal2-input" placeholder="Volumen" step="any" value="${volumen}" />
-                                </div>
-                                <div style="text-align: center; margin-bottom: 15px;">
-                                    <label for="dilucion" style="display: block; margin-bottom: 5px;">Dilución</label>
-                                    <input type="number" id="dilucion" class="swal2-input" placeholder="Dilución" step="any" value="${dilucion}" />
-                                </div>
-                            `,
-                            focusConfirm: false,
-                            showCancelButton: true,
-                            confirmButtonText: 'Guardar',
-                            cancelButtonText: 'Cancelar',
-                            preConfirm: () => {
-                                const id_muestra = document.getElementById('id_muestra').value;
-                                const peso_muestra = document.getElementById('peso_muestra').value;
-                                const volumen = document.getElementById('volumen').value;
-                                const dilucion = document.getElementById('dilucion').value;
-
-                                // Validación del ID Muestra
-                                if (!/^\d{1,3}$/.test(id_muestra)) {
-                                    Swal.showValidationMessage('El ID Muestra debe ser un número de 1 a 3 dígitos');
-                                    return false;
-                                }
-
-                                return { id_muestra, peso_muestra, volumen, dilucion };
-                            }
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                $.ajax({
-                                    type: 'POST',
-                                    url: '/ModMuestra/', 
-                                    data: {
-                                        'MuestraODT': MuestraODT, 
-                                        'TargetDel': sampleId,
-                                        'valID': result.value.id_muestra,
-                                        'valPes': result.value.peso_muestra,
-                                        'valVol': result.value.volumen,
-                                        'valDis': result.value.dilucion,
-                                        'ODTID': idODT,
-                                        'contex': 'Mod',
-                                        'csrfmiddlewaretoken': csrfToken  
-                                    },
-                                    success: function(response) {
-                                        Swal.fire('Muestra Modificada', '', 'success');
-                                        ReloadContent();
-                                    },
-                                    error: function(xhr, status, error) {
-                                        let errorMessage = 'Ocurrió un error al modificar la muestra.';
-                                        if (xhr.responseJSON && xhr.responseJSON.error) {
-                                            errorMessage = xhr.responseJSON.error;
-                                        }
-                                        Swal.fire('Error', errorMessage, 'error');
-                                    }
-                                });
-                            }
-                        });
-                    } else if (result.isDenied) {
-                        // Confirmación para eliminar la muestra
-                        Swal.fire({
-                            title: '¿Estás seguro?',
-                            text: "No podrás deshacer esta acción.",
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonText: 'Sí, eliminar',
-                            cancelButtonText: 'Cancelar'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                $.ajax({
-                                    type: 'POST',
-                                    url: '/ModMuestra/',
-                                    data: {
-                                        'MuestraODT': MuestraODT, 
-                                        'TargetDel': sampleId,
-                                        'ODTID': idODT,
-                                        'contex': 'Del',
-                                        'csrfmiddlewaretoken': csrfToken
-                                    },
-                                    success: function(response) {
-                                        Swal.fire('Muestra Eliminada', '', 'success');
-                                        row.remove();
-                                        ReloadContent();
-                                    },
-                                    error: function(xhr, status, error) {
-                                        let errorMessage = 'Ocurrió un error al eliminar la muestra.';
-                                        if (xhr.responseJSON && xhr.responseJSON.error) {
-                                            errorMessage = xhr.responseJSON.error;
-                                        }
-                                        Swal.fire('Error', errorMessage, 'error');
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-            });
-        });
-    }
-
-    AddEventsTouch();
-
-    function AddMuestra() {
-        Swal.fire({
-            title: 'Ingresa el número de muestra',
-            html: `
-                <style>
-                    .swal2-input {
-                        width: 80%;
-                    }
-                </style>
-                <input type="number" id="sampleNumber" class="swal2-input" placeholder="Número de muestra" min="0" max="999" oninput="AjustID('sampleNumber')" value="0" />
-            `,
-            showCancelButton: true,
-            confirmButtonText: 'Aplicar',
-            cancelButtonText: 'Cancelar',
-            
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const sampleNumber = document.getElementById('sampleNumber').value;
-                $.ajax({
-                    type: 'POST',
-                    url: '/ModMuestra/',
-                    data: {
-                        'MuestraODT' : MuestraODT, 
-                        'contex': 'Add',
-                        'ODTID':idODT,
-                        'valID': sampleNumber,
-                        'csrfmiddlewaretoken': csrfToken
-                    },
-                    success: function(response) {
-                        ReloadContent();
-                        Swal.fire('Muestra agregada', '', 'success');
-                    },
-                    error: function(xhr, status, error) {
-                        Swal.fire('Error', 'Ocurrió un error al eliminar la muestra.', 'error');
-                    }
-                });
-
-            } else if (result.isDismissed) {
-                console.log('Operación cancelada');
-            }
-        });
-    }
-
+    
     function EditODT() 
     {
         const elementId = idODT;
@@ -399,23 +226,6 @@
         });
     }
 
-        function applyFilters() {
-            // Obtener los valores de los filtros
-            var year = document.getElementById('filter-year').value;
-            var month = document.getElementById('filter-month').value;
-            var search = document.getElementById('search-box').value;
-        
-            // Construir la URL de la solicitud con los parámetros de búsqueda y filtro
-            var url = new URL(window.location.href);
-            url.searchParams.set('year', year);
-            url.searchParams.set('month', month);
-            url.searchParams.set('search', search);
-        
-            // Redirigir a la nueva URL con los parámetros de filtro aplicados
-            window.location.href = url.toString();
-        }
-
-
 
     function AjustID(IDValue) {
         let inputField = document.getElementById(IDValue);
@@ -436,71 +246,154 @@
         }
     }
 
-    function ReloadContent() {
-        console.log("Reload");
-        $.ajax({
-            type: 'POST',
-            url: '/ODT-info_Request/',
-            data: {
-                'odt_id': idODT,
-                'csrfmiddlewaretoken': csrfToken
-            },
-            success: function(response) {
-                // Actualiza la tabla con los nuevos datos
-                var tableBody = document.querySelector('.table-container tbody');
-                tableBody.innerHTML = '';  // Limpia el contenido actual
-    
-                response.ots.forEach(ot => {
-                    var row = document.createElement('tr');
-                    row.classList.add('sample-row');
-                    row.setAttribute('data-id', ot.id_muestra);
-    
-                    // Crear una cadena de texto para los elementos asociados al OT
-                    let elementosContent = ''; // Inicializa una cadena vacía
-                    ot.elementos.forEach(elemento => {
-                        elementosContent += `${elemento.nombre} (${elemento.simbolo})<br>`; // Agrega cada elemento seguido de un salto de línea
-                    });
-    
-                    row.innerHTML = `
-                        <td>${ot.id_muestraInput}</td>
-                        <td>${ot.peso_muestra.toFixed(1)}</td>
-                        <td>${ot.volumen.toFixed(1)}</td>
-                        <td>${ot.dilucion.toFixed(1)}</td>
-                        <td>${elementosContent}</td>  <!-- Nueva columna para elementos -->
-                    `;
-    
-                    tableBody.appendChild(row);
+
+    function Delete_HDT(id) {
+        Swal.fire({
+            title: '¿Estás seguro de borrar esta hoja de trabajo?',
+            text: "Esta acción no se puede deshacer.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const elementId = id;
+                const urlDat = '/MasterData/';
+                const Token = csrfToken;
+                const context = 'HDT'; 
+                const action = 'del'; 
+                const stade = "acces"; 
+                $.ajax({
+                    url: urlDat,
+                    type: 'POST',
+                    headers: {
+                        'X-CSRFToken': Token
+                    },
+                    data: {
+                        'id': elementId,
+                        'context': context,
+                        'action': action,
+                        'stade': stade
+                    },
+                    success: function(response) {
+                        if (response.redirect_url) {
+                            window.location.href = response.redirect_url; 
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Error al enviar datos:', xhr.responseText);
+                    }
                 });
-    
-                if (response.ots.length === 0) {
-                    var row = document.createElement('tr');
-                    row.innerHTML = '<td colspan="5">No hay análisis realizados.</td>';  // Aumentar colspan si agregas más columnas
-                    tableBody.appendChild(row);
-                }
-    
-                AddEventsTouch();
-    
-                // Actualiza el panel OdtInfoPanel con los nuevos datos
-                document.querySelector('#OdtInfoPanel .Cant_Muestra').textContent = response.odt.Cant_Muestra;
-                document.querySelector('#OdtInfoPanel .Fec_Recep').textContent = response.odt.Fec_Recep;
-                document.querySelector('#OdtInfoPanel .Cliente').textContent = response.odt.Cliente.nombre;
-                document.querySelector('#OdtInfoPanel .Proyecto').textContent = response.odt.Proyecto.nombre;
-                document.querySelector('#OdtInfoPanel .Despacho').textContent = response.odt.Despacho;
-                document.querySelector('#OdtInfoPanel .Envio').textContent = response.odt.Envio.username;
-                document.querySelector('#OdtInfoPanel .Prefijo').textContent = response.odt.Prefijo;
-                document.querySelector('#OdtInfoPanel .Comentarios').textContent = response.odt.Comentarios;
-                document.querySelector('#OdtInfoPanel .Analisis').textContent = response.odt.Analisis.Analisis_metodo;
-    
-            },
-            error: function(xhr, status, error) {
-                console.error('Error al actualizar la tabla:', error);
             }
         });
     }
 
-    
+    function Edit_HDT(id) {
+        const elementId = id;
+        const urlDat = '/MasterData/';
+        const Token = csrfToken;
+        const context = 'HDT'; 
+        const action = 'mod'; 
+        const stade = "acces"; 
+        $.ajax({
+            url: urlDat,
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': Token
+            },
+            data: {
+                'id': elementId,
+                'context': context,
+                'action': action,
+                'stade': stade
+            },
+            success: function(response) {
+                if (response.redirect_url) {
+                    window.location.href = response.redirect_url; 
+                }
+            },
+            error: function(xhr) {
+                console.error('Error al enviar datos:', xhr.responseText);
+            }
+        });
+    }
 
 
+    function Get_HDT(id)
+    {
+        htId = id
 
+        fetch(`/Get-HDT/?id=${htId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.muestras && data.muestras.length > 0) {
+                let tablaHTML = `
+                    <div style="overflow-x: auto;"> <!-- Contenedor con desplazamiento -->
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Muestra Masificada</th>
+                                    <th>Estado</th>
+                                    <th>Estandar</th>
+                                    <th>Método de Análisis</th>
+                                    <th>Tipo</th>
+                                    <th>Duplicado</th>
+                                    <th>Elementos</th>
+                                    <th>Peso y Elemento</th> <!-- Nueva columna para el peso y el elemento -->
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+                data.muestras.forEach(muestra => {
+                    let elementosText = muestra.elementos.map(elemento => 
+                        `${elemento.nombre} (${elemento.gramos}g / ${elemento.miligramos}ml)`
+                    ).join('<br/>'); 
+
+                    let pesoElementoText = muestra.peso_elemento.split(', ').join('<br/>');
+
+                    tablaHTML += `
+                        <tr>
+                            <td>${muestra.muestra_masificada}</td>
+                            <td>${muestra.estado}</td>
+                            <td>${muestra.estandar}</td>
+                            <td>${muestra.metodo_analisis}</td>
+                            <td>${muestra.tipo}</td>
+                            <td>${muestra.duplicado}</td>
+                            <td>${elementosText}</td>
+                            <td>${pesoElementoText}</td> <!-- Mostrar el peso y el elemento con salto de línea -->
+                        </tr>`;
+                });
+
+                tablaHTML += `</tbody></table></div>`;
+
+                Swal.fire({
+                    title: 'Información de la Hoja de Trabajo ' + htId,
+                    html: tablaHTML,
+                    width: '80%',
+                    showCancelButton: true,
+                    confirmButtonText: 'Cerrar',
+                    denyButtonText: 'Borrar', 
+                    showDenyButton: true,
+                    customClass: {
+                        popup: 'big-swal',  
+                    },
+                    footer: `<button class="btn btn-warning" onclick="Edit_HDT('${htId}')">Modificar</button>`
+                }).then((result) => {
+                    if (result.isDenied) {
+                        console.log("Borrar")
+                        Delete_HDT(htId);
+                    }
+                });
+            } else {
+                Swal.fire('No se encontraron datos', 'No se encontraron muestras para esta Hoja de Trabajo.', 'warning');
+            }
+        })
+        .catch(error => {
+            console.error('Error al obtener la información:', error);
+            Swal.fire('Error', 'Hubo un problema al obtener la información. Intenta nuevamente.', 'error');
+        });
+    }
 </script>
 </html>

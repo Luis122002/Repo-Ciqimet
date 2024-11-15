@@ -177,6 +177,12 @@
                 {% elif action == 'mod' %}
                     Modificar Curvatura de Elemento
                 {% endif %}
+            {% elif contexModel == 'HDT' %}
+                {% if action == 'add' %}
+                    Añadir Hoja de Trabajo
+                {% elif action == 'mod' %}
+                    Modificar Hoja de Trabajo
+                {% endif %}
             {% elif contexModel == 'analytic' %}
                 {% if action == 'add' %}
                     Añadir Análisis de Trabajo
@@ -184,6 +190,7 @@
                     Modificar Análisis de Trabajo
                 {% endif %}
             {% endif %}
+
         </h1>
         {% if form %}
         <form id="myForm" method="POST" action="Action-Resource/">
@@ -215,8 +222,14 @@
                     {% endif %}
                 </div>
             {% endfor %}
-            <button type="submit" class="btn btn-primary btn-submit">Agregar</button>
-            <button type="button" class="btn btn-secondary" onclick="window.location.href='{% if contexModel == 'element' %}/Elements-Manager/{% elif contexModel == 'curv' %}/Elements-Manager/{% elif contexModel == 'ODT' %}/ODT/{% elif contexModel == 'analytic' %}/Analysis-Manager/{% endif %}'">Cancelar</button>
+            <button type="submit" class="btn btn-primary btn-submit">
+                {% if action == 'add' %}
+                    Agregar
+                {% elif action == 'mod' %}
+                    Modificar
+                {% endif %}
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='{% if contexModel == 'element' %}/Elements-Manager/{% elif contexModel == 'curv' %}/Elements-Manager/{% elif contexModel == 'ODT' %}/ODT/{% elif contexModel == 'HDT' %}/ODT/{% elif contexModel == 'analytic' %}/Analysis-Manager/{% endif %}'">Cancelar</button>
         </form>
     <br/>
     {% if id != "-1" %}

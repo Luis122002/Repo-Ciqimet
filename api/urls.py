@@ -53,14 +53,11 @@ urlpatterns = [
     path('index/', views.Main, name='index'),
 
     path('ODT/', views.ODT_Module, name='Main_ODT'),
-    path('ODT-info/', views.ODT_Info),
-    path('ODT-info_Request/', views.ODT_Info_Request),
+    path('ODT-info/', views.ODT_Info, name='info_ODT'),
     
     path('Action-Resource/<str:token>/', views.general_form, name='general_form'),
     path('Action-Resource/<str:token>/Action-Resource/', views.general_form),
 
-    path('ModMuestra/', views.ModMuestras),
-    path('ModODT/', views.ModODT),
     path('get-proyectos/', views.get_proyectos, name='get_proyectos'),
 
     path('Elements-Manager/', views.Elements_Section, name='elements_manager'),

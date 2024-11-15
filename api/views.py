@@ -11,9 +11,10 @@ from django.shortcuts import render, redirect
 from api import models, forms
 from django.urls import reverse
 from django.db import IntegrityError, transaction, connection
-from django.db.models import Q, Min
+from django.db.models import Q, Min, F
 from decimal import Decimal
-
+from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 @login_required(login_url='/login')
 def requestAcces(request):
@@ -84,9 +85,11 @@ def ODT_Module(request):
     filter_year = request.GET.get('year', '')
     filter_month = request.GET.get('month', '')
 
-    print(search_query)
-
     odts = models.ODT.objects.all()
+
+    # Si el prefijo "WSS" está en la búsqueda, eliminarlo para buscar por el ID
+    if search_query.startswith("WSS"):
+        search_query = search_query[3:]
 
     odts = odts.filter(
         Q(id__icontains=search_query) |
@@ -100,7 +103,7 @@ def ODT_Module(request):
         Q(Proyecto__nombre__icontains=search_query) |
         Q(Responsable__icontains=search_query)
     )
-    
+
     if filter_year:
         odts = odts.filter(Fec_Recep__year=filter_year)
 
@@ -120,164 +123,69 @@ def ODT_Module(request):
 
     return render(request, 'ODT-Site.html', context)
 
-@login_required(login_url='/login')
-def ModMuestras(request):
-    if request.method == 'POST':
-        Contex = request.POST.get('contex')
-        idODT = request.POST.get('ODTID')
-        CodigoMuestra = request.POST.get('MuestraODT', '')
-        Volumen = request.POST.get('valVol')
-        Peso = request.POST.get('valPes')
-        Disol = request.POST.get('valDis')
-        muestra_id = str(request.POST.get('valID', '00'))
-        targetDel = str(request.POST.get('TargetDel', ''))
-        
-        if len(muestra_id) == 1:
-            muestra_id = "0" + muestra_id
-
-        ID_CodeOT = CodigoMuestra + "-" + muestra_id
-        print(idODT)
-        try:
-            odt_instance = models.ODT.objects.get(id=idODT)
-        except models.ODT.DoesNotExist:
-            return JsonResponse({'error': 'ODT no encontrado'}, status=404)
-
-        try:
-            if Contex == "Add":
-                models.OT.objects.create(
-                    id_muestra=ID_CodeOT,
-                    odt=odt_instance,
-                    peso_muestra=0.0,
-                    volumen=0.0,
-                    dilucion=0.0
-                )
-            elif Contex == "Mod":
-                TargetOT = models.OT.objects.get(id_muestra=targetDel)
-                TargetOT.dilucion = Disol
-                TargetOT.volumen = Volumen
-                TargetOT.peso_muestra = Peso
-                TargetOT.id_muestra = ID_CodeOT
-                TargetOT.save()
-            elif Contex == "Del":
-                TargetOT = models.OT.objects.get(id_muestra=targetDel)
-                TargetOT.delete()
-            else:
-                return JsonResponse({'error': 'Método no permitido'}, status=405)
-        except models.OT.DoesNotExist:
-            return JsonResponse({'error': 'Muestra no encontrada'}, status=404)
-
-        count_ots = models.OT.objects.filter(odt=odt_instance).count()
-        odt_instance.Cant_Muestra = count_ots
-        odt_instance.save()
-
-        return JsonResponse({'success': True})
-
-    return JsonResponse({'error': 'Método no permitido'}, status=405)
-
-@login_required(login_url='/login')
-def ModODT(request):
-    if request.method == 'POST':
-        try:
-            odt_id = request.POST.get('idODT')
-
-            odt = models.ODT.objects.get(id=odt_id)
-            
-            # Extraer valores del formulario
-            Nro_OT = request.POST.get('Nro_OT')
-            Fec_Recep = request.POST.get('Fec_Recep')
-            Cliente = request.POST.get('Cliente')
-            Proyecto = request.POST.get('Proyecto')
-            Despacho = request.POST.get('Despacho')
-            Envio = request.POST.get('Envio')
-            Prefijo = request.POST.get('Prefijo')
-            Referencia = request.POST.get('Referencia')
-            Comentarios = request.POST.get('Comentarios')
-
-            with transaction.atomic():
-                # Actualizar la ODT
-                odt.Nro_OT = Nro_OT
-                odt.Fec_Recep = Fec_Recep
-                odt.Cliente = Cliente
-                odt.Proyecto = Proyecto
-                odt.Despacho = Despacho
-                odt.Envio = Envio
-                odt.Prefijo = Prefijo
-                odt.Referencia = Referencia
-                odt.Comentarios = Comentarios
-                odt.save()
-
-                ots = models.OT.objects.filter(odt=odt)
-
-                nuevo_id_muestras = set()
-                for ot in ots:
-                    id_muestra_actual = ot.id_muestra
-                    parts = id_muestra_actual.rsplit('-', 1)
-                    
-                    if len(parts) == 2:
-                        nuevo_id_muestra = f"{Prefijo}-{parts[1]}"
-                        if nuevo_id_muestra in nuevo_id_muestras:
-                            return JsonResponse({'error': 'Ya existe un registro con el ID de muestra actualizado'}, status=400)
-                        nuevo_id_muestras.add(nuevo_id_muestra)
-
-                for ot in ots:
-                    id_muestra_actual = ot.id_muestra
-                    parts = id_muestra_actual.rsplit('-', 1)
-                    
-                    if len(parts) == 2:
-                        nuevo_id_muestra = f"{Prefijo}-{parts[1]}"
-                        ot.id_muestra = nuevo_id_muestra
-                        ot.save()
-
-            return JsonResponse({'success': True})
-
-        except models.ODT.DoesNotExist:
-            return JsonResponse({'error': 'ODT no encontrado'}, status=404)
-
-    return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 
 @login_required(login_url='/login')
 def HT_Module(request):
     search_query = request.GET.get('search', '')
-    estado_filter = request.GET.get('estado', '')  # Obtenemos el filtro del estado
+    estado_filter = request.GET.get('estado', '') 
 
-    hts = (models.HojaTrabajo.objects
+    hts = (models.HojaTrabajoQuimico.objects
            .values('ID_HDT')
-           .annotate(min_id=Min('id'))
+           .annotate(min_id=Min('HojaTrabajo__id'))
            .values('min_id'))
     
-    hts = models.HojaTrabajo.objects.filter(id__in=[ht['min_id'] for ht in hts])
+    hts = models.HojaTrabajo.objects.filter(id__in=[ht['min_id'] for ht in hts]).annotate(
+        ID_HDT=F('hojas_trabajo_target__ID_HDT'),
+        confirmar_balanza=F('hojas_trabajo_target__confirmar_balanza')
+    )
 
-    # Filtro por estado (Pendiente, Cerrado, o Todas)
     if estado_filter == 'Pendiente':
-        hts = hts.filter(confirmar_balanza=False)  # Filtrar por Pendiente (False)
+        hts = hts.filter(confirmar_balanza=False)
     elif estado_filter == 'Cerrado':
-        hts = hts.filter(confirmar_balanza=True)  # Filtrar por Cerrado (True)
+        hts = hts.filter(confirmar_balanza=True)
 
-    # Filtro de búsqueda por palabra clave
     if search_query:
         hts = hts.filter(
-            Q(ID_HDT__icontains=search_query) |
+            Q(hojas_trabajo_target__ID_HDT__icontains=search_query) |
             Q(odt__id__icontains=search_query) |
             Q(MuestraMasificada__Prefijo__icontains=search_query) |
             Q(MetodoAnalisis__nombre__icontains=search_query)
         )
+    data = []
+    for ht in hts:
+        data.append({
+            'id': ht.id,
+            'ID_HDT': ht.ID_HDT,
+            'estado': 'Cerrado' if ht.confirmar_balanza else 'Pendiente',
+            'odt': ht.odt.id,
+            'estandar': [estandar.Nombre for estandar in ht.Estandar.all()],
+            'metodo_analisis': ht.MetodoAnalisis.nombre,
+            'muestra_masificada': ht.MuestraMasificada.Prefijo,
+            'tipo': ht.Tipo,
+            'duplicado': ht.Duplicado,
+        })
+
+    data_json = json.dumps(data)
 
     context = {
         'hts': hts,
+        'hts_json': data_json 
     }
 
     return render(request, 'Hoja_Trabajo.html', context)
 
 
-
 def Request_HT(request):
     if request.method == 'GET':
         id_hdt = request.GET.get('id')
-        muestras = models.HojaTrabajo.objects.filter(ID_HDT=id_hdt)
+
+        hojas_trabajo_quimico = models.HojaTrabajoQuimico.objects.filter(ID_HDT=id_hdt).order_by('ID_HDT')
+
         data = []
         
-        for muestra in muestras:
+        for hoja_quimico in hojas_trabajo_quimico:
+            muestra = hoja_quimico.HojaTrabajo 
             elementos_data = [
                 {
                     'nombre': elemento.nombre,
@@ -295,11 +203,13 @@ def Request_HT(request):
                     pesos_elementos[elemento_nombre] += m.peso_m
                 else:
                     pesos_elementos[elemento_nombre] = m.peso_m
+
             peso_elemento_text = ', '.join(f"Peso de {elemento}: {peso}g" for elemento, peso in pesos_elementos.items())
+            
             data.append({
                 'id': muestra.id,
-                'ID_HDT': muestra.ID_HDT,
-                'estado': 'Cerrado' if muestra.confirmar_balanza else 'Pendiente',
+                'ID_HDT': hoja_quimico.ID_HDT,
+                'estado': 'Cerrado' if hoja_quimico.confirmar_balanza else 'Pendiente',
                 'estandar': ', '.join(estandar.Nombre for estandar in muestra.Estandar.all()),
                 'metodo_analisis': muestra.MetodoAnalisis.nombre,
                 'muestra_masificada': muestra.MuestraMasificada.Prefijo,
@@ -309,9 +219,12 @@ def Request_HT(request):
                 'peso_elemento': peso_elemento_text
             })
         
+        data = sorted(data, key=lambda x: x['id'])
+
         return JsonResponse({'muestras': data})
     
     return JsonResponse({'error': 'Método no permitido'}, status=405)
+
 
 
 
@@ -321,27 +234,27 @@ def Balanza_Module(request):
         id_hdt = request.POST.get('id')
         print(f'ID recibido en Balanza: {id_hdt}')
 
-        # Obtener todas las hojas de trabajo que tengan el mismo ID_HDT
-        hojas_trabajo = models.HojaTrabajo.objects.filter(ID_HDT=id_hdt)
+        hojas_trabajo_quimico = models.HojaTrabajoQuimico.objects.filter(ID_HDT=id_hdt)
 
-        if not hojas_trabajo.exists():
-            return HttpResponse("No se encontró ninguna Hoja de Trabajo con el ID especificado.", status=404)
+        targetHDT_Quimico = hojas_trabajo_quimico.first()
 
-        # Obtener la primera muestra asociada a las hojas de trabajo filtradas
+        if not hojas_trabajo_quimico.exists():
+            return render(request, 'Balanza.html')
+
+        hojas_trabajo = models.HojaTrabajo.objects.filter(id__in=[htq.HojaTrabajo.id for htq in hojas_trabajo_quimico])
+
         primera_muestra = models.Muestra.objects.filter(hoja_trabajo__in=hojas_trabajo, indexCurv=1).first()
 
         if primera_muestra is None:
-            return HttpResponse("No se encontraron muestras para la Hoja de Trabajo especificada.", status=404)
+            return render(request, 'Balanza.html')
 
-        # Filtrar las muestras con el mismo tipo de 'elemento' que la primera muestra
         tipo_elemento = primera_muestra.elemento
         muestras_balanza = models.Muestra.objects.filter(
             hoja_trabajo__in=hojas_trabajo,
             elemento=tipo_elemento,
             indexCurv=1
-        )
-
-        context = {'muestras_balanza': muestras_balanza}
+        ).order_by('muestraMasificada__Prefijo')
+        context = {'muestras_balanza': muestras_balanza, 'id_hdt': id_hdt, 'stade': targetHDT_Quimico.confirmar_balanza}
         return render(request, 'Balanza.html', context)
 
     return render(request, 'Balanza.html')
@@ -350,65 +263,79 @@ def Balanza_Module(request):
 def Save_M(request):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)  # Los datos se envían en formato JSON
+            data = json.loads(request.body)
             muestras = data.get('muestras', [])
-            
-            # Iterar sobre las muestras recibidas
+            ID_HDT = data.get('id')
+            print(f"ID_HDT recibido: {ID_HDT}")
+
             for muestra_data in muestras:
                 prefijo = muestra_data.get('prefijo')
                 peso_m = muestra_data.get('peso_m')
 
-                # Filtrar la muestra por Prefijo (muestraMasificada.Prefijo)
-                muestra = models.Muestra.objects.filter(muestraMasificada__Prefijo=prefijo).first()
-                
-                if muestra:
-                    # Reemplazar el punto (.) por una coma (,) en el peso
-                    peso_m = Decimal(str(peso_m).replace(',', '.'))
-                    
-                    # Actualizar el valor de peso_m
+                # Convertir peso a Decimal
+                peso_m = Decimal(str(peso_m).replace(',', '.'))
+
+                # Filtrar muestras específicas usando el ID_HDT y el Prefijo
+                muestras = models.Muestra.objects.filter(
+                    muestraMasificada__Prefijo=prefijo,
+                    hoja_trabajo__hojas_trabajo_target__ID_HDT=ID_HDT  # Filtrar por HojaTrabajo y ID_HDT
+                )
+
+                # Actualizar el campo peso_m en las muestras filtradas
+                for muestra in muestras:
                     muestra.peso_m = peso_m
                     muestra.save()
-
-                    print(f"Actualizado - Prefijo: {prefijo}, Peso: {peso_m}")
+                    print(f"Actualizado - Prefijo: {prefijo}, Elemento: {muestra.elemento}, Peso: {peso_m}")
 
             return JsonResponse({'success': True})
 
         except json.JSONDecodeError:
             return JsonResponse({'success': False, 'message': 'Error al procesar los datos'}, status=400)
-    
+
     return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
+
+
+
 
 def Confirm_M(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             muestras = data.get('muestras', [])
-            
+            ID_HDT = data.get('id')
+            print(f"ID_HDT recibido: {ID_HDT}")
+
             for muestra_data in muestras:
                 prefijo = muestra_data.get('prefijo')
                 peso_m = muestra_data.get('peso_m')
 
-                muestra = models.Muestra.objects.filter(muestraMasificada__Prefijo=prefijo).first()
-                
-                if muestra:
+                muestras = models.Muestra.objects.filter(
+                    muestraMasificada__Prefijo=prefijo,
+                    hoja_trabajo__hojas_trabajo_target__ID_HDT=ID_HDT
+                )
 
-                    peso_m = Decimal(str(peso_m).replace(',', '.'))
-                    
+                peso_m = Decimal(str(peso_m).replace(',', '.'))
+                
+                for muestra in muestras:
                     muestra.peso_m = peso_m
                     muestra.save()
 
-                    hoja_trabajo = muestra.hoja_trabajo
-                    if hoja_trabajo:
-                        hoja_trabajo.confirmar_balanza = True
-                        hoja_trabajo.save()
+                    hoja_trabajo_quimico = models.HojaTrabajoQuimico.objects.filter(
+                        HojaTrabajo=muestra.hoja_trabajo,
+                        ID_HDT=ID_HDT
+                    ).first()
 
-                    print(f"Confirmada - Prefijo: {prefijo}, Confirmar Balanza: {hoja_trabajo.confirmar_balanza}")
+                    if hoja_trabajo_quimico:
+                        hoja_trabajo_quimico.confirmar_balanza = True
+                        hoja_trabajo_quimico.save()
+
+                    print(f"Confirmada - Prefijo: {prefijo}, Confirmar Balanza: {hoja_trabajo_quimico.confirmar_balanza}")
 
             return JsonResponse({'success': True})
 
         except json.JSONDecodeError:
             return JsonResponse({'success': False, 'message': 'Error al procesar los datos'}, status=400)
-    
+
     return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
         
 
@@ -440,92 +367,16 @@ def ODT_Info(request):
         odt = models.ODT.objects.get(id=odt_id)
         muestras_M = models.MuestraMasificada.objects.filter(odt=odt)
 
-     
-        context = {"odt": odt, "Muestras": muestras_M}
+        HDT = models.HojaTrabajo.objects.filter(odt=odt)
+        HDT_Quimico = models.HojaTrabajoQuimico.objects.filter(HojaTrabajo__in=HDT).values('ID_HDT').distinct()
+
+        # Agregar HDT_Quimico al contexto
+        context = {"odt": odt, "Muestras": muestras_M, "HDT_Quimico": HDT_Quimico}
 
         return render(request, 'ODT-Info.html', context)
     else:
         return HttpResponse(status=405)
     
-@login_required(login_url='/login')
-def ODT_Info_Request(request):
-    if request.method == 'POST':
-        odt_id = request.POST.get('odt_id')
-        try:
-            odt = models.ODT.objects.get(id=odt_id)
-        except models.ODT.DoesNotExist:
-            return JsonResponse({'error': 'ODT no encontrado'}, status=404)
-        
-        ots = models.OT.objects.filter(odt=odt)
-
-        try:
-            analisis = models.Analisis.objects.get(Analisis_metodo=odt.Analisis)
-        except models.Analisis.DoesNotExist:
-            return JsonResponse({'error': 'Análisis no encontrado'}, status=404)
-
-        elementos = analisis.Elementos.all()
-
-        def extract_number_from_id(id_muestra):
-            parts = id_muestra.split('-')
-            return int(parts[-1]) if parts[-1].isdigit() else 0
-        
-        ots_sorted = sorted(ots, key=lambda ot: extract_number_from_id(ot.id_muestra))
-        new_ots = []
-        for ot in ots_sorted:
-            cleaned_id_muestra = str(ot.id_muestra).replace("-", "")
-            
-            elementos_data = [
-                {
-                    'nombre': elemento.nombre,
-                    'simbolo': elemento.simbolo,
-                    'numero_atomico': elemento.numero_atomico,
-                    'masa_atomica': elemento.masa_atomica,
-                }
-                for elemento in elementos
-            ]
-
-            new_ots.append({
-                'id': ot.id,
-                'id_muestra': ot.id_muestra,
-                'id_muestraInput': cleaned_id_muestra,
-                'peso_muestra': ot.peso_muestra,
-                'volumen': ot.volumen,
-                'dilucion': ot.dilucion,
-                'odt': ot.odt.Nro_OT,
-                'updated_at': ot.updated_at,
-                'elementos': elementos_data 
-            })
-
-        odt_data = {
-            'Nro_OT': odt.Nro_OT,
-            'Cant_Muestra': odt.Cant_Muestra,
-            'Fec_Recep': odt.Fec_Recep,
-            'Cliente': {
-                'id': odt.Cliente.id,
-                'nombre': odt.Cliente.nombre,
-            } if odt.Cliente else None,
-            'Proyecto': {
-                'id': odt.Proyecto.id,
-                'nombre': odt.Proyecto.nombre,
-            } if odt.Proyecto else None,
-            'Envio': {
-                'id': odt.Envio.id,
-                'username': odt.Envio.username,
-            } if odt.Envio else None,
-            'Despacho': odt.Despacho,
-            'Prefijo': odt.Prefijo,
-            'Comentarios': odt.Comentarios,
-            'Analisis': {
-                'id': odt.Analisis.id,
-                'Analisis_metodo': odt.Analisis.Analisis_metodo,
-            }
-        }
-
-        return JsonResponse({'ots': new_ots, 'odt': odt_data})
-    else:
-        return HttpResponse(status=405)
-
-
 @login_required(login_url='/login')
 def Elements_Section(request):
     elementos = models.Elementos.objects.all()
@@ -563,14 +414,10 @@ def general_form(request, token):
         decoded_data = base64.urlsafe_b64decode(token.encode()).decode()
         data = json.loads(decoded_data)
 
-        target_ID = data.get('id')
+        target_ID = str(data.get('id'))
         context = data.get('context')
         action = data.get('action')
         stade = data.get('stade')
-
-        print(target_ID)
-        print(context)
-        print(action)
 
         form = None
         model = None
@@ -579,7 +426,7 @@ def general_form(request, token):
         if stade != "acces":
             return HttpResponseForbidden("Acceso no autorizado.")
         # Validar contexto y acción
-        if context not in ['element', 'analytic', 'ODT', 'Read', 'curv']:
+        if context not in ['element', 'analytic', 'ODT', 'Read', 'curv', 'HDT']:
             return HttpResponseForbidden("Contexto no válido.")
         if action not in ['add', 'mod', 'del']:
             return HttpResponseForbidden("Acción no válida.")
@@ -614,18 +461,42 @@ def general_form(request, token):
                 if request.method == 'POST':
                     form = forms.ODTForm(request.POST)
                     if form.is_valid():
-                        form.save()
+                        odt_instance = form.save()
+                        models.Novedades.objects.create(
+                            tipo_model='Orden de trabajo',
+                            accion="Crear",
+                            modelt_id=str(odt_instance.Prefijo),
+                            fecha=timezone.now(),
+                            usuario = request.user
+                        )
                         return redirect(reverse('Main_ODT'))
             elif action == 'mod':
                 model = models.ODT.objects.get(id=target_ID)
-                form = forms.ODTForm(instance = model)
+                form = forms.ODTForm(instance=model)
                 model.Fec_Recep = model.Fec_Recep.strftime('%Y-%m-%d')
                 model.Fec_Finalizacion = model.Fec_Finalizacion.strftime('%Y-%m-%d')
-                form = forms.ODTForm(instance = model)
+                form = forms.ODTForm(instance=model)
+
                 if request.method == 'POST':
                     form = forms.ODTForm(request.POST, instance=model)
                     if form.is_valid():
-                        form = form.save()
+                        try:
+                            odt_instance = form.save()
+                            models.Novedades.objects.create(
+                                tipo_model='Orden de trabajo',
+                                accion="Modificar",
+                                modelt_id=str(odt_instance.Prefijo),
+                                fecha=timezone.now(),
+                                usuario=request.user
+                            )
+                            messages.add_message(request=request, level=messages.SUCCESS, message='Se ajustó la orden de trabajo con éxito.')
+                            return redirect(reverse('Main_ODT'))
+                        except ValidationError as e:
+                            messages.add_message(request=request, level=messages.ERROR, message='La orden de trabajo ya tiene una hoja de trabajo asociada.')
+                            return redirect(reverse('Main_ODT'))
+                    else:
+                        # Si el formulario no es válido
+                        messages.add_message(request=request, level=messages.ERROR, message='Error al ajustar la orden de trabajo. Por favor, verifica los datos ingresados.')
                         return redirect(reverse('Main_ODT'))
             elif action == 'del':
                 model = models.ODT.objects.get(id=target_ID)
@@ -636,10 +507,16 @@ def general_form(request, token):
                         messages.add_message(request=request, level=messages.ERROR, message='Algunas muestras estan operativas en una hoja de trabajo, eliminalas antes de aplicar esta acción')
                         return redirect(reverse('Main_ODT'))
                     else:
+                        models.Novedades.objects.create(
+                            tipo_model='Orden de trabajo',
+                            accion="Eliminar",
+                            modelt_id=str(model.Prefijo),
+                            fecha=timezone.now(),
+                            usuario = request.user
+                        )
                         model.delete()
                         messages.add_message(request=request, level=messages.SUCCESS, message='Se eliminó la orden de trabajo con exito')
                         return redirect(reverse('Main_ODT'))
-
 
         if context == 'curv':
             if action == 'add':
@@ -664,7 +541,6 @@ def general_form(request, token):
                 if request.method == "GET":
                     model.delete()
                     return redirect(reverse('elements_manager'))
-
         
         elif context == 'analytic':
             if action == 'add':
@@ -690,9 +566,71 @@ def general_form(request, token):
                     model.delete()
                     return redirect(reverse('analisis_manager'))
 
+        if context == 'HDT':
+            if action == 'add':
+                form = forms.HojaTrabajoGeneralForm()
+                if request.method == 'POST':
+                    form = forms.HojaTrabajoGeneralForm(request.POST)
+                    if form.is_valid():
+                        hdt_instance = form.save()
 
+                        hoja_trabajo_quimico = hdt_instance.hojas_trabajo_target.first()
 
+                        if hoja_trabajo_quimico:
+                            models.Novedades.objects.create(
+                                tipo_model='Hoja de trabajo',
+                                accion="Crear",
+                                modelt_id=hoja_trabajo_quimico.ID_HDT,  
+                                fecha=timezone.now(),
+                                usuario=request.user
+                            )
+                        return redirect(reverse('Main_ODT'))
+            
+            elif action == 'mod':
+                hoja_trabajo_quimico = models.HojaTrabajoQuimico.objects.filter(ID_HDT=target_ID).first()
+                
+                if not hoja_trabajo_quimico:
+                    messages.add_message(request=request, level=messages.ERROR, message='No se encontró la hoja de trabajo química.')
+                    return redirect(reverse('Main_ODT'))
 
+                hoja_trabajo = hoja_trabajo_quimico.HojaTrabajo
+
+                form = forms.HojaTrabajoGeneralForm(instance=hoja_trabajo)
+                if request.method == 'POST':
+                    form = forms.HojaTrabajoGeneralForm(request.POST, instance=hoja_trabajo)
+                    if form.is_valid():
+                        hoja_trabajo_instance = form.save()
+                        models.Novedades.objects.create(
+                            tipo_model='Hoja de trabajo',
+                            accion="Modificar",
+                            modelt_id=hoja_trabajo_quimico.ID_HDT,  
+                            fecha=timezone.now(),
+                            usuario=request.user
+                        )
+                        messages.add_message(request=request, level=messages.SUCCESS, message='Hoja de trabajo modificada con éxito.')
+                        return redirect(reverse('Main_ODT'))
+                    else:
+                        messages.add_message(request=request, level=messages.ERROR, message='Error al modificar la hoja de trabajo. Verifica los datos ingresados.')
+                        return redirect(reverse('Main_ODT'))
+    
+            elif action == 'del':
+                try:
+                    models_hoja_trabajo_quimico = models.HojaTrabajoQuimico.objects.filter(ID_HDT=target_ID)
+                    if not models_hoja_trabajo_quimico.exists():
+                        messages.add_message(request=request, level=messages.ERROR, message='No se encontró el registro a eliminar')
+                        return redirect(reverse('Main_ODT'))
+                    hoja_trabajos = []
+                    for model in models_hoja_trabajo_quimico:
+                        hoja_trabajos.append(model.HojaTrabajo)
+                    models_hoja_trabajo_quimico.delete()
+                    for hoja_trabajo in set(hoja_trabajos):
+                        hoja_trabajo.delete()
+                    messages.add_message(request=request, level=messages.SUCCESS, message='Hojas de trabajo eliminadas con éxito')
+                    return redirect(reverse('Main_ODT'))
+
+                except Exception as e:
+                    messages.add_message(request=request, level=messages.ERROR, message=f'Error al eliminar las hojas de trabajo: {str(e)}')
+                    return redirect(reverse('Main_ODT'))
 
 
         
@@ -765,11 +703,17 @@ def check_db_connection(request):
 def get_user_data(request):
     user = request.user
 
+    URL_React = ""
+
+    if settings.ENABLED_LOGIN_LOCAL:
+       URL_React = settings.URL_LOCAL
+    else:
+        URL_React = settings.URL_REACT
     user_data = {
         'email': user.username,         
         'full_name': f"{user.first_name} {user.last_name}",
         'role': user.rolname,
-        'URLReact':settings.URL_REACT,
+        'URLReact':URL_React,
         'LocalURL':settings.URL_LOCAL          
     }
     return JsonResponse(user_data)

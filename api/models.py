@@ -3,6 +3,8 @@ from django.db import models
 from django.forms import ValidationError
 from django.utils.translation import gettext as _
 from django.core.validators import MinValueValidator
+from django.utils import timezone
+from datetime import timedelta
 
 # Modelo para almacenar los usuarios
 class User(AbstractUser):
@@ -238,10 +240,6 @@ class Estandar(models.Model):
     parametros = models.ManyToManyField('Parametros', related_name="Parametro")
 
 class HojaTrabajo(models.Model):
-    ### >
-    ID_HDT = models.CharField(_("Nro Hoja de trabajo"), max_length=200, blank=False, null=False)
-    confirmar_balanza = models.BooleanField(default=False, verbose_name="Confirmar Balanza")
-    ### <
     odt = models.ForeignKey('ODT', on_delete=models.CASCADE, related_name='hojas_trabajo')
     Estandar = models.ManyToManyField('Estandar', related_name="Estandar")
     MetodoAnalisis = models.ForeignKey('MetodoAnalisis', on_delete=models.CASCADE, related_name="Metodo_de_Analisis")
@@ -249,7 +247,15 @@ class HojaTrabajo(models.Model):
     Tipo = models.CharField(max_length=200, default='M')  # 'S' para estandar, 'D' para duplicado, 'B' para blanco
     Duplicado = models.CharField(max_length=200, blank=True, null=True)
 
-    
+
+class HojaTrabajoQuimico(models.Model):
+    ### >
+    ID_HDT = models.CharField(_("Nro Hoja de trabajo"), max_length=200, blank=False, null=False)
+    confirmar_balanza = models.BooleanField(default=False, verbose_name="Confirmar_Balanza")
+    confirmar_Absorcion = models.BooleanField(default=False, verbose_name="Confirmar_Absorción")
+    ### <
+    HojaTrabajo=models.ForeignKey(HojaTrabajo, on_delete=models.CASCADE, related_name='hojas_trabajo_target')
+
 
 # Modelo general para almacenar asociadas a una muestra de análisis
 class Muestra(models.Model):
@@ -287,6 +293,35 @@ class Resultado(models.Model):
     elemento = models.ForeignKey(Elementos, on_delete=models.CASCADE, related_name="resultados")
     muestra = models.ForeignKey(MuestraMasificada, on_delete=models.CASCADE, related_name="resultados")
     hoja_trabajo = models.ForeignKey(HojaTrabajo, on_delete=models.CASCADE, related_name="resultados")
-    resultadoAnalisis = models.IntegerField(verbose_name="Resultado de Análisis", null=False, blank=False)
+    resultadoAnalisis = models.FloatField(verbose_name="Resultado de Análisis", null=False, blank=False)
     fecha_emision = models.DateField(verbose_name="Fecha de Emisión", null=False, blank=False)
 ### <
+
+class Novedades(models.Model):
+    class Tipo(models.TextChoices):
+        ORDEN_DE_TRABAJO = 'Orden_de_trabajo', _('Orden de trabajo')
+        HOJA_DE_TRABAJO = 'Hoja_de_trabajo', _('Hoja de trabajo')
+
+    class Accion(models.TextChoices):
+        CREAR = 'Crear', _('Crear')
+        MODIFICAR = 'Modificar', _('Modificar')
+        ELIMINAR = 'Eliminar', _('Eliminar')
+        BALANZA = 'Balanza', _('Balanza')
+        ABSORCION = 'Absorcion', _('Absorción')
+
+    tipo_model = models.CharField(max_length=200, choices=Tipo.choices)
+    accion = models.CharField(max_length=200, choices=Accion.choices)
+    modelt_id = models.CharField(max_length=200, verbose_name="ID registro") 
+    fecha = models.DateTimeField(auto_now_add=True)
+    usuario = models.CharField(max_length=200)  
+
+    def __str__(self):
+        return f"{self.tipo_model} - {self.accion} - {self.modelt_id} - {self.fecha}"
+
+    class Meta:
+        verbose_name_plural = "Novedades"
+
+    @classmethod
+    def eliminar_antiguos(cls):
+        limite = timezone.now() - timedelta(days=30)
+        cls.objects.filter(fecha__lt=limite).delete()

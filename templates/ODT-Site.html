@@ -76,6 +76,9 @@
                     <a href="/Elements-Manager" class="btn btn-primary text-center">
                         Gestionar Elementos
                     </a>
+                    <button class="btn btn-primary text-center" onclick="AddHDT()">
+                        Crear Hoja de Trabajo
+                    </a>
                 </div>
             </div>
             <!-- Columna de filtros (más grande y centrada) -->
@@ -129,7 +132,7 @@
                     </button>
                     
                     <!-- Botón para ir atrás -->
-                    <button class="btn btn-info" onclick="window.location.href = '/'">
+                    <button class="btn btn-info" onclick="window.location.href = '/index'">
                         Atrás
                     </button>
                 </div>
@@ -241,6 +244,41 @@
                 }
             });
         }
+
+        function AddHDT()
+        {
+            const elementId = -1;
+            const urlDat = '/MasterData/';
+            const Token = csrfToken;
+            const context = 'HDT'; 
+            const action = 'add'; 
+            const stade = "acces"; 
+            $.ajax({
+                url: urlDat,
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': Token
+                },
+                data: {
+                    'id': elementId,
+                    'context': context,
+                    'action': action,
+                    'stade': stade
+                },
+                success: function(response) {
+                    if (response.redirect_url) {
+                        window.location.href = response.redirect_url; 
+                    } else {
+                        console.log(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Error al enviar datos:', xhr.responseText);
+                }
+            });
+        }
+
+
 
         function applyFilters() {
             // Obtener los valores de los filtros

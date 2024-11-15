@@ -2,13 +2,13 @@ from django.contrib import admin
 from .models import (
     User, Proyecto, Cliente, Muestra, AnalisisCuTFeZn, AnalisisCuS4FeS4MoS4, AnalisisMulti,
     AnalisisCuS10FeS10MoS10, AnalisisCuSCuSFe, AnalisisCuTestConsH, Resultado, ODT, MuestraMasificada,
-    Elementos, MetodoAnalisis, Parametros, Estandar, HojaTrabajo, CurvaturaElementos
+    Elementos, MetodoAnalisis, Parametros, Estandar, HojaTrabajo, HojaTrabajoQuimico, CurvaturaElementos
 )
 from .forms import (
     CustomUserCreationForm, ProyectoForm, ClienteForm, MuestraForm, AnalisisCuTFeZnForm,
     AnalisisCuS4FeS4MoS4Form, AnalisisMultiForm, AnalisisCuS10FeS10MoS10Form, AnalisisCuSCuSFeForm,
     AnalisisCuTestConsHForm, ResultadoForm, ODTForm, MuestraMasificadaForm, ElementosForm,
-    MetodoAnalisisForm, ParametrosForm, EstandarForm, HojaTrabajoForm, HojaTrabajoGeneralForm, CurvaturaForm
+    MetodoAnalisisForm, ParametrosForm, EstandarForm, HojaTrabajoForm, HojaTrabajoGeneralForm, HojaTrabajoQuimicoForm,  CurvaturaForm
 )
 
 
@@ -120,7 +120,13 @@ class EstandarAdmin(admin.ModelAdmin):
 @admin.register(HojaTrabajo)
 class HojaTrabajoAdmin(admin.ModelAdmin):
     form = HojaTrabajoGeneralForm
-    list_display = ('ID_HDT','odt', 'MetodoAnalisis', 'Tipo')
+    list_display = ('odt', 'MetodoAnalisis', 'Tipo')
+
+
+@admin.register(HojaTrabajoQuimico)
+class HojaTrabajoQuimicosAdmin(admin.ModelAdmin):
+    form = HojaTrabajoQuimicoForm
+    list_display = ('ID_HDT', 'confirmar_balanza', 'confirmar_Absorcion', 'HojaTrabajo')
 
 @admin.register(CurvaturaElementos)
 class CurvaturaAdmin(admin.ModelAdmin):
