@@ -85,4 +85,10 @@ urlpatterns = [
     path('Contacto/', views.contacto, name='Contacto'),
 
 
+
+    path('Tester-balanza/', views.tester_balanza, name='tester_balanza'),
+    path('api/list-usb-ports/', views.list_usb_ports, name='list_usb_ports'),
+    path('api/get-events/', views.get_events, name='get_events'),
+
+
 ]

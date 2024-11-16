@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tester de Balanza</title>
+    <script>
+        // Fetch available ports and populate the dropdown
+        function fetchPorts() {
+            fetch('/api/list-usb-ports/')
+                .then(response => response.json())
+                .then(data => {
+                    const portSelect = document.getElementById('port-select');
+                    portSelect.innerHTML = ''; // Clear existing options
+                    if (data.status === 'success') {
+                        data.ports.forEach(port => {
+                            const option = document.createElement('option');
+                            option.value = port;
+                            option.textContent = port;
+                            portSelect.appendChild(option);
+                        });
+                    } else {
+                        alert('Error al listar puertos: ' + data.message);
+                    }
+                })
+                .catch(error => console.error('Error al obtener puertos:', error));
+        }
+
+        // Fetch events from the server for the selected port
+        function fetchEvents() {
+            const port = document.getElementById('port-select').value;
+
+            if (!port) {
+                alert('Por favor, seleccione un puerto.');
+                return;
+            }
+
+            fetch(`/api/get-events/?port=${port}`)
+                .then(response => response.json())
+                .then(data => {
+                    const eventList = document.getElementById('event-list');
+                    eventList.innerHTML = ''; // Clear the current list
+
+                    if (data.status === 'success') {
+                        data.events.forEach(event => {
+                            const li = document.createElement('li');
+                            li.textContent = event;
+                            eventList.appendChild(li);
+                        });
+                    } else {
+                        const li = document.createElement('li');
+                        li.textContent = `Error: ${data.message}`;
+                        eventList.appendChild(li);
+                    }
+                })
+                .catch(error => console.error('Error al obtener eventos:', error));
+        }
+    </script>
+</head>
+<body onload="fetchPorts()">
+    <h1>Tester de Balanza</h1>
+    <p>Conecta tu balanza y selecciona un puerto:</p>
+
+    <div>
+        <label for="port-select">Puertos disponibles:</label>
+        <select id="port-select">
+            <option value="">Cargando...</option>
+        </select>
+        <button onclick="fetchEvents()">Obtener Eventos</button>
+    </div>
+    <ul id="event-list">
+        <!-- Los eventos se cargarán aquí dinámicamente -->
+    </ul>
+</body>
+</html>

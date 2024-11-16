@@ -15,6 +15,11 @@ from django.db.models import Q, Min, F
 from decimal import Decimal
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+import threading
+import serial
+import serial.tools.list_ports
+from serial.tools import list_ports
+
 
 @login_required(login_url='/login')
 def requestAcces(request):
@@ -801,3 +806,51 @@ def noticias(request):
 
 def contacto(request):
     return render(request, 'contacto.html')
+
+
+
+
+def listen_to_balance(port):
+    event_list = []
+    try:
+        # Configura la conexión serial con el puerto especificado
+        ser = serial.Serial(port=port, baudrate=9600, timeout=1)
+        for _ in range(10):  # Leer solo un número limitado de eventos para la prueba
+            line = ser.readline().decode('utf-8').strip()
+            if line:
+                event_list.append(line)
+    except Exception as e:
+        event_list.append(f"Error: {str(e)}")
+    return event_list
+
+# View to render the tester page
+def tester_balanza(request):
+    return render(request, 'tester_balanza.html')
+
+# API view to fetch events dynamically
+def get_events(request):
+    port = request.GET.get('port')
+    if not port:
+        return JsonResponse({'status': 'error', 'message': 'No se proporcionó un puerto.'})
+
+    # Verificar si el puerto es válido
+    available_ports = [p.device for p in serial.tools.list_ports.comports()]
+    if port not in available_ports:
+        return JsonResponse({'status': 'error', 'message': f'El puerto {port} no es válido. Puertos disponibles: {", ".join(available_ports)}'})
+
+    # Intentar leer datos del puerto
+    try:
+        ser = serial.Serial(port=port, baudrate=9600, timeout=1)
+        events = []
+        for _ in range(5):  # Leer hasta 5 líneas como prueba
+            line = ser.readline().decode('utf-8').strip()
+            if line:
+                events.append(line)
+        ser.close()
+        return JsonResponse({'status': 'success', 'events': events})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+    
+def list_usb_ports(request):
+    ports = [p.device for p in list_ports.comports()]
+    return JsonResponse({'status': 'success', 'ports': ports})
