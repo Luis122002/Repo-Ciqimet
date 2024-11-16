@@ -169,8 +169,8 @@
                             .then(data => {
                                 if (data.muestras && data.muestras.length > 0) {
                                     let tablaHTML = `
-                                        <div style="overflow-x: auto;"> <!-- Contenedor con desplazamiento -->
-                                            <table class="table table-bordered table-striped">
+                                        <div class="message-table-container"><div class="container"> <!-- Contenedor con scroll lateral -->
+                                            <table class="message-table table table-bordered table-striped">
                                                 <thead>
                                                     <tr>
                                                         <th>Muestra Masificada</th>
@@ -216,7 +216,7 @@
                                         title: 'Información de la Hoja de Trabajo ' + htId,
                                         html: tablaHTML,
                                         width: '80%',
-                                        showCancelButton: true,
+                                        showCancelButton: false,
                                         confirmButtonText: 'Cerrar',
                                         customClass: {
                                             popup: 'big-swal', // Clase personalizada para el popup grande

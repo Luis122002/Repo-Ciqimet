@@ -698,6 +698,67 @@
             }
         }
 
+        
+        .mensaje-table-container {
+            overflow-x: auto; /* Habilitar desplazamiento horizontal */
+            max-height: 300px; /* Limitar altura máxima */
+            border: 1px solid #ddd; /* Borde sutil */
+            border-radius: 8px; /* Bordes redondeados */
+            background-color: #f9f9f9; /* Fondo claro */
+            margin: 10px 0; /* Separación superior e inferior */
+            padding: 10px; /* Espaciado interno */
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Sombra para destacar */
+        }
+        
+        .mensaje-table {
+            width: 100%; /* Usar todo el ancho disponible */
+            border-collapse: collapse; /* Quitar espacio entre bordes */
+            font-size: 12px; /* Reducir tamaño de fuente */
+            text-align: center; /* Centrar contenido */
+        }
+        
+        .mensaje-table thead th {
+            background-color: #002d72; /* Fondo azul oscuro */
+            color: #fff; /* Texto blanco */
+            padding: 10px; /* Espaciado interno */
+            text-align: center; /* Centrar texto */
+        }
+        
+        .mensaje-table tbody tr:nth-child(even) {
+            background-color: #f1f1f1; /* Fondo para filas pares */
+        }
+        
+        .mensaje-table tbody tr:hover {
+            background-color: #e0e0e0; /* Fondo al pasar el mouse */
+        }
+        
+        .mensaje-table th,
+        .mensaje-table td {
+            padding: 8px; /* Espaciado interno */
+            white-space: nowrap; /* Evitar saltos de línea */
+        }
+        
+        .big-swal {
+            max-width: 95%; /* Ampliar ancho del modal */
+            overflow: hidden; /* Ocultar desbordes */
+        }
+
+
+
+        .message-table {
+            overflow-x: auto; 
+            white-space: nowrap;
+        }
+        .message-table table {
+            width: 100%;
+            table-layout: fixed;
+        }
+        .message-table th, .message-table td {
+            text-align: center; 
+            word-wrap: break-word; 
+            padding: 8px;
+        }
+
 
 
     </style>

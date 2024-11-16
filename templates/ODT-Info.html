@@ -48,7 +48,7 @@
                 width: 100%; /* Ocupa el 100% del ancho de la pantalla */
             }
         }
-        
+
     </style>
 </head>
 <body>
@@ -323,8 +323,8 @@
         .then(data => {
             if (data.muestras && data.muestras.length > 0) {
                 let tablaHTML = `
-                    <div style="overflow-x: auto;"> <!-- Contenedor con desplazamiento -->
-                        <table class="table table-bordered table-striped">
+                    <div class="message-table-container"><div class="container"> <!-- Contenedor con scroll lateral -->
+                        <table class="message-table table table-bordered table-striped">
                             <thead>
                                 <tr>
                                     <th>Muestra Masificada</th>
@@ -334,11 +334,11 @@
                                     <th>Tipo</th>
                                     <th>Duplicado</th>
                                     <th>Elementos</th>
-                                    <th>Peso y Elemento</th> <!-- Nueva columna para el peso y el elemento -->
+                                    <th>Peso y Elemento</th>
                                 </tr>
                             </thead>
                             <tbody>`;
-
+                            
                 data.muestras.forEach(muestra => {
                     let elementosText = muestra.elementos.map(elemento => 
                         `${elemento.nombre} (${elemento.gramos}g / ${elemento.miligramos}ml)`
@@ -355,17 +355,17 @@
                             <td>${muestra.tipo}</td>
                             <td>${muestra.duplicado}</td>
                             <td>${elementosText}</td>
-                            <td>${pesoElementoText}</td> <!-- Mostrar el peso y el elemento con salto de línea -->
+                            <td>${pesoElementoText}</td>
                         </tr>`;
                 });
 
-                tablaHTML += `</tbody></table></div>`;
+                tablaHTML += `</tbody></table></div></div>`;
 
                 Swal.fire({
                     title: 'Información de la Hoja de Trabajo ' + htId,
                     html: tablaHTML,
                     width: '80%',
-                    showCancelButton: true,
+                    showCancelButton: false,
                     confirmButtonText: 'Cerrar',
                     denyButtonText: 'Borrar', 
                     showDenyButton: true,
