@@ -138,6 +138,54 @@
                 margin: 10px 0;
             }
         }
+
+
+
+
+
+
+        .sidebar {
+            padding: 10px;
+            background-color: #f5f7fa;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            max-height: 90vh; /* Limita la altura total del sidebar */
+            overflow: hidden; /* Evita que el contenido se desborde */
+        }
+        
+        .table-container {
+            max-height: 45%; /* Cada tabla ocupa la mitad del sidebar */
+            overflow-y: auto; /* Activa el desplazamiento vertical */
+            margin-bottom: 10px; /* Espaciado entre tablas */
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table th,
+        .table td {
+            padding: 4px;
+            text-align: left;
+            font-size: 12px;
+        }
+        
+        .table thead th {
+            background-color: #002d72;
+            color: #fff;
+        }
+        
+        .table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
     </style>
 </head>
 <body>
@@ -145,10 +193,69 @@
         <!-- Sidebar (Perfil) -->
         <div class="sidebar">
             <h2>Novedades</h2>
-            
             <hr>
-            <p>Ninguna novedad</p>
+            <!-- Sección de Acciones de Registros -->
+            <h5>Acciones de Registros</h5>
+            <div class="table-container">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Acción</th>
+                        <th>ID Registro</th>
+                        <th>Fecha</th>
+                        <th>Usuario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for novedad in acciones_registros %}
+                    <tr>
+                        <td>{{ novedad.tipo_model }}</td>
+                        <td>{{ novedad.accion }}</td>
+                        <td>{{ novedad.modelt_id }}</td>
+                        <td>{{ novedad.fecha|date:"d/m/Y H:i" }}</td>
+                        <td>{{ novedad.usuario }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5">No hay novedades registradas.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
+        <h5>Procesos de Hojas de Trabajo</h5>
+            <div class="table-container">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Acción</th>
+                            <th>ID Registro</th>
+                            <th>Fecha</th>
+                            <th>Usuario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for novedad in procesos_hojas_trabajo %}
+                        <tr>
+                            <td>{{ novedad.tipo_model }}</td>
+                            <td>{{ novedad.accion }}</td>
+                            <td>{{ novedad.modelt_id }}</td>
+                            <td>{{ novedad.fecha|date:"d/m/Y H:i" }}</td>
+                            <td>{{ novedad.usuario }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5">No hay procesos registrados.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+    
+    </div>
 
         <!-- Main Content -->
         <div class="main-content">

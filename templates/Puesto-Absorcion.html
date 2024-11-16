@@ -8,159 +8,132 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Absorción</title>
     <style>
-       
-        .button-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 20px;
-            width: 100%;
+        .actions, .details, .filters {
+            margin: 0; /* Asegura que no haya márgenes adicionales */
+            padding: 10px; /* Mantiene un espaciado interno uniforme */
+            background-color: #f5f7fa; /* Color de fondo */
+            border-radius: 8px; /* Bordes redondeados */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombras ligeras */
+            height: auto; /* Ajuste automático de altura */
         }
 
-        .container {
-            margin-top: 20px;
+        .filters .btn {
+            width: 100%; /* Hace que el botón ocupe todo el ancho del contenedor */
+            display: block; /* Garantiza que sea un elemento de bloque */
+            margin: 10px auto; /* Centra el botón vertical y horizontalmente */
         }
-
-        .row {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center; /* Centra los elementos en la fila */
+    
+        .button-grid a {
+            font-size: 12px;
+            padding: 5px;
         }
-
-        .col {
-            margin: 0 10px;
-        }
-
-        .filters,
-        .actions,
-        .add-odt {
-            background-color: #f5f7fa;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .filters {
-            min-width: 400px; /* Tamaño mínimo mayor */
-            max-width: 600px; /* Tamaño máximo mayor para que pueda extenderse más */
-        }
-
-        .actions {
-            width: 200px; /* Tamaño fijo menor */
-            text-align: center;
-        }
-
-        .add-odt {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 200px; /* Tamaño fijo menor */
-        }
+    
         .data-grid {
             display: flex;
             justify-content: space-between;
-            gap: 10px;
-            margin-top: 10px;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 5px 0;
         }
-
+    
         .data-grid div {
-            padding: 10px;
-            background-color: #fff;
+            padding: 5px;
+            background-color: #ffffff;
             text-align: center;
             border: 1px solid #ccc;
-            flex: 1;
+            border-radius: 4px;
+            flex: 1 1 calc(30% - 10px);
+            font-size: 12px;
         }
-
+    
         .status-box {
-            background-color: #000000;
+            padding: 5px;
+            background-color: #000;
             color: cyan;
-            padding: 15px;
-            text-align: center;
-            border: 2px solid #000;
-            margin-top: 20px;
+            border: 1px solid #000;
+            border-radius: 4px;
+            font-size: 12px;
         }
-
-        .status-box h2 {
+    
+        .status-box h6 {
             margin: 0;
-            font-size: 24px;
+            font-size: 12px;
+        }
+    
+        .row.align-items-center {
+            align-items: center; /* Asegura alineación vertical uniforme */
+        }
+    
+        .buttons-row {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+        }
+    
+        .filters .input-group {
+            display: flex;
+            gap: 5px;
         }
 
-        .status-box p {
-            margin: 5px 0;
-            font-size: 16px;
+
+        .row {
+            margin: 0; /* Elimina márgenes adicionales entre filas */
+            gap: 5px; /* Define un espacio uniforme de 5px entre columnas */
         }
+        
+        .col-md-3, .col-md-6 {
+            padding: 5px; /* Añade un pequeño padding para un espaciado interno */
+        }
+        
+
     </style>
 </head>
 <body>
     <h1 class="custom-title">Puesto de Absorción</h1>
 
-<div class="container">
     <div class="row">
-    
-        <!-- Columna de acciones (más pequeña) -->
-        <div class="col-md-2 actions">
-            <!-- Botones de análisis y gestión -->
+        <!-- Columna de acciones -->
+        <div class="col-md-3 actions">
+            <h5 class="text-center">Acciones</h5>
             <div class="button-grid">
-                <!-- Botón -->
-                <a href="#seccion-elementos" class="btn btn-primary text-center">
-                    Gestionar análisis
-                </a>
-                
-                <!-- Botón -->
-                <a href="/Elements-Manager" class="btn btn-primary text-center">
-                    Grabar Análisis
-                </a>
-
-                <!-- Botón -->
-                <a href="/Elements-Manager" class="btn btn-primary text-center">
-                    Exportar
-                </a>
+                <a href="#seccion-elementos" class="btn btn-primary btn-sm w-100 mb-2">Gestionar análisis</a>
+                <a href="/Elements-Manager" class="btn btn-primary btn-sm w-100 mb-2">Grabar Análisis</a>
+                <a href="/Elements-Manager" class="btn btn-primary btn-sm w-100">Exportar</a>
             </div>
         </div>
-
-        <!-- Columna de filtros (más grande y centrada) -->
-        <div class="col-md-8 filters">
-            <!-- Filtros -->
-            <div class="row mb-3">
-                <!-- Búsqueda por palabra clave -->
-                <div class="col-md-6 mb-3">
-                    <label for="search-box">Buscar:</label>
-                    <div class="input-group">
-                        <input id="search-box" type="text" class="form-control" placeholder="Buscar órdenes..." value="{{ request.GET.search }}">
-                    </div>
-                </div>
-        
-                <div class="col-md-6 mb-3">
-                    <label>&nbsp;</label>
-                    <div class="input-group">
-                        <button class="btn btn-primary" onclick="applyFilters()">Filtrar Órdenes</button>
-                    </div>
-                </div>
+    
+        <!-- Columna de detalles -->
+        <div class="col-md-6 details">
+            <h5 class="text-center">Detalles</h5>
+            <div class="data-grid">
+                <div>Muestras: <span id="muestras">{{ muestras_count }}</span></div>
+                <div>Blk Lab.: <span id="blk_lab">0</span></div>
+                <div>Blk Prep.: <span id="blk_prep">0</span></div>
+                <div>Dup. Lab.: <span id="dup_lab">0</span></div>
+                <div>Dup. Prep.: <span id="dup_prep">0</span></div>
+                <div>Std. Ref.: <span id="std_ref">0</span></div>
             </div>
-
-            <!-- Detalle de Muestras (Horizontal) -->
-            <div class="section">
-                <label for="detalle">Detalle de Muestras:</label>
-                <div class="data-grid">
-                    <div>Muestras: <span id="muestras">0</span></div>
-                    <div>Blk Lab.: <span id="blk_lab">0</span></div>
-                    <div>Blk Prep.: <span id="blk_prep">0</span></div>
-                    <div>Dup. Lab.: <span id="dup_lab">0</span></div>
-                    <div>Dup. Prep.: <span id="dup_prep">0</span></div>
-                    <div>Std. Ref.: <span id="std_ref">0</span></div>
-                </div>
+            <div class="buttons-row mt-2 d-flex justify-content-center">
+                <a href="#hojaTrabajo" class="btn btn-primary btn-sm mx-1">Hoja de trabajo</a>
+                <a href="#diluciones" class="btn btn-primary btn-sm mx-1">Diluciones</a>
+                <a href="#lecturas" class="btn btn-primary btn-sm mx-1">Lecturas</a>
+                <a href="#leyes" class="btn btn-primary btn-sm mx-1">Leyes</a>
             </div>
         </div>
-
-        <!-- Columna para añadir ODT (sin cambios) -->
-        <div class="col-md-2 add-odt">
-            <div class="status-box">
-                <h2>Id. de Lote</h2>
+    
+        <!-- Columna de filtros -->
+        <div class="col-md-3 filters">
+            <h5 class="text-center">Filtros</h5>
+            <div class="input-group mb-2">
+                <button class="btn btn-primary btn-sm">Buscar hojas</button>
+            </div>
+            <div class="status-box text-center">
+                <h6>Id. de Lote</h6>
                 <p>Sin Asig.</p>
                 <p>Creación: <span id="fecha_creacion">22/04/2024</span></p>
             </div>
         </div>
     </div>
-</div>
 
     <div class="container mt-5">
         <section class="intro">
@@ -296,4 +269,5 @@
 
     </script>
 </body>
+{% include 'Footer.html' %}
 </html>

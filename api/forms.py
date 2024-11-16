@@ -237,45 +237,40 @@ class HojaTrabajoGeneralForm(forms.ModelForm):
                 hojas_trabajo = [hq.HojaTrabajo for hq in hojas_quimicos]
 
                 odt = self.cleaned_data['odt']
-                muestras_masificadas = list(MuestraMasificada.objects.filter(odt=odt))  # Convertir a lista explícitamente
-                muestras = list(Muestra.objects.filter(hoja_trabajo__in=hojas_trabajo))  # Convertir a lista explícitamente
-                resultados = list(Resultado.objects.filter(hoja_trabajo__in=hojas_trabajo))  # Convertir a lista explícitamente
+                muestras_masificadas = list(MuestraMasificada.objects.filter(odt=odt))  
+                muestras = list(Muestra.objects.filter(hoja_trabajo__in=hojas_trabajo))  
+                resultados = list(Resultado.objects.filter(hoja_trabajo__in=hojas_trabajo))
 
                 curvElement = CurvaturaElementos.objects.filter(elemento__in=elementos)
 
                 for hoja_trabajo in hojas_trabajo:
                     hoja_trabajo.odt = self.instance.odt
-                    # Usa .set() para actualizar la relación ManyToMany
                     hoja_trabajo.Estandar.set(self.instance.Estandar.all())
                     hoja_trabajo.MetodoAnalisis = self.instance.MetodoAnalisis
                     hoja_trabajo.Tipo = self.instance.Tipo
                     hoja_trabajo.Duplicado = self.instance.Duplicado
                     hoja_trabajo.save()
 
-                # Ajustar muestras según curvatura
                 for elemento in elementos:
                     curvatura = curvElement.filter(elemento=elemento).first().curvatura
                     print(f"Elemento: {elemento.nombre} - Curvatura: {curvatura}")
 
                     for muestra_masificada in muestras_masificadas:
                         muestras_existentes = [m for m in muestras if m.elemento == elemento.nombre and m.muestraMasificada == muestra_masificada]
-                        muestras_existentes.sort(key=lambda x: x.indexCurv)  # Ordenar por indexCurv
+                        muestras_existentes.sort(key=lambda x: x.indexCurv) 
 
-                        # Reordenar índices para garantizar consistencia
                         for i, muestra in enumerate(muestras_existentes, start=1):
                             if muestra.indexCurv != i:
                                 muestra.indexCurv = i
                                 muestra.save()
                                 print(f"Reordenado índice de muestra: {muestra.nombre} a {i}")
 
-                        # Eliminar muestras que excedan la curvatura
                         if len(muestras_existentes) > curvatura:
                             exceso = muestras_existentes[curvatura:]
                             for muestra_exceso in exceso:
                                 muestra_exceso.delete()
                             print(f"Eliminadas {len(exceso)} muestras fuera del rango de curvatura para {elemento.nombre}.")
 
-                        # Crear nuevas muestras si la curvatura aumentó
                         elif len(muestras_existentes) < curvatura:
                             falta = curvatura - len(muestras_existentes)
                             for i in range(len(muestras_existentes) + 1, len(muestras_existentes) + falta + 1):
@@ -287,7 +282,7 @@ class HojaTrabajoGeneralForm(forms.ModelForm):
                                     nbo=f"NBO-{i}",
                                     ident=f"ID-{i}",
                                     indexCurv=i,
-                                    hoja_trabajo=hojas_trabajo[0],  # Asumimos la primera hoja asociada
+                                    hoja_trabajo=hojas_trabajo[0], 
                                     muestraMasificada=muestra_masificada,
                                     t="M",
                                     peso_m=0.0,
@@ -298,7 +293,6 @@ class HojaTrabajoGeneralForm(forms.ModelForm):
                                 )
                                 print(f"Creada nueva muestra: {nueva_muestra.nombre}")
 
-                # Ajustar resultados según elementos
                 for muestra in muestras:
                     for elemento in elementos:
                         resultado_existente = next(

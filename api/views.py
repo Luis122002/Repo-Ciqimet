@@ -294,9 +294,6 @@ def Save_M(request):
 
     return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
 
-
-
-
 def Confirm_M(request):
     if request.method == 'POST':
         try:
@@ -339,25 +336,71 @@ def Confirm_M(request):
     return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
         
 
+
+
 @login_required(login_url='/login')
 def PI_Module(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        id_hdt = data.get('id')
+        id_hdt = request.POST.get('id')
         print(f'ID recibido en Absorción: {id_hdt}')
-        
-        return JsonResponse({'success': True})
-    
-    return render(request, 'Puesto-Absorcion.html')
 
+        hojas_trabajo_quimico = models.HojaTrabajoQuimico.objects.filter(ID_HDT=id_hdt).order_by('ID_HDT')
+        targetHDT_Quimico = hojas_trabajo_quimico.first()
+
+        if not hojas_trabajo_quimico.exists():
+            return render(request, 'Puesto-Absorcion.html')
+
+        hojas_trabajo = models.HojaTrabajo.objects.filter(
+            id__in=[htq.HojaTrabajo.id for htq in hojas_trabajo_quimico]
+        ).order_by('id')
+
+        odt_ids = hojas_trabajo.values_list('odt_id', flat=True)
+
+        muestras_M = models.MuestraMasificada.objects.filter(odt_id__in=odt_ids)
+
+        muestras = models.Muestra.objects.filter(
+            hoja_trabajo__in=hojas_trabajo
+        ).order_by('hoja_trabajo__hojas_trabajo_target__ID_HDT', 'hoja_trabajo__id', 'elemento', 'indexCurv')
+
+        muestras_count = muestras_M.count()
+
+        resultados = models.Resultado.objects.filter(
+            hoja_trabajo__in=hojas_trabajo
+        ).order_by('hoja_trabajo__hojas_trabajo_target__ID_HDT', 'hoja_trabajo__id', 'muestra__elemento', 'fecha_emision')
+
+        context = {
+            'id_hdt': id_hdt,
+            'hojas_trabajo': hojas_trabajo,
+            'muestras': muestras,
+            'muestras_M': muestras_M,
+            'resultados': resultados,
+            'muestras_count': muestras_count
+        }
+        
+        return render(request, 'Puesto-Absorcion.html', context)
+
+    return render(request, 'Puesto-Absorcion.html')
 
 
 
 @login_required(login_url='/login')
 def PT_Module(request):
+    fecha_actual = timezone.now()
 
+    acciones_registros = models.Novedades.objects.filter(
+        accion__in=['Crear', 'Modificar', 'Eliminar']
+    ).order_by('-fecha') 
 
-    return render(request, 'Puesto-Trabajo.html')
+    procesos_hojas_trabajo = models.Novedades.objects.filter(
+        accion__in=['Balanza', 'Absorcion']
+    ).order_by('-fecha')
+
+    context = {
+        'acciones_registros': acciones_registros,
+        'procesos_hojas_trabajo': procesos_hojas_trabajo,
+    }
+
+    return render(request, 'Puesto-Trabajo.html', context)
 
 
 @login_required(login_url='/login')
@@ -625,6 +668,13 @@ def general_form(request, token):
                     models_hoja_trabajo_quimico.delete()
                     for hoja_trabajo in set(hoja_trabajos):
                         hoja_trabajo.delete()
+                    models.Novedades.objects.create(
+                            tipo_model='Hoja de trabajo',
+                            accion="Eliminar",
+                            modelt_id=hoja_trabajo_quimico.ID_HDT,  
+                            fecha=timezone.now(),
+                            usuario=request.user
+                        )
                     messages.add_message(request=request, level=messages.SUCCESS, message='Hojas de trabajo eliminadas con éxito')
                     return redirect(reverse('Main_ODT'))
 

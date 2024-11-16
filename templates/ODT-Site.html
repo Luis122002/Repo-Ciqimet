@@ -7,57 +7,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ODT Display</title>
-    <style>
-       
-        .button-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 20px;
-            width: 100%;
-        }
-
-        .container {
-            margin-top: 20px;
-        }
-
-        .row {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center; /* Centra los elementos en la fila */
-        }
-
-        .col {
-            margin: 0 10px;
-        }
-
-        .filters,
-        .actions,
-        .add-odt {
-            background-color: #f5f7fa;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .filters {
-            min-width: 400px; /* Tamaño mínimo mayor */
-            max-width: 600px; /* Tamaño máximo mayor para que pueda extenderse más */
-        }
-
-        .actions {
-            width: 200px; /* Tamaño fijo menor */
-            text-align: center;
-        }
-
-        .add-odt {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 200px; /* Tamaño fijo menor */
-        }
-    </style>
 </head>
 <body>
+    <div>
     <h1 class="custom-title">Registros de órdenes de trabajo (ODT)</h1>
 
     <div class="container">
@@ -140,11 +92,10 @@
         </div>
     </div>
 
-    <div class="table-container table-responsive">
-    
-            <table class="table table-bordered ">
-                <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
-                    <tr>
+    <div class="table-container">
+        <table class="table table table-striped mb-0">
+            <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
+                <tr>
                         <th scope="col">Nro ODT</th>
                         <th scope="col">Fec Recep</th>
                         <th scope="col">Fec Fin</th>
@@ -182,7 +133,7 @@
     </div>
 
     </div>
-
+    </div>
     
     <script>
         

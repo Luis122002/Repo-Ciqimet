@@ -7,55 +7,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ODT Display</title>
-    <style>
-       
-        .button-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 20px;
-            width: 100%;
-        }
-
-        .container {
-            margin-top: 20px;
-        }
-
-        .row {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center; /* Centra los elementos en la fila */
-        }
-
-        .col {
-            margin: 0 10px;
-        }
-
-        .filters,
-        .actions,
-        .add-odt {
-            background-color: #f5f7fa;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .filters {
-            min-width: 400px; /* Tamaño mínimo mayor */
-            max-width: 600px; /* Tamaño máximo mayor para que pueda extenderse más */
-        }
-
-        .actions {
-            width: 200px; /* Tamaño fijo menor */
-            text-align: center;
-        }
-
-        .add-odt {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 200px; /* Tamaño fijo menor */
-        }
-    </style>
 </head>
 <body>
     <h1 class="custom-title">Balanza</h1>

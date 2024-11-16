@@ -7,73 +7,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ODT Display</title>
-    <style>
-       
-        .button-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 20px;
-            width: 100%;
-        }
-
-        .container {
-            margin-top: 20px;
-        }
-
-        .row {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center; /* Centra los elementos en la fila */
-        }
-
-        .col {
-            margin: 0 10px;
-        }
-
-        .filters,
-        .actions,
-        .add-odt {
-            background-color: #f5f7fa;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .filters {
-            min-width: 400px; /* Tamaño mínimo mayor */
-            max-width: 600px; /* Tamaño máximo mayor para que pueda extenderse más */
-        }
-
-        .actions {
-            width: 200px; /* Tamaño fijo menor */
-            text-align: center;
-        }
-
-        .add-odt {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 200px; /* Tamaño fijo menor */
-        }
-
-        .big-swal {
-            max-width: 1000px; /* Tamaño máximo */
-            width: 90%; /* Ancho adaptable */
-            overflow: auto; /* Asegurar que no se corte el contenido */
-        }
-
-    </style>
 </head>
 <body>
     <h1 class="custom-title">Hoja de trabajo</h1>
-
     <div class="container">
         <div class="row">
-            <!-- Columna de filtros (más grande y centrada) -->
             <div class="col filters">
-                <!-- Filtros -->
                 <div class="row mb-3">
-                    <!-- Filtro por año -->
                     <div class="col-md-6 mb-3">
                         <label for="filter-state">Estado:</label>
                         <p>
@@ -83,7 +23,6 @@
                         </p>
                     </div>
             
-                    <!-- Búsqueda por palabra clave -->
                     <div class="col-md-6 mb-3">
                         <label for="search-box">Buscar:</label>
                         <div class="input-group">
@@ -202,24 +141,24 @@
                         });
                 
                         document.getElementById('absorcionButton').addEventListener('click', function () {
-                            // Hacer solicitud POST con el ID de absorción
-                            fetch('/Puesto-Absorcion/', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRFToken': csrfToken // El token CSRF es necesario para la protección
-                                },data: {
-                                    'id': id_hdt
-                                },
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                // Redirigir a la página después de recibir la respuesta
-                                if (data.success) {
-                                    window.location.href = '/Puesto-Absorcion/';
-                                }
-                            })
-                            .catch(error => console.error('Error:', error));
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = '/Puesto-Absorcion/';
+        
+                            const csrfInput = document.createElement('input');
+                            csrfInput.type = 'hidden';
+                            csrfInput.name = 'csrfmiddlewaretoken';
+                            csrfInput.value = csrfToken;
+                            form.appendChild(csrfInput);
+                        
+                            const idInput = document.createElement('input');
+                            idInput.type = 'hidden';
+                            idInput.name = 'id';
+                            idInput.value = htId;
+                            form.appendChild(idInput);
+                        
+                            document.body.appendChild(form);
+                            form.submit(); 
                         });
                     }
                 }).then((result) => {

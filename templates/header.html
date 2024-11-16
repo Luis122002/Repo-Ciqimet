@@ -10,6 +10,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{% static 'rest_framework/css/bootstrap.min.css' %}">
     <style>
+
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden; /* Evitar desbordamiento horizontal */
+        }
+        
+        /* Contenedor principal del contenido */
+        .main-content {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Centra horizontalmente el contenido */
+            justify-content: flex-start; /* Ajusta el contenido hacia arriba */
+            padding: 10px; /* Espaciado interno */
+            box-sizing: border-box;
+        }
+        
+        /* Estilo específico para las tarjetas y contenedores */
+        .container, .card {
+            width: 100%; /* Asegura que el contenedor ocupe el ancho completo */
+            max-width: 1200px; /* Opcional: Limita el ancho máximo */
+            margin: 0 auto; /* Centra el contenido */
+            box-sizing: border-box;
+            padding: 10px;
+        }
+        
+        
+    
         /* Estilos generales del header */
 
         @media (min-width: 998px) {
@@ -161,7 +196,7 @@
                 cursor: pointer;
                 z-index: 2;
                 position: absolute; /* Posicionar correctamente en móviles */
-                top: 40px; /* Ajusta la posición según tus necesidades */
+                top: 50px; /* Ajusta la posición según tus necesidades */
                 right: 15px; /* Ajusta la posición según tus necesidades */
             }
 
@@ -516,30 +551,47 @@
             justify-content: center;
             width: 200px; /* Tamaño fijo menor */
         }
-        
+
         .table-container {
-            margin: 20px auto; /* Centra la tabla */
-            padding: 20px;
-            background-color: #ffffff; /* Fondo blanco para la tabla */
+            padding: 10px;
+            background-color: #ffffff;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            width: 90%; /* Ancho del 90% de la pantalla */
-            max-width: 1200px; /* Ancho máximo de la tabla */
+            width: 98%; /* Aumenta el ancho para ocupar más espacio horizontal */
+            max-width: 100%; /* Limita el ancho máximo al 100% del contenedor */
+            overflow-x: auto; /* Activa desplazamiento horizontal si es necesario */
+            overflow-y: auto; /* Activa desplazamiento vertical si es necesario */
+            max-height: 70vh; /* Altura máxima dinámica según la pantalla */
+            min-height: 450px; /* Tamaño mínimo fijo del contenedor */
+            margin: 10px auto; /* Centra horizontalmente */
+            display: flex;
+            flex-direction: column;
         }
+        
+        /* Encabezados y estilo de tabla */
         th {
             background-color: #164766f0; /* Azul para encabezados */
             color: white; /* Color de texto blanco para encabezados */
         }
+        
         tr:nth-child(even) {
             background-color: #e9ecef; /* Color gris claro para filas pares */
         }
+        
         tr:hover {
             background-color: #d1ecf1; /* Color azul claro al pasar el mouse */
         }
+        
         td {
             color: #343a40; /* Color de texto oscuro para datos */
             text-align: center; /* Centrar contenido de las celdas */
         }
+
+
+
+
+
+
         .btn-edit, .btn-delete {
             font-size: 0.8rem; /* Tamaño de fuente más pequeño */
             padding: 0.3rem 0.6rem; /* Tamaño del padding reducido */
@@ -562,7 +614,89 @@
 
 
 
-
+        /* Estilos generales (para computadoras de escritorio) */
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+    
+        .container {
+            margin-top: 20px;
+        }
+    
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+    
+        .col {
+            margin: 0 10px;
+        }
+    
+        .filters,
+        .actions,
+        .add-odt {
+            background-color: #f5f7fa;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    
+        .filters {
+            min-width: 400px;
+            max-width: 600px;
+        }
+    
+        .actions {
+            width: 200px;
+            text-align: center;
+        }
+    
+        .add-odt {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 200px;
+        }
+    
+        /* Estilos para dispositivos móviles y tabletas en orientación horizontal */
+        @media (max-width: 1024px) {
+            /* Ajustes en móviles y tabletas */
+            .button-grid {
+                grid-template-columns: 1fr; /* Solo una columna en móviles y tabletas */
+                gap: 10px;
+                width: 100%;
+            }
+    
+            .row {
+                flex-direction: column; /* Cambiar a columna en pantallas pequeñas */
+                align-items: center;    /* Centrar en dispositivos pequeños */
+            }
+    
+            .col {
+                flex: 1;
+                min-width: 250px; /* Anchura mínima para adaptarse a móviles */
+                margin: 10px 0; /* Separación vertical */
+            }
+    
+            /* Ajustes para que el ancho de las tarjetas sea del 100% en móviles */
+            .filters,
+            .actions,
+            .add-odt {
+                width: 100%;
+                max-width: 100%;
+                min-width: 0;
+                margin: 0 auto;
+            }
+    
+            .filters {
+                text-align: center;
+                padding: 15px;
+            }
+        }
 
 
 
