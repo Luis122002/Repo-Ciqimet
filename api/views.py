@@ -286,7 +286,13 @@ def Save_M(request):
                     muestra.peso_m = peso_m
                     muestra.save()
                     print(f"Actualizado - Prefijo: {prefijo}, Elemento: {muestra.elemento}, Peso: {peso_m}")
-
+            models.Novedades.objects.create(
+                tipo_model = 'Hoja de trabajo',
+                accion="Modificar",
+                modelt_id=str(ID_HDT),
+                fecha=timezone.now(),
+                usuario = request.user
+            )
             return JsonResponse({'success': True})
 
         except json.JSONDecodeError:
@@ -327,7 +333,14 @@ def Confirm_M(request):
                         hoja_trabajo_quimico.save()
 
                     print(f"Confirmada - Prefijo: {prefijo}, Confirmar Balanza: {hoja_trabajo_quimico.confirmar_balanza}")
-
+            
+            models.Novedades.objects.create(
+                tipo_model = 'Hoja de trabajo',
+                accion="Balanza",
+                modelt_id=str(ID_HDT),
+                fecha=timezone.now(),
+                usuario = request.user
+            )
             return JsonResponse({'success': True})
 
         except json.JSONDecodeError:

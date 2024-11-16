@@ -142,7 +142,7 @@
             margin: 0;
             border-radius: 5px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 1;
+            z-index: 10;
             top: 100%;
             left: 0;
             border: 1px solid #eceff1;
@@ -260,7 +260,7 @@
                 margin: 0;
                 border-radius: 5px;
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-                z-index: 1;
+                z-index: 10;
                 top: 100%;
                 left: 0;
                 border-left: 3px solid #eceff1;
@@ -759,7 +759,12 @@
             padding: 8px;
         }
 
-
+        #user-image {
+            width: 50px;
+            height: 50px;
+            object-fit: cover; /* Ajusta la imagen al contenedor sin deformarla */
+            border-radius: 50%; /* Si quieres que la imagen sea circular */
+        }
 
     </style>
 </head>
@@ -781,13 +786,13 @@
                             <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="ordersDropdown">
-                            <li><a class="dropdown-item" href="">Ver orden de trabajo</a></li>
-                            <li><a class="dropdown-item" href="">Añadir orden de trabajo</a></li>
-                            <li><a class="dropdown-item" href="">Exportar información de ODT</a></li>
-                            <li><a class="dropdown-item" href="">Ver análisis</a></li>
-                            <li><a class="dropdown-item" href="">Añadir análisis</a></li>
-                            <li><a class="dropdown-item" href="">Ver elementos</a></li>
-                            <li><a class="dropdown-item" href="">Añadir elementos</a></li>
+                            <li><a class="dropdown-item" onclick="NavigationFunc(1)">Ver ordenes de trabajo</a></li>
+                            <li><a class="dropdown-item" onclick="NavigationFunc(2)">Añadir orden de trabajo</a></li>
+                            <li><a class="dropdown-item" onclick="NavigationFunc(3)">Exportar información de ODT</a></li>
+                            <li><a class="dropdown-item" onclick="NavigationFunc(4)">Ver análisis</a></li>
+                            <li><a class="dropdown-item" onclick="NavigationFunc(5)">Añadir análisis</a></li>
+                            <li><a class="dropdown-item" onclick="NavigationFunc(6)">Ver elementos</a></li>
+                            <li><a class="dropdown-item" onclick="NavigationFunc(7)">Añadir elementos</a></li>
                         </ul>
                     </li>
                     <!-- Menú desplegable Puesto de Trabajo Instrumental -->
@@ -797,11 +802,11 @@
                             <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="instrumentalDropdown">
-                            <li><a class="dropdown-item" href="">Abrir plantilla ODT</a></li>
-                            <li><a class="dropdown-item" href="">Exportar plantilla ODT</a></li>
-                            <li><a class="dropdown-item" href="">Modificar muestra</a></li>
-                            <li><a class="dropdown-item" href="">Eliminar muestra</a></li>
-                            <li><a class="dropdown-item" href="">Exportar plantilla de balanza ODT</a></li>
+                            <li><a class="dropdown-item" onclick="showInputModal(2)">Abrir plantilla ODT</a></li>
+                            <li><a class="dropdown-item" onclick="">Exportar plantilla ODT</a></li>
+                            <li><a class="dropdown-item" onclick="">Modificar muestra</a></li>
+                            <li><a class="dropdown-item" onclick="">Eliminar muestra</a></li>
+                            <li><a class="dropdown-item" onclick="">Exportar plantilla de balanza ODT</a></li>
                         </ul>
                     </li>
                     <!-- Menú desplegable Puesto de Trabajo (Balanza de Muestras) -->
@@ -811,10 +816,10 @@
                             <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="balanzaDropdown">
-                            <li><a class="dropdown-item" href="">Abrir plantilla ODT</a></li>
-                            <li><a class="dropdown-item" href="">Asignar lotes de muestras</a></li>
-                            <li><a class="dropdown-item" href="">Obtener análisis de muestras</a></li>
-                            <li><a class="dropdown-item" href="">Exportar análisis de ODT</a></li>
+                            <li><a class="dropdown-item" onclick="showInputModal(1)">Abrir plantilla ODT</a></li>
+                            <li><a class="dropdown-item" onclick="">Asignar lotes de muestras</a></li>
+                            <li><a class="dropdown-item" onclick="">Obtener análisis de muestras</a></li>
+                            <li><a class="dropdown-item" onclick="">Exportar análisis de ODT</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -838,13 +843,13 @@
                             <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="ordersDropdownMobile">
-                            <li><a class="dropdown-item" href="/ODT/">Ver orden de trabajo</a></li>
-                            <li><a class="dropdown-item" href="">Añadir orden de trabajo</a></li>
-                            <li><a class="dropdown-item" href="">Exportar información de ODT</a></li>
-                            <li><a class="dropdown-item" href="">Ver análisis</a></li>
-                            <li><a class="dropdown-item" href="">Añadir análisis</a></li>
-                            <li><a class="dropdown-item" href="">Ver elementos</a></li>
-                            <li><a class="dropdown-item" href="">Añadir elementos</a></li>
+                            <li><a class="dropdown-item" onclick="NavigationFunc(1)">Ver ordenes de trabajo</a></li>
+                            <li><a class="dropdown-item" onclick="NavigationFunc(2)">Añadir ordenes de trabajo</a></li>
+                            <li><a class="dropdown-item" onclick="NavigationFunc(3)">Exportar información de ODT</a></li>
+                            <li><a class="dropdown-item" onclick="NavigationFunc(4)">Ver análisis</a></li>
+                            <li><a class="dropdown-item" onclick="NavigationFunc(5)">Añadir análisis</a></li>
+                            <li><a class="dropdown-item" onclick="NavigationFunc(6)">Ver elementos</a></li>
+                            <li><a class="dropdown-item" onclick="NavigationFunc(7)">Añadir elementos</a></li>
                         </ul>
                     </li>
                     <br/><br/>
@@ -855,11 +860,11 @@
                             <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="instrumentalDropdownMobile">
-                            <li><a class="dropdown-item" href="">Abrir plantilla ODT</a></li>
-                            <li><a class="dropdown-item" href="">Exportar plantilla ODT</a></li>
-                            <li><a class="dropdown-item" href="">Modificar muestra</a></li>
-                            <li><a class="dropdown-item" href="">Eliminar muestra</a></li>
-                            <li><a class="dropdown-item" href="">Exportar plantilla de balanza ODT</a></li>
+                            <li><a class="dropdown-item" onclick="">Abrir plantilla ODT</a></li>
+                            <li><a class="dropdown-item" onclick="">Exportar plantilla ODT</a></li>
+                            <li><a class="dropdown-item" onclick="">Modificar muestra</a></li>
+                            <li><a class="dropdown-item" onclick="">Eliminar muestra</a></li>
+                            <li><a class="dropdown-item" onclick="">Exportar plantilla de balanza ODT</a></li>
                         </ul>
                     </li>
                     <br/><br/>
@@ -870,10 +875,10 @@
                             <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="balanzaDropdownMobile">
-                            <li><a class="dropdown-item" href="">Abrir plantilla ODT</a></li>
-                            <li><a class="dropdown-item" href="">Asignar lotes de muestras</a></li>
-                            <li><a class="dropdown-item" href="">Obtener análisis de muestras</a></li>
-                            <li><a class="dropdown-item" href="">Exportar análisis de ODT</a></li>
+                            <li><a class="dropdown-item" onclick="">Abrir plantilla ODT</a></li>
+                            <li><a class="dropdown-item" onclick="">Asignar lotes de muestras</a></li>
+                            <li><a class="dropdown-item" onclick="">Obtener análisis de muestras</a></li>
+                            <li><a class="dropdown-item" onclick="">Exportar análisis de ODT</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -887,7 +892,7 @@
         <div class="user-card shadow-lg p-4 rounded container">
             <div class="d-flex align-items-center">
                 <br/>
-                <img src="https://via.placeholder.com/50" class="rounded-circle me-3" alt="User Image">
+                <img id="user-image" src="{% static 'rest_framework/img/Logocapture-removebg-preview.png' %}" class="rounded-circle me-3" alt="User Image">
                 <div>
                     <h5 class="mb-1" id="card-user-username">John Doe</h5>
                     <p class="mb-0 text-muted" id="card-user-email">johndoe@example.com</p>
@@ -911,6 +916,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     
     <script>
+        var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
         RedirecPath = ""
         LocalPath = ""
@@ -1046,29 +1052,207 @@
 
         function getUserData() {
             $.ajax({
-                url: '/api/get-user-data/',  // URL de la vista en Django
-                type: 'GET',                 // Tipo de petición (GET)
-                dataType: 'json',            // Formato de respuesta esperado (JSON)
-                success: function(data) {    // Función a ejecutar en caso de éxito
-        
-                    // Actualiza los elementos con id específicos
+                url: '/api/get-user-data/',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    // Actualizar datos del usuario
                     $('#user-email').text(data.email);
-                    $('#user-email').attr('href', `mailto:${data.email}`); // Actualiza el enlace del correo
+                    $('#user-email').attr('href', `mailto:${data.email}`);
                     $('#user-username').text(data.full_name);
                     $('#user-role').text(data.role);
-
+        
                     $('#card-user-email').text(data.email);
                     $('#card-user-username').text(data.full_name);
                     $('#card-user-role').text(data.role);
+        
+                    let roleImage = ''; 
+                    switch (data.role) {
+                        case 'Supervisor':
+                            roleImage = 'Supervisor_icon.png';
+                            break;
+                        case 'Administrador':
+                            roleImage = 'Admin_icon.png';
+                            break;
+                        case 'Quimico':
+                            roleImage = 'Quimico_icon.png';
+                            break;
+                        default:
+                            console.error('Rol no reconocido:', data.role);
+                            return; 
+                    }
+        
+                    const imagePath = `{% static 'rest_framework/img/` + roleImage + `' %}`;
+                    $('#user-image').attr('src', imagePath);
+        
                     RedirecPath = data.URLReact;
                     LocalPath = data.LocalURL;
                 },
-                error: function(xhr, status, error) {  // Función a ejecutar en caso de error
+                error: function(xhr, status, error) {
                     console.error('Error al obtener los datos del usuario:', error);
                 }
             });
-            
         }
+
+        function NavigationFunc(number)
+        {
+            switch (number) 
+            {
+                case 1:
+                    console.log("Navegando a la sección: Órdenes de Trabajo");
+                    window.location.href = LocalPath + "/ODT"
+                    break;
+                case 2:
+                    $.ajax({
+                        url: LocalPath + '/MasterData/',
+                        type: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken
+                        },
+                        data: {
+                            'id': -1,
+                            'context': 'ODT',
+                            'action': 'add',
+                            'stade': "acces"
+                        },
+                        success: function(response) {
+                            if (response.redirect_url) {
+                                window.location.href = response.redirect_url; 
+                            } else {
+                                console.log(response.message);
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error('Error al enviar datos:', xhr.responseText);
+                        }
+                    });
+
+                    break;
+                case 3:
+                    console.log("Navegando a la sección: Órdenes de Trabajo");
+                    break;
+                case 4:
+                    console.log("Navegando a la sección: Órdenes de Trabajo");
+                    window.location.href = LocalPath + "/Analysis-Manager"
+                    break;
+                case 5:
+                    console.log("Navegando a la sección: Órdenes de Trabajo");
+                    $.ajax({
+                        url: LocalPath + '/MasterData/',
+                        type: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken
+                        },
+                        data: {
+                            'id': -1,
+                            'context': 'analytic',
+                            'action': 'add',
+                            'stade': "acces"
+                        },
+                        success: function(response) {
+                            if (response.redirect_url) {
+                                window.location.href = response.redirect_url; 
+                            } else {
+                                console.log(response.message);
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error('Error al enviar datos:', xhr.responseText);
+                        }
+                    });
+                break;
+                case 6:
+                console.log("Navegando a la sección: Órdenes de Trabajo");
+                window.location.href = LocalPath + "/Elements-Manager"
+                break;
+                case 7:
+                console.log("Navegando a la sección: Órdenes de Trabajo");
+                    $.ajax({
+                        url: LocalPath + '/MasterData/',
+                        type: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken
+                        },
+                        data: {
+                            'id': -1,
+                            'context': 'element',
+                            'action': 'add',
+                            'stade': "acces"
+                        },
+                        success: function(response) {
+                            if (response.redirect_url) {
+                                window.location.href = response.redirect_url; 
+                            } else {
+                                console.log(response.message);
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error('Error al enviar datos:', xhr.responseText);
+                        }
+                    });
+                break;
+
+            }
+        }
+
+
+        function showInputModal(mode) {
+
+            Ruta = ''
+            if(mode == 1)
+            {
+                Ruta = LocalPath + '/Balanza/'
+            }
+            else
+            {
+                Ruta = LocalPath + '/Puesto-Absorcion/'
+            }
+
+            Swal.fire({
+                title: 'Buscar',
+                html: `
+                <label for="search-input" style="display: block; margin-bottom: 10px;">Ingrese un número:</label>
+                <input id="search-input" type="number" placeholder="Ingrese un número" class="swal2-input" style="width: 80%; box-sizing: border-box;">`,
+                showCancelButton: true,
+                confirmButtonText: 'Buscar',
+                cancelButtonText: 'Cancelar',
+                focusConfirm: false,
+                preConfirm: () => {
+                    const inputValue = document.getElementById('search-input').value;
+                    if (!inputValue) {
+                        Swal.showValidationMessage('Debe ingresar un número');
+                        return false;
+                    }
+                    return inputValue;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                        console.log(`Valor ingresado: ${result.value}`);
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = Ruta;
+        
+                            const csrfInput = document.createElement('input');
+                            csrfInput.type = 'hidden';
+                            csrfInput.name = 'csrfmiddlewaretoken';
+                            csrfInput.value = csrfToken;
+                            form.appendChild(csrfInput);
+                        
+                            const idInput = document.createElement('input');
+                            idInput.type = 'hidden';
+                            idInput.name = 'id';
+                            idInput.value = `${result.value}`;
+                            form.appendChild(idInput);
+                        
+                            document.body.appendChild(form);
+                            form.submit(); 
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    console.log('Operación cancelada');
+                }
+            });
+        }
+
+
         
         $(document).ready(function(){
             getUserData();

@@ -13,13 +13,14 @@
             #myForm {
                 display: grid;
                 gap: 15px; /* Espacio entre columnas */
-                background-color: #f9f9f9; /* Color de fondo claro */
+                background-color: #ffffff; /* Fondo blanco */
                 border: 2px solid #00796b; /* Azul claro */
                 border-radius: 8px; /* Bordes redondeados */
-                padding: 15px; /* Espacio interno */
-                box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* Sombra suave */
-                transition: all 0.3s ease-in-out; /* Transiciones suaves */
-                width: 100%; /* Ancho completo del contenedor padre */
+                padding: 20px; /* Espacio interno */
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave */
+                min-height: 70vh; /* El formulario ocupa el 70% de la altura de la pantalla */
+                align-content: start; /* Asegura que los elementos internos no se desborden */
+                width: 100%; /* Asegura que ocupe todo el ancho disponible */
             }
         
             /* Estilo para los grupos de campos */
@@ -138,6 +139,17 @@
             box-sizing: border-box; /* Incluye padding en el ancho total */
         }
 
+        .btn-cancel {
+            margin-top: 15px;
+            border: none;
+            border-radius: 4px;
+            padding: 12px 20px; /* Padding aumentado para mejor accesibilidad */
+            font-weight: 600;
+            font-size: 16px; /* Tamaño de fuente ajustado */
+            width: 100%; /* El botón ocupa todo el ancho en pantallas pequeñas */
+            box-sizing: border-box; /* Incluye padding en el ancho total */
+        }
+
         .btn-submit:hover {
             background-color: #ff9800; /* Naranja más oscuro */
         }
@@ -229,7 +241,7 @@
                     Modificar
                 {% endif %}
             </button>
-            <button type="button" class="btn btn-secondary" onclick="window.location.href='{% if contexModel == 'element' %}/Elements-Manager/{% elif contexModel == 'curv' %}/Elements-Manager/{% elif contexModel == 'ODT' %}/ODT/{% elif contexModel == 'HDT' %}/ODT/{% elif contexModel == 'analytic' %}/Analysis-Manager/{% endif %}'">Cancelar</button>
+            <button type="button" class="btn btn-secondary btn-cancel" onclick="window.location.href='{% if contexModel == 'element' %}/Elements-Manager/{% elif contexModel == 'curv' %}/Elements-Manager/{% elif contexModel == 'ODT' %}/ODT/{% elif contexModel == 'HDT' %}/ODT/{% elif contexModel == 'analytic' %}/Analysis-Manager/{% endif %}'">Cancelar</button>
         </form>
     <br/>
     {% if id != "-1" %}
@@ -254,7 +266,7 @@
             </div>
         {% endif %}
     </div>
-    <button id="open-alert" style="display: none;">Crear Fórmula Química</button>
+    
 </body>
 
 {% include 'Footer.html' %}
