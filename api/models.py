@@ -207,25 +207,6 @@ class MetodoAnalisis(models.Model):
         return f"Metodo {self.nombre}"
     
 
- ### >   
-class CurvaturaElementos(models.Model):
-    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE) 
-    elemento = models.ForeignKey(Elementos, on_delete=models.CASCADE, related_name="elemento")  
-    curvatura = models.IntegerField(
-        "Curvatura de análisis", 
-        default=1, 
-        validators=[MinValueValidator(1)]
-    )
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['cliente', 'elemento'], name='unique_cliente_elemento')
-        ]
-
-    def __str__(self):
-        return f"{self.cliente.nombre} | {self.elemento.nombre} | Curvatura: {self.curvatura}"
-### <
-
 class Parametros(models.Model):
     Elementos = models.ManyToManyField(Elementos, related_name="Elementos")
     Unidad = models.CharField(max_length=200)
@@ -283,19 +264,38 @@ class Muestra(models.Model):
     
 
 class LotesAbsorción(models.Model):
-    ID_HDT = models.CharField(_("Nro de Lote"), max_length=200, blank=False, null=False)
-    muestra = models.ForeignKey(Muestra, on_delete=models.CASCADE, related_name="muestra_de_analisis")
+    ID_LT = models.CharField(_("Nro de Lote"), max_length=200, blank=False, null=False, default=0)
+    hoja_trabajo = models.ForeignKey(HojaTrabajoQuimico, on_delete=models.CASCADE, null=False, blank=True, default=None, related_name="resultado_hoja")
+    curv_1 = models.FloatField(_("Curvatura 1"), default=0.0, validators=[MinValueValidator(0.0)])
+    curv_2 = models.FloatField(_("Curvatura 2"), default=0.0, validators=[MinValueValidator(0.0)])
+    curv_3 = models.FloatField(_("Curvatura 3"), default=0.0, validators=[MinValueValidator(0.0)])
+    curv_4 = models.FloatField(_("Curvatura 4"), default=0.0, validators=[MinValueValidator(0.0)])
+
+    def __str__(self):
+        return f"Lote {self.ID_LT} - HDT {self.hoja_trabajo}"
+
+    class Meta:
+        verbose_name = _("Lote de Absorción")
+        verbose_name_plural = _("Lotes de Absorción")
 
 
-# Modelo para almacenar los resultados
-### >
 class Resultado(models.Model):
-    elemento = models.ForeignKey(Elementos, on_delete=models.CASCADE, related_name="resultados")
-    muestra = models.ForeignKey(MuestraMasificada, on_delete=models.CASCADE, related_name="resultados")
-    hoja_trabajo = models.ForeignKey(HojaTrabajo, on_delete=models.CASCADE, related_name="resultados")
+    elemento = models.ForeignKey(Elementos, on_delete=models.CASCADE, related_name="resultado_elemento")
+    muestra = models.ForeignKey(Muestra, on_delete=models.CASCADE, related_name="resultado_muestra")
+    lote_absorcion = models.ForeignKey(LotesAbsorción, on_delete=models.CASCADE, null=False, blank=True, default=None, related_name="resultados_lote")
+    dilucion = models.FloatField(verbose_name="dilución de elemento", null=False, blank=False, default=0)
     resultadoAnalisis = models.FloatField(verbose_name="Resultado de Análisis", null=False, blank=False)
-    fecha_emision = models.DateField(verbose_name="Fecha de Emisión", null=False, blank=False)
-### <
+    leyAnalisis = models.FloatField(verbose_name="Ley de Análisis", null=False, blank=False, default=0)
+    fecha_emision = models.DateField(verbose_name="Fecha de Emisión", null=False, blank=False, default=0)
+
+    def __str__(self):
+        return f"Resultado de {self.elemento.nombre} - Lote {self.lote_absorcion.ID_LT}"
+
+    class Meta:
+        verbose_name = _("Resultado")
+        verbose_name_plural = _("Resultados")
+
+
 
 class Novedades(models.Model):
     class Tipo(models.TextChoices):
@@ -325,3 +325,14 @@ class Novedades(models.Model):
     def eliminar_antiguos(cls):
         limite = timezone.now() - timedelta(days=30)
         cls.objects.filter(fecha__lt=limite).delete()
+
+
+class Noticia(models.Model):
+    titulo = models.CharField(max_length=200)
+    descripcion = models.TextField()
+    contenido_completo = models.TextField()
+    imagen = models.ImageField(upload_to='noticias/')
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    def str(self):
+        return self.titulo

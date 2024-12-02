@@ -186,46 +186,87 @@
         .table tbody tr:hover {
             background-color: #f1f1f1;
         }
+
+
+        .btn {
+            display: inline-block; /* Para asegurarse de que estén en línea */
+            margin: 5px; /* Espaciado entre botones */
+            padding: 5px;
+            border: 1px solid #aaa;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            text-align: center;
+        }
+    
+        /* Botón Activo */
+        .btn-active {
+            background-color: #007BFF; /* Azul activo */
+            color: white;
+            border-color: #0056b3;
+        }
+    
+
+    
+        /* Efecto hover para todos los botones */
+        .btn:hover {
+            background-color: #e9ecef;
+            color: black;
+        }
+    
+        /* Asegurarse de que los botones estén alineados horizontalmente */
+        .buttons-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px; /* Espacio entre botones */
+        }
+
     </style>
 </head>
 <body>
     <div class="content-wrapper">
-        <!-- Sidebar (Perfil) -->
         <div class="sidebar">
-            <h2>Novedades</h2>
+            <button class="btn btn-block btn-info" onclick="window.location.href='/index'">Atras</button>
+
+            <h2>Registros de documentos</h2>
             <hr>
-            <!-- Sección de Acciones de Registros -->
-            <h5>Acciones de Registros</h5>
-            <div class="table-container">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Tipo</th>
-                        <th>Acción</th>
-                        <th>ID Registro</th>
-                        <th>Fecha</th>
-                        <th>Usuario</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for novedad in acciones_registros %}
-                    <tr>
-                        <td>{{ novedad.tipo_model }}</td>
-                        <td>{{ novedad.accion }}</td>
-                        <td>{{ novedad.modelt_id }}</td>
-                        <td>{{ novedad.fecha|date:"d/m/Y H:i" }}</td>
-                        <td>{{ novedad.usuario }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5">No hay novedades registradas.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <h5>Procesos de Hojas de Trabajo</h5>
-            <div class="table-container">
+            <div class="buttons-row container">
+                <button class="btn btn-active" onclick="mostrarTabla('acciones-registros', this)">Acciones generales</button>
+                <button class="btn" onclick="mostrarTabla('procesos-hojas', this)">Procesos por Balanza</button>
+            </div>
+            <div id="acciones-registros" class="table-container hidden">
+                <h5>Acciones de Registros</h5>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Acción</th>
+                            <th>ID Registro</th>
+                            <th>Fecha</th>
+                            <th>Usuario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for novedad in acciones_registros %}
+                        <tr>
+                            <td>{{ novedad.tipo_model }}</td>
+                            <td>{{ novedad.accion }}</td>
+                            <td>{{ novedad.modelt_id }}</td>
+                            <td>{{ novedad.fecha|date:"d/m/Y H:i" }}</td>
+                            <td>{{ novedad.usuario }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5">No hay novedades registradas.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+    
+            <!-- Tabla: Procesos por Balanza -->
+            <div id="procesos-hojas" class="table-container hidden">
+                <h5>Procesos de Hojas de Trabajo</h5>
                 <table class="table table-striped">
                     <thead>
                         <tr>
@@ -253,9 +294,8 @@
                     </tbody>
                 </table>
             </div>
-            
+        </div>
     
-    </div>
 
         <!-- Main Content -->
         <div class="main-content">
@@ -292,43 +332,56 @@
 </body>
 <script>
 
-function ShowInfo(value)
-{
-
-    console.log("Hola" + value.toString())
-    Contex = ""
-    if (value == "1")
+    function ShowInfo(value)
     {
-        Contex = "Esta sección corresponde a la creación de documentos y registros de orden de trabajo para poder llevar a cabo el inicio de la investigación y análisis de resultados solicitados por los clientes"
+        console.log("Hola" + value.toString())
+        Contex = ""
+        if (value == "1")
+        {
+            Contex = "Esta sección corresponde a la creación de documentos y registros de orden de trabajo para poder llevar a cabo el inicio de la investigación y análisis de resultados solicitados por los clientes"
 
-    }
-    if (value == "2")
-    {
-
-        Contex = "Esa sección corresponde a la asignación de muestras para realizar el análisis de una orden de trabajo y poder ser procesados por los trabajadores"
-    }
-    if (value == "3")
-    {
-        Contex = "Esta sección corresponde al entorno de análisis que se busca realizar en las asignadas de las órdenes de trabajo y obtener resultados de acuerdo al uso que se le busca dar"
-    }
-    Swal.fire({
-        title: Contex,
-        showClass: {
-          popup: `
-            animate__animated
-            animate__fadeInUp
-            animate__faster
-          `
-        },
-        hideClass: {
-          popup: `
-            animate__animated
-            animate__fadeOutDown
-            animate__faster
-          `
         }
-      });
-}
+        if (value == "2")
+        {
+
+            Contex = "Esa sección corresponde a la asignación de muestras para realizar el análisis de una orden de trabajo y poder ser procesados por los trabajadores"
+        }
+        if (value == "3")
+        {
+            Contex = "Esta sección corresponde al entorno de análisis que se busca realizar en las asignadas de las órdenes de trabajo y obtener resultados de acuerdo al uso que se le busca dar"
+        }
+        Swal.fire({
+            title: Contex,
+            showClass: {
+            popup: `
+                animate__animated
+                animate__fadeInUp
+                animate__faster
+            `
+            },
+            hideClass: {
+            popup: `
+                animate__animated
+                animate__fadeOutDown
+                animate__faster
+            `
+            }
+        });
+    }
+
+    function mostrarTabla(id, boton) {
+        document.querySelectorAll('.table-container').forEach(function(tabla) {
+            tabla.classList.add('hidden');
+        });
+
+        document.getElementById(id).classList.remove('hidden');
+
+        document.querySelectorAll('.btn').forEach(function(btn) {
+            btn.classList.remove('btn-active');
+        });
+
+        boton.classList.add('btn-active');
+    }
 
 </script>
 </html>

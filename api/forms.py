@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.password_validation import CommonPasswordValidator, validate_password
-from .models import User, Proyecto, Cliente, Muestra, AnalisisCuTFeZn, AnalisisCuS4FeS4MoS4, AnalisisMulti, AnalisisCuS10FeS10MoS10, AnalisisCuSCuSFe, AnalisisCuTestConsH, Resultado, ODT, MuestraMasificada, Elementos, MetodoAnalisis, Parametros, Estandar, HojaTrabajo, CurvaturaElementos, HojaTrabajoQuimico, Novedades
+from .models import User, Proyecto, Cliente, Muestra, AnalisisCuTFeZn, AnalisisCuS4FeS4MoS4, AnalisisMulti, AnalisisCuS10FeS10MoS10, AnalisisCuSCuSFe, AnalisisCuTestConsH, Resultado, ODT, MuestraMasificada, Elementos, MetodoAnalisis, Parametros, Estandar, HojaTrabajo, HojaTrabajoQuimico, Novedades, Noticia
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 import random
@@ -38,7 +38,36 @@ class CustomUserCreationForm(UserCreationForm):
         if password1 and password2 and password1 != password2:
             raise forms.ValidationError(("Las contraseñas no coinciden."))
         return password2
-    
+
+class ContactoForm(forms.Form):
+    nombre = forms.CharField(
+        max_length=100, 
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',  
+            'placeholder': 'Ingresa tu nombre' 
+        })
+    )
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',  # Clase de Bootstrap
+            'placeholder': 'Ingresa tu correo'  # Placeholder descriptivo
+        })
+    )
+    mensaje = forms.CharField(
+        required=True,
+        widget=forms.TextInput(attrs={  # Cambiamos a TextInput para igualar el tamaño
+            'class': 'form-control',  # Clase de Bootstrap
+            'placeholder': 'Escribe tu mensaje'  # Placeholder descriptivo
+        })
+    )
+
+class NoticiaForm(forms.ModelForm):
+    class Meta:
+        model = Noticia
+        fields = ['titulo', 'descripcion', 'contenido_completo', 'imagen']
+        
     
 class ProyectoForm(forms.ModelForm):
     class Meta:
@@ -218,20 +247,16 @@ class HojaTrabajoGeneralForm(forms.ModelForm):
         id_hdt_value = ''
 
         if self.instance.pk:
-            # Obtener el ID_HDT asociado a la instancia actual
             muestra_quimico_id = HojaTrabajoQuimico.objects.filter(HojaTrabajo=self.instance).first()
             if not muestra_quimico_id:
-                print("No se encontró ninguna HojaTrabajoQuimico asociada a esta instancia.")
                 return super().save(commit=commit)
 
             id_hdt_value = muestra_quimico_id.ID_HDT
-            print(f"ID_HDT recibido: {id_hdt_value}")
             metodo_analisis = self.instance.MetodoAnalisis
             elementos = metodo_analisis.elementos.all()
 
             if muestra_quimico_id:
                 hojas_quimicos = HojaTrabajoQuimico.objects.filter(ID_HDT=id_hdt_value)
-                print("Modificando Hoja de Trabajo Químico...")
 
                 instance = super().save(commit=False)
                 hojas_trabajo = [hq.HojaTrabajo for hq in hojas_quimicos]
@@ -241,8 +266,6 @@ class HojaTrabajoGeneralForm(forms.ModelForm):
                 muestras = list(Muestra.objects.filter(hoja_trabajo__in=hojas_trabajo))  
                 resultados = list(Resultado.objects.filter(hoja_trabajo__in=hojas_trabajo))
 
-                curvElement = CurvaturaElementos.objects.filter(elemento__in=elementos)
-
                 for hoja_trabajo in hojas_trabajo:
                     hoja_trabajo.odt = self.instance.odt
                     hoja_trabajo.Estandar.set(self.instance.Estandar.all())
@@ -251,47 +274,43 @@ class HojaTrabajoGeneralForm(forms.ModelForm):
                     hoja_trabajo.Duplicado = self.instance.Duplicado
                     hoja_trabajo.save()
 
-                for elemento in elementos:
-                    curvatura = curvElement.filter(elemento=elemento).first().curvatura
-                    print(f"Elemento: {elemento.nombre} - Curvatura: {curvatura}")
+                for muestra_masificada in muestras_masificadas:
+                    muestras_existentes = [m for m in muestras if m.elemento == elemento.nombre and m.muestraMasificada == muestra_masificada]
+                    muestras_existentes.sort(key=lambda x: x.indexCurv)
 
-                    for muestra_masificada in muestras_masificadas:
-                        muestras_existentes = [m for m in muestras if m.elemento == elemento.nombre and m.muestraMasificada == muestra_masificada]
-                        muestras_existentes.sort(key=lambda x: x.indexCurv) 
+                    for i, muestra in enumerate(muestras_existentes, start=1):
+                        if muestra.indexCurv != i:
+                            muestra.indexCurv = i
+                            muestra.save()
+                            print(f"Reordenado índice de muestra: {muestra.nombre} a {i}")
 
-                        for i, muestra in enumerate(muestras_existentes, start=1):
-                            if muestra.indexCurv != i:
-                                muestra.indexCurv = i
-                                muestra.save()
-                                print(f"Reordenado índice de muestra: {muestra.nombre} a {i}")
+                    if len(muestras_existentes) > 0:
+                        exceso = muestras_existentes[1:] 
+                        for muestra_exceso in exceso:
+                            muestra_exceso.delete()
+                        print(f"Eliminadas muestras fuera del rango.")
 
-                        if len(muestras_existentes) > curvatura:
-                            exceso = muestras_existentes[curvatura:]
-                            for muestra_exceso in exceso:
-                                muestra_exceso.delete()
-                            print(f"Eliminadas {len(exceso)} muestras fuera del rango de curvatura para {elemento.nombre}.")
-
-                        elif len(muestras_existentes) < curvatura:
-                            falta = curvatura - len(muestras_existentes)
-                            for i in range(len(muestras_existentes) + 1, len(muestras_existentes) + falta + 1):
-                                nueva_muestra = Muestra.objects.create(
-                                    nombre=f"{elemento.nombre} - Muestra {i}",
-                                    proyecto=odt.Proyecto,
-                                    fecha_emision=timezone.now(),
-                                    elemento=elemento.nombre,
-                                    nbo=f"NBO-{i}",
-                                    ident=f"ID-{i}",
-                                    indexCurv=i,
-                                    hoja_trabajo=hojas_trabajo[0], 
-                                    muestraMasificada=muestra_masificada,
-                                    t="M",
-                                    peso_m=0.0,
-                                    v_ml=0.0,
-                                    l_ppm=0.0,
-                                    l_ppm_bk=0.0,
-                                    porcentaje=0.0
-                                )
-                                print(f"Creada nueva muestra: {nueva_muestra.nombre}")
+                    if len(muestras_existentes) < len(elementos):
+                        falta = len(elementos) - len(muestras_existentes)
+                        for i in range(len(muestras_existentes) + 1, len(muestras_existentes) + falta + 1):
+                            nueva_muestra = Muestra.objects.create(
+                                nombre=f"{elemento.nombre} - Muestra {i}",
+                                proyecto=odt.Proyecto,
+                                fecha_emision=timezone.now(),
+                                elemento=elemento.nombre,
+                                nbo=f"NBO-{i}",
+                                ident=f"ID-{i}",
+                                indexCurv=i,
+                                hoja_trabajo=hojas_trabajo[0], 
+                                muestraMasificada=muestra_masificada,
+                                t="M",
+                                peso_m=0.0,
+                                v_ml=0.0,
+                                l_ppm=0.0,
+                                l_ppm_bk=0.0,
+                                porcentaje=0.0
+                            )
+                            print(f"Creada nueva muestra: {nueva_muestra.nombre}")
 
                 for muestra in muestras:
                     for elemento in elementos:
@@ -300,7 +319,6 @@ class HojaTrabajoGeneralForm(forms.ModelForm):
                             None
                         )
 
-                        # Crear resultado si no existe
                         if not resultado_existente:
                             nuevo_resultado = Resultado.objects.create(
                                 elemento=elemento,
@@ -326,8 +344,6 @@ class HojaTrabajoGeneralForm(forms.ModelForm):
             elementos = metodo_analisis.elementos.all()
             
             for muestra in muestras:
-                
-
                 if count == 0:
                     hoja_trabajo = instance
                     hoja_trabajo.MuestraMasificada = muestra
@@ -340,7 +356,7 @@ class HojaTrabajoGeneralForm(forms.ModelForm):
                         Duplicado=instance.Duplicado,
                         MuestraMasificada=muestra
                     )
-                    hoja_trabajo.save()  # Guarda la hoja de trabajo
+                    hoja_trabajo.save()  
                 hoja_trabajo.Estandar.set(self.cleaned_data['Estandar']) 
                 hojas_trabajo.append(hoja_trabajo)
                 count += 1
@@ -354,42 +370,24 @@ class HojaTrabajoGeneralForm(forms.ModelForm):
                 hoja_trabajo_quimico.save()
 
                 for elemento in elementos:
-                    curvatura = CurvaturaElementos.objects.filter(
-                        cliente=metodo_analisis.cliente,
-                        elemento=elemento
-                    ).first()
-                    
-                    curvatura_valor = curvatura.curvatura if curvatura else 1
-                    print(f"Elemento: {elemento.nombre} - Curvatura: {curvatura_valor}")
-                    
-                    for index in range(1, curvatura_valor + 1):
-                        muestra_instance = Muestra(
-                            nombre=f"{elemento.nombre} - Muestra {index}",
-                            proyecto=odt.Proyecto,
-                            fecha_emision=timezone.now(),
-                            elemento=elemento.nombre,
-                            nbo=f"NBO-{index}", 
-                            ident=f"ID-{index}",
-                            indexCurv=index,
-                            hoja_trabajo=hoja_trabajo,  
-                            muestraMasificada=muestra,
-                            t="M", 
-                            peso_m=0.0, 
-                            v_ml=0.0, 
-                            l_ppm=0.0, 
-                            l_ppm_bk=0.0,  
-                            porcentaje=0.0  
-                        )
-                        muestra_instance.save() 
-
-                    resultado_instance = Resultado(
-                        elemento=elemento, 
-                        muestra=muestra, 
-                        hoja_trabajo=hoja_trabajo,
-                        resultadoAnalisis=0, 
-                        fecha_emision=timezone.now()
+                    muestra_instance = Muestra(
+                        nombre=f"{elemento.nombre} - Muestra {1}",
+                        proyecto=odt.Proyecto,
+                        fecha_emision=timezone.now(),
+                        elemento=elemento.nombre,
+                        nbo=f"NBO-{1}", 
+                        ident=f"ID-{1}",
+                        indexCurv=1,
+                        hoja_trabajo=hoja_trabajo,  
+                        muestraMasificada=muestra,
+                        t="M", 
+                        peso_m=0.0, 
+                        v_ml=0.0, 
+                        l_ppm=0.0, 
+                        l_ppm_bk=0.0,  
+                        porcentaje=0.0  
                     )
-                    resultado_instance.save() 
+                    muestra_instance.save() 
 
         if commit:
             instance.save()
@@ -401,8 +399,4 @@ class HojaTrabajoQuimicoForm(forms.ModelForm):
     class Meta:
         model = HojaTrabajoQuimico
         fields = '__all__'
-    
-class CurvaturaForm(forms.ModelForm):
-    class Meta:
-        model = CurvaturaElementos
-        fields = '__all__'
+

@@ -159,18 +159,27 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-MEDIA_URL='media/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-MEDIA_ROOT=os.path.join(BASE_DIR,'media')
-
 STATICFILES_DIRS = [os.path.join(BASE_DIR,'static')]
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
 STORAGES = {
-    # ...
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "OPTIONS": {
+            "location": MEDIA_ROOT,  # Ruta donde se almacenarán los archivos subidos
+            "base_url": MEDIA_URL,   # URL base para acceder a los archivos
+        },
+    },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+
+
 
 AUTH_USER_MODEL='api.User'
 
@@ -196,3 +205,14 @@ CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_AGE = 18000  # Dos semanas en segundos
 SESSION_SAVE_EVERY_REQUEST = True  # Renueva la sesión con cada solicitud
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Mantener la sesión abierta aunque el navegador se cierre
+
+
+
+
+DEFAULT_FROM_EMAIL = 'omgfabri@gmail.com'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = DEFAULT_FROM_EMAIL
+EMAIL_HOST_PASSWORD = 'tqoy wsxh sxce copo'  

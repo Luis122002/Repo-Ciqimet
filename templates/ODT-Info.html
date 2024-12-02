@@ -334,7 +334,7 @@
                                     <th>Tipo</th>
                                     <th>Duplicado</th>
                                     <th>Elementos</th>
-                                    <th>Peso y Elemento</th>
+                                    <th>Peso de muestra</th>
                                 </tr>
                             </thead>
                             <tbody>`;
@@ -343,8 +343,6 @@
                     let elementosText = muestra.elementos.map(elemento => 
                         `${elemento.nombre} (${elemento.gramos}g / ${elemento.miligramos}ml)`
                     ).join('<br/>'); 
-
-                    let pesoElementoText = muestra.peso_elemento.split(', ').join('<br/>');
 
                     tablaHTML += `
                         <tr>
@@ -355,7 +353,7 @@
                             <td>${muestra.tipo}</td>
                             <td>${muestra.duplicado}</td>
                             <td>${elementosText}</td>
-                            <td>${pesoElementoText}</td>
+                            <td>${muestra.peso_muestra}</td>
                         </tr>`;
                 });
 

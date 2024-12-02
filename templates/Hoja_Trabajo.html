@@ -193,7 +193,6 @@
                                         ).join('<br/>'); // Usa <br/> para salto de línea entre elementos
 
                                         // Agregar salto de línea en peso y elemento
-                                        let pesoElementoText = muestra.peso_elemento.split(', ').join('<br/>');
 
                                         tablaHTML += `
                                             <tr>
@@ -204,7 +203,7 @@
                                                 <td>${muestra.tipo}</td>
                                                 <td>${muestra.duplicado}</td>
                                                 <td>${elementosText}</td>
-                                                <td>${pesoElementoText}</td> <!-- Mostrar el peso y el elemento con salto de línea -->
+                                                <td>${muestra.peso_muestra}</td> <!-- Mostrar el peso y el elemento con salto de línea -->
                                             </tr>`;
                                     });
 

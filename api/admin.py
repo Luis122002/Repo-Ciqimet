@@ -2,13 +2,13 @@ from django.contrib import admin
 from .models import (
     User, Proyecto, Cliente, Muestra, AnalisisCuTFeZn, AnalisisCuS4FeS4MoS4, AnalisisMulti,
     AnalisisCuS10FeS10MoS10, AnalisisCuSCuSFe, AnalisisCuTestConsH, Resultado, ODT, MuestraMasificada,
-    Elementos, MetodoAnalisis, Parametros, Estandar, HojaTrabajo, HojaTrabajoQuimico, CurvaturaElementos
+    Elementos, MetodoAnalisis, Parametros, Estandar, HojaTrabajo, HojaTrabajoQuimico
 )
 from .forms import (
     CustomUserCreationForm, ProyectoForm, ClienteForm, MuestraForm, AnalisisCuTFeZnForm,
     AnalisisCuS4FeS4MoS4Form, AnalisisMultiForm, AnalisisCuS10FeS10MoS10Form, AnalisisCuSCuSFeForm,
     AnalisisCuTestConsHForm, ResultadoForm, ODTForm, MuestraMasificadaForm, ElementosForm,
-    MetodoAnalisisForm, ParametrosForm, EstandarForm, HojaTrabajoForm, HojaTrabajoGeneralForm, HojaTrabajoQuimicoForm,  CurvaturaForm
+    MetodoAnalisisForm, ParametrosForm, EstandarForm, HojaTrabajoForm, HojaTrabajoGeneralForm, HojaTrabajoQuimicoForm
 )
 
 
@@ -28,9 +28,6 @@ class ProyectoAdmin(admin.ModelAdmin):
 class ClienteAdmin(admin.ModelAdmin):
     form = ClienteForm
     list_display = ('nombre', 'rut', 'direccion', 'telefono', 'email')
-
-
-
 
 
 @admin.register(AnalisisCuTFeZn)
@@ -68,11 +65,6 @@ class AnalisisCuTestConsHAdmin(admin.ModelAdmin):
     form = AnalisisCuTestConsHForm
     list_display = ('control1_cut_cutest', 'cut', 'cut_test', 'gaston_ml')
 
-
-@admin.register(Resultado)
-class ResultadoAdmin(admin.ModelAdmin):
-    form = ResultadoForm
-    list_display = ('elemento', 'muestra', 'hoja_trabajo', 'hoja_trabajo', 'resultadoAnalisis', 'fecha_emision')
 
 
 @admin.register(ODT)
@@ -127,8 +119,3 @@ class HojaTrabajoAdmin(admin.ModelAdmin):
 class HojaTrabajoQuimicosAdmin(admin.ModelAdmin):
     form = HojaTrabajoQuimicoForm
     list_display = ('ID_HDT', 'confirmar_balanza', 'confirmar_Absorcion', 'HojaTrabajo')
-
-@admin.register(CurvaturaElementos)
-class CurvaturaAdmin(admin.ModelAdmin):
-    form = CurvaturaForm
-    list_display = ('cliente','elemento', 'curvatura')

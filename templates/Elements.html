@@ -22,10 +22,6 @@
                 <button class="btn btn-success" onclick="addElement()">
                     Añadir elementos
                 </button>
-
-                <button class="btn btn-success" onclick="addCurv()">
-                    Añadir curvatura
-                </button>
                 
                 <button class="btn btn-info" onclick="window.location.href = '/ODT'">
                     Atrás
@@ -45,16 +41,16 @@
                     <th scope="col">Nombre</th>
                     <th scope="col">Gramos</th>
                     <th scope="col">Miligramos</th>
-                    <th scope="col">Curvatura de Cliente</th>
+                    <th scope="col">Clientes asociados</th>
                     <th scope="col">Acción</th>
                 </tr>
             </thead>
             <tbody id="element-table-body">
                 {% for item in elementos %}
                     <tr class="{% if item.enabled %}active{% else %}inactive{% endif %}">
-                        <td><h3>{{ item.nombre }}</h3></td>
-                        <td><h3>{{ item.gramos|floatformat:0 }}</h3></td>
-                        <td><h3>{{ item.miligramos|floatformat:0 }}</h3></td>
+                        <td>{{ item.nombre }}</td>
+                        <td>{{ item.gramos|floatformat:0 }}</td>
+                        <td>{{ item.miligramos|floatformat:0 }}</td>
                         <td class="text-align-left">
                             {% for curvatura in item.curvaturas %}
                                 <div class="align-items-left">
@@ -216,41 +212,7 @@
             });
         }
 
-        function addCurv()
-        {
-            const elementId = -1;
-            const urlDat = '/MasterData/';
-            const Token = csrfToken;
-            const context = 'curv'; 
-            const action = 'add'; 
-            const stade = "acces"; 
-            $.ajax({
-                url: urlDat,
-                type: 'POST',
-                headers: {
-                    'X-CSRFToken': Token
-                },
-                data: {
-                    'id': elementId,
-                    'context': context,
-                    'action': action,
-                    'stade': stade
-                },
-                success: function(response) {
-                    if (response.redirect_url) {
-                        window.location.href = response.redirect_url; 
-                    } else {
-                        console.log(response.message);
-                    }
-                },
-                error: function(xhr) {
-                    console.error('Error al enviar datos:', xhr.responseText);
-                }
-            });
-        }
-
-
-
+    
     </script>
 </body>
 

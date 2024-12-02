@@ -788,25 +788,10 @@
                         <ul class="dropdown-menu" aria-labelledby="ordersDropdown">
                             <li><a class="dropdown-item" onclick="NavigationFunc(1)">Ver ordenes de trabajo</a></li>
                             <li><a class="dropdown-item" onclick="NavigationFunc(2)">Añadir orden de trabajo</a></li>
-                            <li><a class="dropdown-item" onclick="NavigationFunc(3)">Exportar información de ODT</a></li>
                             <li><a class="dropdown-item" onclick="NavigationFunc(4)">Ver análisis</a></li>
                             <li><a class="dropdown-item" onclick="NavigationFunc(5)">Añadir análisis</a></li>
                             <li><a class="dropdown-item" onclick="NavigationFunc(6)">Ver elementos</a></li>
                             <li><a class="dropdown-item" onclick="NavigationFunc(7)">Añadir elementos</a></li>
-                        </ul>
-                    </li>
-                    <!-- Menú desplegable Puesto de Trabajo Instrumental -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="instrumentalDropdown" role="button" aria-expanded="false">
-                            Puesto de Trabajo Instrumental
-                            <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="instrumentalDropdown">
-                            <li><a class="dropdown-item" onclick="showInputModal(2)">Abrir plantilla ODT</a></li>
-                            <li><a class="dropdown-item" onclick="">Exportar plantilla ODT</a></li>
-                            <li><a class="dropdown-item" onclick="">Modificar muestra</a></li>
-                            <li><a class="dropdown-item" onclick="">Eliminar muestra</a></li>
-                            <li><a class="dropdown-item" onclick="">Exportar plantilla de balanza ODT</a></li>
                         </ul>
                     </li>
                     <!-- Menú desplegable Puesto de Trabajo (Balanza de Muestras) -->
@@ -816,10 +801,22 @@
                             <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="balanzaDropdown">
-                            <li><a class="dropdown-item" onclick="showInputModal(1)">Abrir plantilla ODT</a></li>
-                            <li><a class="dropdown-item" onclick="">Asignar lotes de muestras</a></li>
-                            <li><a class="dropdown-item" onclick="">Obtener análisis de muestras</a></li>
-                            <li><a class="dropdown-item" onclick="">Exportar análisis de ODT</a></li>
+                            <li><a class="dropdown-item" onclick="showInputModal(1)">Abrir plantilla HDT</a></li>
+                            <li><a class="dropdown-item" onclick="NavigationFunc(8)">Acceder Sección de trabajo</a></li>
+                            <li><a class="dropdown-item" onclick="NavigationFunc(9)">Acceder Balanza</a></li>
+                            <li><a class="dropdown-item" onclick="NavigationFunc(10)">Acceder hojas de trabajo</a></li>
+                        </ul>
+                    </li>
+                    <!-- Menú desplegable Puesto de Trabajo Instrumental -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="instrumentalDropdown" role="button" aria-expanded="false">
+                            Puesto de Trabajo Instrumental
+                            <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="instrumentalDropdown">
+                            <li><a class="dropdown-item" onclick="showInputModal(2)">Abrir plantilla HDT</a></li>
+                            <li><a class="dropdown-item" onclick="showInputModal(3)">Abrir Lote de absorción</a></li>
+                            <li><a class="dropdown-item" onclick="NavigationFunc(11)">Acceder sección de absorción</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -844,27 +841,11 @@
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="ordersDropdownMobile">
                             <li><a class="dropdown-item" onclick="NavigationFunc(1)">Ver ordenes de trabajo</a></li>
-                            <li><a class="dropdown-item" onclick="NavigationFunc(2)">Añadir ordenes de trabajo</a></li>
-                            <li><a class="dropdown-item" onclick="NavigationFunc(3)">Exportar información de ODT</a></li>
+                            <li><a class="dropdown-item" onclick="NavigationFunc(2)">Añadir orden de trabajo</a></li>
                             <li><a class="dropdown-item" onclick="NavigationFunc(4)">Ver análisis</a></li>
                             <li><a class="dropdown-item" onclick="NavigationFunc(5)">Añadir análisis</a></li>
                             <li><a class="dropdown-item" onclick="NavigationFunc(6)">Ver elementos</a></li>
                             <li><a class="dropdown-item" onclick="NavigationFunc(7)">Añadir elementos</a></li>
-                        </ul>
-                    </li>
-                    <br/><br/>
-                    <!-- Menú desplegable Puesto de Trabajo Instrumental -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="instrumentalDropdownMobile" role="button" aria-expanded="false">
-                            Puesto de Trabajo Instrumental
-                            <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="instrumentalDropdownMobile">
-                            <li><a class="dropdown-item" onclick="">Abrir plantilla ODT</a></li>
-                            <li><a class="dropdown-item" onclick="">Exportar plantilla ODT</a></li>
-                            <li><a class="dropdown-item" onclick="">Modificar muestra</a></li>
-                            <li><a class="dropdown-item" onclick="">Eliminar muestra</a></li>
-                            <li><a class="dropdown-item" onclick="">Exportar plantilla de balanza ODT</a></li>
                         </ul>
                     </li>
                     <br/><br/>
@@ -875,10 +856,23 @@
                             <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="balanzaDropdownMobile">
-                            <li><a class="dropdown-item" onclick="">Abrir plantilla ODT</a></li>
-                            <li><a class="dropdown-item" onclick="">Asignar lotes de muestras</a></li>
-                            <li><a class="dropdown-item" onclick="">Obtener análisis de muestras</a></li>
-                            <li><a class="dropdown-item" onclick="">Exportar análisis de ODT</a></li>
+                            <li><a class="dropdown-item" onclick="showInputModal(1)">Abrir plantilla HDT</a></li>
+                            <li><a class="dropdown-item" onclick="NavigationFunc(8)">Acceder Sección de trabajo</a></li>
+                            <li><a class="dropdown-item" onclick="NavigationFunc(9)">Acceder Balanza</a></li>
+                            <li><a class="dropdown-item" onclick="NavigationFunc(10)">Acceder hojas de trabajo</a></li>
+                        </ul>
+                    </li>
+                    <br/><br/>
+                    <!-- Menú desplegable Puesto de Trabajo Instrumental -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="instrumentalDropdownMobile" role="button" aria-expanded="false">
+                            Puesto de Trabajo Instrumental
+                            <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="instrumentalDropdownMobile">
+                            <li><a class="dropdown-item" onclick="showInputModal(2)">Abrir plantilla HDT</a></li>
+                            <li><a class="dropdown-item" onclick="showInputModal(3)">Abrir Lote de absorción</a></li>
+                            <li><a class="dropdown-item" onclick="NavigationFunc(11)">Acceder sección de absorción</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -1191,7 +1185,22 @@
                         }
                     });
                 break;
-
+                case 8:
+                console.log("Navegando a la sección puesto de trabajo");
+                    window.location.href = LocalPath + "/Puesto-trabajo/"
+                break;
+                case 9:
+                console.log("Navegando a la sección puesto de balanza");
+                    window.location.href = LocalPath + "/Balanza/"
+                break;
+                case 10:
+                console.log("Navegando a la sección hojas de trabajo");
+                    window.location.href = LocalPath + "/Hoja-Trabajo/"
+                break;
+                case 11:
+                console.log("Navegando a la sección hojas de trabajo");
+                    window.location.href = LocalPath + "/Puesto-Absorcion/"
+                break;
             }
         }
 
@@ -1240,7 +1249,20 @@
                         
                             const idInput = document.createElement('input');
                             idInput.type = 'hidden';
-                            idInput.name = 'id';
+
+                            var nameCamp = ''
+
+                            if(mode == 2)
+                            {
+                                nameCamp = 'id'
+                            }
+                            else
+                            {
+                                nameCamp = 'batch'
+                            }
+
+
+                            idInput.name = nameCamp;
                             idInput.value = `${result.value}`;
                             form.appendChild(idInput);
                         
@@ -1259,6 +1281,21 @@
             $('[data-bs-toggle="tooltip"]').tooltip();   
           });
 
+          function moverFoco(event) {
+            // Verificar si la tecla presionada es "Enter"
+            if (event.key === "Enter") {
+                event.preventDefault(); // Prevenir el comportamiento predeterminado de Enter (enviar formulario)
+    
+                // Buscar el siguiente campo de entrada (input)
+                const inputs = document.querySelectorAll('input');
+                const currentIndex = Array.from(inputs).indexOf(event.target);
+    
+                // Mover el foco al siguiente campo si existe
+                if (currentIndex + 1 < inputs.length) {
+                    inputs[currentIndex + 1].focus();
+                }
+            }
+        }
 
 
     </script>

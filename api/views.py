@@ -3,7 +3,7 @@ import json
 from django.shortcuts import HttpResponse
 from django.contrib import messages
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import  AuthenticationForm
 from django.contrib.auth import login, logout
 from django.http import JsonResponse, HttpResponseForbidden, HttpResponseRedirect
@@ -11,14 +11,21 @@ from django.shortcuts import render, redirect
 from api import models, forms
 from django.urls import reverse
 from django.db import IntegrityError, transaction, connection
-from django.db.models import Q, Min, F
+from django.db.models import Q, Min, F, IntegerField
 from decimal import Decimal
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from django.shortcuts import render
+from django.core.mail import send_mail
 import threading
 import serial
 import serial.tools.list_ports
 from serial.tools import list_ports
+from django.db.models.functions import Cast
+import random
+from collections import defaultdict
+import string
+
 
 
 @login_required(login_url='/login')
@@ -185,12 +192,13 @@ def Request_HT(request):
     if request.method == 'GET':
         id_hdt = request.GET.get('id')
 
+        # Filtrar y ordenar hojas de trabajo químico
         hojas_trabajo_quimico = models.HojaTrabajoQuimico.objects.filter(ID_HDT=id_hdt).order_by('ID_HDT')
 
         data = []
         
         for hoja_quimico in hojas_trabajo_quimico:
-            muestra = hoja_quimico.HojaTrabajo 
+            muestra = hoja_quimico.HojaTrabajo
             elementos_data = [
                 {
                     'nombre': elemento.nombre,
@@ -199,17 +207,12 @@ def Request_HT(request):
                 }
                 for elemento in muestra.MetodoAnalisis.elementos.all()
             ]
-            muestras_filtradas = models.Muestra.objects.filter(hoja_trabajo=muestra, indexCurv=1)
+            muestras_filtradas = models.Muestra.objects.filter(hoja_trabajo=muestra)
 
-            pesos_elementos = {}
+            Data_Peso = 0
             for m in muestras_filtradas:
-                elemento_nombre = m.elemento
-                if elemento_nombre in pesos_elementos:
-                    pesos_elementos[elemento_nombre] += m.peso_m
-                else:
-                    pesos_elementos[elemento_nombre] = m.peso_m
+                Data_Peso = m.peso_m
 
-            peso_elemento_text = ', '.join(f"Peso de {elemento}: {peso}g" for elemento, peso in pesos_elementos.items())
             
             data.append({
                 'id': muestra.id,
@@ -217,14 +220,14 @@ def Request_HT(request):
                 'estado': 'Cerrado' if hoja_quimico.confirmar_balanza else 'Pendiente',
                 'estandar': ', '.join(estandar.Nombre for estandar in muestra.Estandar.all()),
                 'metodo_analisis': muestra.MetodoAnalisis.nombre,
-                'muestra_masificada': muestra.MuestraMasificada.Prefijo,
+                'muestra_masificada': muestra.MuestraMasificada.Prefijo, 
                 'tipo': muestra.Tipo,
                 'duplicado': muestra.Duplicado,
                 'elementos': elementos_data,
-                'peso_elemento': peso_elemento_text
+                'peso_muestra': Data_Peso
             })
         
-        data = sorted(data, key=lambda x: x['id'])
+        data = sorted(data, key=lambda x: (int(x['muestra_masificada']), x['id']))
 
         return JsonResponse({'muestras': data})
     
@@ -245,6 +248,9 @@ def Balanza_Module(request):
 
         if not hojas_trabajo_quimico.exists():
             return render(request, 'Balanza.html')
+
+
+        print("Ingresando a este modulo")
 
         hojas_trabajo = models.HojaTrabajo.objects.filter(id__in=[htq.HojaTrabajo.id for htq in hojas_trabajo_quimico])
 
@@ -271,26 +277,19 @@ def Save_M(request):
             data = json.loads(request.body)
             muestras = data.get('muestras', [])
             ID_HDT = data.get('id')
-            print(f"ID_HDT recibido: {ID_HDT}")
 
             for muestra_data in muestras:
                 prefijo = muestra_data.get('prefijo')
                 peso_m = muestra_data.get('peso_m')
-
-                # Convertir peso a Decimal
                 peso_m = Decimal(str(peso_m).replace(',', '.'))
 
-                # Filtrar muestras específicas usando el ID_HDT y el Prefijo
                 muestras = models.Muestra.objects.filter(
                     muestraMasificada__Prefijo=prefijo,
-                    hoja_trabajo__hojas_trabajo_target__ID_HDT=ID_HDT  # Filtrar por HojaTrabajo y ID_HDT
+                    hoja_trabajo__hojas_trabajo_target__ID_HDT=ID_HDT  
                 )
-
-                # Actualizar el campo peso_m en las muestras filtradas
                 for muestra in muestras:
                     muestra.peso_m = peso_m
                     muestra.save()
-                    print(f"Actualizado - Prefijo: {prefijo}, Elemento: {muestra.elemento}, Peso: {peso_m}")
             models.Novedades.objects.create(
                 tipo_model = 'Hoja de trabajo',
                 accion="Modificar",
@@ -311,8 +310,6 @@ def Confirm_M(request):
             data = json.loads(request.body)
             muestras = data.get('muestras', [])
             ID_HDT = data.get('id')
-            print(f"ID_HDT recibido: {ID_HDT}")
-
             for muestra_data in muestras:
                 prefijo = muestra_data.get('prefijo')
                 peso_m = muestra_data.get('peso_m')
@@ -337,7 +334,6 @@ def Confirm_M(request):
                         hoja_trabajo_quimico.confirmar_balanza = True
                         hoja_trabajo_quimico.save()
 
-                    print(f"Confirmada - Prefijo: {prefijo}, Confirmar Balanza: {hoja_trabajo_quimico.confirmar_balanza}")
             
             models.Novedades.objects.create(
                 tipo_model = 'Hoja de trabajo',
@@ -359,46 +355,272 @@ def Confirm_M(request):
 @login_required(login_url='/login')
 def PI_Module(request):
     if request.method == 'POST':
-        id_hdt = request.POST.get('id')
-        print(f'ID recibido en Absorción: {id_hdt}')
+        id_hdt = request.POST.get('id') 
+        id_hdt_list = request.POST.get('id_sec', '')  
+        id_Batch = request.POST.get('batch')
+        
+        batch_mode = False  # Inicializar el indicador
+        elementos_unicos = []  # Lista para almacenar elementos únicos
+        resultados_map = {}  # Mapeo de resultados por muestra y elemento
+        
+        Creación_Batch = ""
 
-        hojas_trabajo_quimico = models.HojaTrabajoQuimico.objects.filter(ID_HDT=id_hdt).order_by('ID_HDT')
-        targetHDT_Quimico = hojas_trabajo_quimico.first()
+        if id_Batch:
+            batch_mode = True  # Activar si se accede con batch
+            Contenedor = models.LotesAbsorción.objects.filter(ID_LT=id_Batch)
 
-        if not hojas_trabajo_quimico.exists():
-            return render(request, 'Puesto-Absorcion.html')
+            if Contenedor.exists():
+                id_hdt_final = list(Contenedor.values_list('hoja_trabajo__ID_HDT', flat=True).distinct())
+                Resultados_Batch = models.Resultado.objects.filter(lote_absorcion__in=Contenedor)
+                
+                if Resultados_Batch.exists():
+                    Creación_Batch = Resultados_Batch.earliest('fecha_emision').fecha_emision
+                else:
+                    Creación_Batch = None
+                
+                # Mapear resultados (muestra + elemento)
+                for resultado in Resultados_Batch:
+                    resultados_map[(resultado.muestra.id, resultado.elemento.nombre)] = {
+                        "resultado_id": resultado.id,
+                        "dilucion": resultado.dilucion,
+                        "resultadoAnalisis": resultado.resultadoAnalisis,
+                        "leyAnalisis": resultado.leyAnalisis,
+                    }
+                    # Añadir elementos únicos
+                    if resultado.elemento.nombre not in elementos_unicos:
+                        elementos_unicos.append(resultado.elemento.nombre)
+            else:
+                id_hdt_final = []  
+        else:
+            id_hdt_list = id_hdt_list.split('-') if id_hdt_list else []
+            id_hdt_set = set(id_hdt_list)
+            if id_hdt: 
+                id_hdt_set.add(id_hdt)
+            id_hdt_final = list(id_hdt_set)
+        
+       
+        Doc_Muestra = []
+        for x in id_hdt_final:
+            hojas_trabajo_quimico = models.HojaTrabajoQuimico.objects.filter(ID_HDT=x)
+            hojas_trabajo = models.HojaTrabajo.objects.filter(id__in=[htq.HojaTrabajo.id for htq in hojas_trabajo_quimico])
+            muestras_balanza = models.Muestra.objects.filter(hoja_trabajo__in=hojas_trabajo, indexCurv=1).order_by('muestraMasificada__Prefijo')
 
-        hojas_trabajo = models.HojaTrabajo.objects.filter(
-            id__in=[htq.HojaTrabajo.id for htq in hojas_trabajo_quimico]
-        ).order_by('id')
+            for muestra in muestras_balanza:
+                existing_muestra = next((m for m in Doc_Muestra if m["Prefijo"] == muestra.muestraMasificada.Prefijo), None)
 
-        odt_ids = hojas_trabajo.values_list('odt_id', flat=True)
+                if not existing_muestra:
+                    # Si no existe, crear la entrada inicial
+                    existing_muestra = {
+                        "Prefijo": muestra.muestraMasificada.Prefijo if muestra.muestraMasificada else None,
+                        "Peso": muestra.peso_m,
+                        "Volumen": muestra.v_ml,
+                        "HojaTrabajo": {
+                            "ID_HDT": x,
+                            "Tipo": muestra.hoja_trabajo.Tipo if muestra.hoja_trabajo else None,
+                            "Duplicado": muestra.hoja_trabajo.Duplicado if muestra.hoja_trabajo else None,
+                            "Cliente": muestra.hoja_trabajo.odt.Cliente.nombre if muestra.hoja_trabajo.odt.Cliente else "Sin Cliente"
+                        },
+                        "Elementos": [], 
+                    }
+                    Doc_Muestra.append(existing_muestra)
 
-        muestras_M = models.MuestraMasificada.objects.filter(odt_id__in=odt_ids)
+                resultado_key = (muestra.id, muestra.elemento)
+                resultado_data = resultados_map.get(resultado_key, {
+                    "resultado_id": None,
+                    "dilucion": None,
+                    "resultadoAnalisis": None,
+                    "leyAnalisis": None,
+                })
 
-        muestras = models.Muestra.objects.filter(
-            hoja_trabajo__in=hojas_trabajo
-        ).order_by('hoja_trabajo__hojas_trabajo_target__ID_HDT', 'hoja_trabajo__id', 'elemento', 'indexCurv')
+                existing_muestra["Elementos"].append({
+                    "nombre": muestra.elemento,
+                    "resultado_id": resultado_data["resultado_id"],
+                    "dilucion": resultado_data["dilucion"],
+                    "resultadoAnalisis": resultado_data["resultadoAnalisis"],
+                    "leyAnalisis": resultado_data["leyAnalisis"],
+                })
 
-        muestras_count = muestras_M.count()
-
-        resultados = models.Resultado.objects.filter(
-            hoja_trabajo__in=hojas_trabajo
-        ).order_by('hoja_trabajo__hojas_trabajo_target__ID_HDT', 'hoja_trabajo__id', 'muestra__elemento', 'fecha_emision')
+                if muestra.elemento not in elementos_unicos:
+                    elementos_unicos.append(muestra.elemento)
 
         context = {
-            'id_hdt': id_hdt,
-            'hojas_trabajo': hojas_trabajo,
-            'muestras': muestras,
-            'muestras_M': muestras_M,
-            'resultados': resultados,
-            'muestras_count': muestras_count
+            'id_hdt': id_hdt_final,
+            'Doc_Muestra': Doc_Muestra,
+            'muestras_count': len(Doc_Muestra),
+            'elementos_unicos': elementos_unicos,
+            'Batch_ID':id_Batch,
+            'Bacth_Creación':Creación_Batch,
+            'batch_mode': batch_mode,
         }
-        
         return render(request, 'Puesto-Absorcion.html', context)
-
     return render(request, 'Puesto-Absorcion.html')
 
+@login_required(login_url='/login')
+def obtener_hojas_trabajo(request):
+    if request.method == 'GET':
+        hojas = models.HojaTrabajoQuimico.objects.filter(confirmar_balanza=True).values_list('ID_HDT', flat=True).distinct()
+        return JsonResponse({'hojas': list(hojas)}, safe=False)
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+@login_required(login_url='/login')
+def Lot_Generator(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            lot_id = data.get('id', None)
+            
+            if not lot_id:
+                return JsonResponse({'error': 'ID no proporcionado'}, status=400)
+            
+            lot_id_list = lot_id.split('-')
+            resultados = []
+
+
+            ID_Taker = random.randint(100000, 999999)
+
+            
+            for lot in lot_id_list:
+                hojas_trabajo_quimico = models.HojaTrabajoQuimico.objects.filter(ID_HDT=lot)
+
+                for hoja_quimica in hojas_trabajo_quimico:
+                    hoja_trabajo = hoja_quimica.HojaTrabajo
+                    modelLot = models.LotesAbsorción.objects.create(
+                        ID_LT = ID_Taker,
+                        hoja_trabajo = hoja_quimica,
+                        curv_1 = 0,
+                        curv_2 = 0,
+                        curv_3 = 0,
+                        curv_4 = 0
+                    )
+                    muestras = models.Muestra.objects.filter(
+                        hoja_trabajo=hoja_trabajo
+                    ).order_by('elemento')
+
+                    resultado = {
+                        "ID_HDT": lot,
+                        "HojaTrabajo": hoja_trabajo.id,
+                        "Muestras": []
+                    }
+
+                    for muestra_target in muestras:
+                        
+                        elementos = models.Elementos.objects.filter(nombre=muestra_target.elemento)
+                        elementoTarget = models.Elementos.objects.get(nombre = muestra_target.elemento)
+                        models.Resultado.objects.create(
+                            elemento=elementoTarget,
+                            muestra=muestra_target,
+                            lote_absorcion=modelLot,
+                            resultadoAnalisis=0.0,
+                            leyAnalisis=0.0, 
+                            fecha_emision=timezone.now()
+                        )
+
+
+                        resultado["Muestras"].append({
+                            "Nombre": muestra_target.nombre,
+                            "Elemento": muestra_target.elemento,
+                            "Peso": muestra_target.peso_m,
+                            "Volumen": muestra_target.v_ml,
+                            "Elementos": [
+                                {
+                                    "Nombre": elemento.nombre,
+                                    "Gramos": elemento.gramos,
+                                    "Miligramos": elemento.miligramos
+                                }
+                                for elemento in elementos
+                            ]
+                        })
+
+                        print(f"  - {muestra_target.nombre} ({muestra_target.elemento}): Peso={muestra_target.peso_m}, Volumen={muestra_target.v_ml}")
+
+                    resultados.append(resultado)
+                    modelLot.save()
+
+            resultado = {
+                'success': True,
+                'generated_lot_id': ID_Taker,
+                'message': f'Lote generado correctamente con ID {ID_Taker}',
+                'detalles': resultados
+            }
+            return JsonResponse(resultado)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error en el formato de los datos'}, status=400)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+
+
+@login_required(login_url='/login')
+def get_lotes(request):
+    if request.method == 'GET':
+        lotes = models.LotesAbsorción.objects.values('ID_LT').distinct()
+        lotes_list = [{'id': lote['ID_LT']} for lote in lotes]
+        return JsonResponse({'lotes': lotes_list}, safe=False)
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+
+@login_required(login_url='/login')
+def delete_lote(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            lote_id = data.get('lote_id')
+            
+            if not lote_id:
+                return JsonResponse({'success': False, 'error': 'ID del lote no proporcionado.'}, status=400)
+
+            lotes = models.LotesAbsorción.objects.filter(ID_LT=lote_id)
+            
+            if not lotes.exists():
+                return JsonResponse({'success': False, 'error': f'No se encontró ningún lote con ID {lote_id}.'}, status=404)
+
+            resultados = models.Resultado.objects.filter(lote_absorcion__in=lotes)
+            resultados_count = resultados.count() 
+            resultados.delete()
+
+            lotes_count = lotes.count() 
+            lotes.delete()
+
+            return JsonResponse({
+                'success': True,
+                'message': f'Lote {lote_id} y {resultados_count} resultados asociados eliminados correctamente.',
+                'lotes_eliminados': lotes_count,
+                'resultados_eliminados': resultados_count
+            })
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'error': 'Datos no válidos.'}, status=400)
+    else:
+        return JsonResponse({'success': False, 'error': 'Método no permitido.'}, status=405)
+
+
+@login_required(login_url='/login')
+def guardar_valores_absorción(request):
+    if request.method == 'POST':
+        try:
+            datos = json.loads(request.body).get('datos', [])
+            c = json.loads(request.body).get('contexto', None)  # Nuevo índice para identificar el contexto
+
+            for dato in datos:
+                resultado_id = dato.get('resultado_id')
+                valor = dato.get('valor')  # Ahora el valor se usa de forma dinámica según `c`
+
+                resultado = models.Resultado.objects.filter(id=resultado_id).first()
+                if resultado:
+                    # Determinar qué valor guardar según el contexto
+                    if c == 1:  # Diluciones
+                        resultado.dilucion = float(valor)
+                    elif c == 2:  # Lecturas
+                        resultado.resultadoAnalisis = float(valor)
+                    elif c == 3:  # Leyes
+                        resultado.leyAnalisis = float(valor)
+                    resultado.save()
+
+            return JsonResponse({'success': True, 'message': 'Valores guardados correctamente.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    else:
+        return JsonResponse({'success': False, 'error': 'Método no permitido.'}, status=405)
 
 
 @login_required(login_url='/login')
@@ -426,12 +648,15 @@ def ODT_Info(request):
     if request.method == 'POST':
         odt_id = request.POST.get('odt_id')
         odt = models.ODT.objects.get(id=odt_id)
-        muestras_M = models.MuestraMasificada.objects.filter(odt=odt)
 
-        HDT = models.HojaTrabajo.objects.filter(odt=odt)
-        HDT_Quimico = models.HojaTrabajoQuimico.objects.filter(HojaTrabajo__in=HDT).values('ID_HDT').distinct()
+        muestras_M = models.MuestraMasificada.objects.filter(odt=odt).annotate(
+            prefijo_numero=Cast('Prefijo', output_field=IntegerField())
+        ).order_by('prefijo_numero')
 
-        # Agregar HDT_Quimico al contexto
+        HDT = models.HojaTrabajo.objects.filter(odt=odt).order_by('-id')  
+
+        HDT_Quimico = models.HojaTrabajoQuimico.objects.filter(HojaTrabajo__in=HDT).values('ID_HDT').distinct().order_by('-ID_HDT')
+
         context = {"odt": odt, "Muestras": muestras_M, "HDT_Quimico": HDT_Quimico}
 
         return render(request, 'ODT-Info.html', context)
@@ -445,9 +670,6 @@ def Elements_Section(request):
     tipo_filtrado = request.GET.get('tipo', '')
     if tipo_filtrado:
         elementos = elementos.filter(nombre__icontains=tipo_filtrado)
-
-    for elemento in elementos:
-        elemento.curvaturas = models.CurvaturaElementos.objects.filter(elemento=elemento)
 
     context = {
         'elementos': elementos,
@@ -801,12 +1023,78 @@ def recursos(request):
 
 
 def noticias(request):
-    return render(request, 'noticias.html')
+    noticias = models.Noticia.objects.all()
+    return render(request, 'noticias.html', {'noticias': noticias})
+
+
+
+def is_admin(user):
+    return user.is_authenticated and user.rolname == 'Administrador'
+
+
+@user_passes_test(is_admin)
+def modificar_noticia(request, noticia_id):
+    noticia = models.Noticia.objects.get(id=noticia_id)
+    if request.method == 'POST':
+        form = forms.NoticiaForm(request.POST, request.FILES, instance=noticia)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'La noticia ha sido modificada exitosamente.')
+            return redirect('noticias') 
+        else:
+            messages.error(request, 'Hubo un error al intentar modificar la noticia.')
+    else:
+        form = forms.NoticiaForm(instance=noticia)
+
+    return render(request, 'modificar_noticia.html', {'form': form, 'noticia': noticia})
+
+@login_required(login_url='/login')
+def agregar_noticia(request):
+    if not request.user.is_authenticated or request.user.rolname != 'Administrador':
+        return HttpResponseForbidden("No tienes permiso para acceder a esta página.")
+
+    if request.method == 'POST':
+        form = forms.NoticiaForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('noticias') 
+    else:
+        form = forms.NoticiaForm()
+
+    return render(request, 'agregar_noticia.html', {'form': form})
+
+@user_passes_test(is_admin)
+def eliminar_noticia(request, noticia_id):
+    noticia = models.Noticia.objects.get(id=noticia_id)
+    if request.method == 'POST':
+        noticia.delete()
+        messages.success(request, 'La noticia ha sido eliminada exitosamente.')
+        return redirect('noticias')  
+    return render(request, 'eliminar_noticia.html', {'noticia': noticia})
+
 
 
 def contacto(request):
-    return render(request, 'contacto.html')
+    enviado = False
+    if request.method == 'POST':
+        form = forms.ContactoForm(request.POST)
+        if form.is_valid():
+            nombre = form.cleaned_data['nombre']
+            email = form.cleaned_data['email']
+            mensaje = form.cleaned_data['mensaje']
 
+            send_mail(
+                subject=f'Contacto de {nombre}', 
+                message=f'Mensaje de {nombre} <{email}>:\n\n{mensaje}',  
+                from_email=email, 
+                recipient_list=['tu_correo@gmail.com'], 
+                fail_silently=False,
+            )
+            enviado = True
+    else:
+        form = forms.ContactoForm()
+
+    return render(request, 'contacto.html', {'form': form, 'enviado': enviado})
 
 
 

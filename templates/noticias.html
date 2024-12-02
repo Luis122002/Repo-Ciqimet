@@ -10,6 +10,9 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <style>
         /* Fondo general de la página */
         body {
@@ -135,47 +138,58 @@
     </div>
 
     <!-- Título de la página -->
+
+
     <section class="container mt-4">
-        <h1 class="section-title">Noticias</h1>
-        <p class="section-subtitle">Conoce las principales noticias sobre la actualidad del Gobierno de Chile</p>
+        {% if user.is_authenticated and user.rolname == 'Administrador' %}
+        <a href="{% url 'agregar_noticia' %}" class="btn btn-success mb-4">Agregar Noticia</a>
+        {% endif %}
     </section>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+    </form>
 
     <!-- Noticias -->
     <section class="container mt-4">
         <div class="row">
             <!-- Tarjetas de noticia -->
-            <div class="col-md-4">
-                <div class="news-card">
-                    <img src="{% static 'rest_framework/img/c2.jpg' %}" alt="Noticia 1">
-                    <div class="news-card-body">
-                        <h5>Impacta INACAP</h5>
-                        <p>Conoce nuestros estudios de Movilidad Social y el aporte que genera la Educación Técnico Profesional al desarrollo del país y sus regiones.</p>
-                        <a href="#" class="btn btn-link">Ver más</a>
+            {% for noticia in noticias %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <img src="{{ noticia.imagen.url }}" class="card-img-top" alt="{{ noticia.titulo }}" style="width: 100%; height: 300px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ noticia.titulo }}</h5>
+                        <p class="card-text">{{ noticia.descripcion|truncatechars:100 }}</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-{{ noticia.id }}">
+                            Ver más
+                        </button>
+                        {% if user.is_authenticated and user.rolname == 'Administrador' %}
+                            <div class="admin-buttons">
+                                <a href="{% url 'modificar_noticia' noticia.id %}" class="btn btn-warning btn-sm">Modificar</a>
+                                <a href="{% url 'eliminar_noticia' noticia.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Está seguro de eliminar esta noticia?')">Eliminar</a>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
-            <!-- Más tarjetas de noticias -->
-            <div class="col-md-4">
-                <div class="news-card">
-                    <img src="{% static 'rest_framework/img/c2.jpg' %}" alt="Noticia 2">
-                    <div class="news-card-body">
-                        <h5>Comienzan las obras del Instituto Teletón Ñuble</h5>
-                        <p>En la región de Ñuble se inician las obras del Instituto Teletón, que beneficiarán a miles de personas.</p>
-                        <a href="#" class="btn btn-link">Ver más</a>
+            <!-- Tarjetas de noticia -->
+            <div class="modal fade" id="modal-{{ noticia.id }}" tabindex="-1" aria-labelledby="modalLabel-{{ noticia.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modalLabel-{{ noticia.id }}">{{ noticia.titulo }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <img src="{{ noticia.imagen.url }}" class="img-fluid mb-3" alt="{{ noticia.titulo }}" style="width: 100%; height: 300px; object-fit: cover;">
+                            <p>{{ noticia.contenido_completo }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
-            <!-- Otra tarjeta -->
-            <div class="col-md-4">
-                <div class="news-card">
-                    <img src="{% static 'rest_framework/img/c2.jpg' %}" alt="Noticia 3">
-                    <div class="news-card-body">
-                        <h5>Nuevo desarrollo en el campo de la minería</h5>
-                        <p>Avances en la industria minera en Chile y cómo afectarán el desarrollo económico del país.</p>
-                        <a href="#" class="btn btn-link">Ver más</a>
-                    </div>
-                </div>
-            </div>
+            {% endfor %}
         </div>
     </section>
 

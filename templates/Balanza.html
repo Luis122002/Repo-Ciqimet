@@ -18,7 +18,7 @@
                     {% for muestra in muestras_balanza %}
                         {% if forloop.first %}
                             <!-- Muestra de la primera muestra con los valores necesarios -->
-                            <p><strong>ODT: </strong>{{ muestra.muestraMasificada.Prefijo }}</p>
+                            <p><strong>ODT: </strong>{{ muestra.muestraMasificada.odt }}</p>
                             <p><strong>Hoja de Trabajo: </strong>{{ id_hdt }}</p>
                             <p><strong>Estado de la Hoja de Trabajo: </strong>
                                 {% if stade %}
@@ -62,8 +62,8 @@
                 <div class="button-grid">   
                     {% for muestra in muestras_balanza %}
                         {% if forloop.first %}
-                                <button class="btn btn-success" onclick="GuardarMuestras({{id_hdt}})">Guardar</button>
-                                <button class="btn btn-dark" onclick="confirmarMuestras({{id_hdt}})">Terminar</button>
+                                <button class="btn btn-success" onclick="GuardarMuestras('{{id_hdt}}')">Guardar</button>
+                                <button class="btn btn-dark" onclick="confirmarMuestras('{{id_hdt}}')">Terminar</button>
                             {% endif %}
                         {% endfor %} 
                     <button class="btn btn-info" onclick="window.location.href = '/Puesto-trabajo/'">
@@ -79,40 +79,30 @@
         <table class="table table-bordered">
             <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
                 <tr>
+                    <th scope="col"> Secuencia</th>
                     <th scope="col">Id muestra</th>
                     <th scope="col">Proyecto</th>
-                    <th scope="col">Fecha Emisión</th>
-                    <th scope="col">NBO</th>
-                    <th scope="col">Ident</th>
                     <th scope="col">Tipo</th>
                     <th scope="col">Peso de muestra (Gr)</th>
                     <th scope="col">Volumen de Aforo (M)</th>
-                    <th scope="col">L. ppm</th>
-                    <th scope="col">L. ppm-BK</th>
-                    <th scope="col">Porcentaje (%)</th>
                 </tr>
             </thead>
             <tbody>
                 {% for muestra in muestras_balanza %}
                 <tr>
+                    <td>{{ forloop.counter }}</td>
                     <td>{{ muestra.muestraMasificada.Prefijo }}</td>
                     <td>{{ muestra.proyecto }}</td>
-                    <td>{{ muestra.fecha_emision }}</td>
-                    <td>{{ muestra.nbo }}</td>
-                    <td>{{ muestra.ident }}</td>
                     <td>{{ muestra.t }}</td>
                     <td>
                         {% if stade %}
-                            <input type="number" value="{{ muestra.peso_m }}" readonly>
+                            <input type="text" value="{{ muestra.peso_m }}" readonly>
                         {% else %}
-                        <input type="text" name="peso_m_{{ muestra.id }}" value="{{ muestra.peso_m }}" oninput="validateDecimal(this)" value = 0>
+                        <input type="text" name="peso_m_{{ muestra.id }}" value="{{ muestra.peso_m }}" oninput="validateDecimal(this)" onkeydown="moverFoco(event)" value = 0>
                         {% endif %}
                     </td>
                 
                     <td>{{ muestra.v_ml }}</td>
-                    <td>{{ muestra.l_ppm }}</td>
-                    <td>{{ muestra.l_ppm_bk }}</td>
-                    <td>{{ muestra.porcentaje }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -203,7 +193,7 @@
 
         function GuardarMuestras(id) {
             let muestrasData = [];
-            
+            console.log(id)
             var SaveFunc = true;
             // Obtener todas las filas de la tabla
             let filas = document.querySelectorAll("table tbody tr");
@@ -234,12 +224,11 @@
                 }
         
                 // Obtener el Prefijo (ID de muestra) y el peso_m
-                let prefijo = row.cells[0].textContent.trim();
+                let prefijo = row.cells[1].textContent.trim();
                 let pesoInput = row.querySelector("input[name^='peso_m_']");
         
                 // Verificar si el input de peso_m existe antes de obtener su valor
                 if (pesoInput === null) {
-                    console.log("Hola")
                     SaveFunc = false;
 
                     Swal.fire({
@@ -341,7 +330,7 @@
                 }
         
                 // Obtener el Prefijo (ID de muestra) y el peso_m
-                let prefijo = row.cells[0].textContent.trim();
+                let prefijo = row.cells[1].textContent.trim();
                 let pesoInput = row.querySelector("input[name^='peso_m_']");
         
                 // Verificar si el input de peso_m existe antes de obtener su valor

@@ -74,6 +74,11 @@ urlpatterns = [
     path('Puesto-Absorcion/', views.PI_Module),
     path('Hoja-Trabajo/', views.HT_Module),
     path('Get-HDT/', views.Request_HT, name='obtener_informacion_hoja_trabajo'),
+    path('obtener-hojas/', views.obtener_hojas_trabajo, name='obtener-hojas'),
+    path('lot-generator/', views.Lot_Generator),
+    path('get-lotes/', views.get_lotes, name='get_lotes'),
+    path('delete-lote/', views.delete_lote, name='delete_lote'),
+    path('guardar-valores-absorcion/',views.guardar_valores_absorción),
 
     path('api/status/', views.check_db_connection, name='check_db_connection'),
     path('api/get-user-data/', views.get_user_data, name='get_user_data'),
@@ -81,7 +86,10 @@ urlpatterns = [
     path('Servicio/', views.servicios, name='Servicio'),
     path('Sobre-Nosotros/', views.sobre_nosostros, name='Sobre-Nosotros'),
     path('Recursos/', views.recursos, name='Recursos'),
-    path('Noticias/', views.noticias, name='Noticias'),
+    path('noticias/', views.noticias, name='noticias'),
+    path('noticias/agregar/', views.agregar_noticia, name='agregar_noticia'),
+    path('noticias/modificar/<int:noticia_id>/', views.modificar_noticia, name='modificar_noticia'),
+    path('noticias/eliminar/<int:noticia_id>/', views.eliminar_noticia, name='eliminar_noticia'),
     path('Contacto/', views.contacto, name='Contacto'),
 
 
