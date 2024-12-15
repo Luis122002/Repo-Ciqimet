@@ -41,7 +41,6 @@
                     <th scope="col">Nombre</th>
                     <th scope="col">Gramos</th>
                     <th scope="col">Miligramos</th>
-                    <th scope="col">Clientes asociados</th>
                     <th scope="col">Acción</th>
                 </tr>
             </thead>
@@ -51,20 +50,6 @@
                         <td>{{ item.nombre }}</td>
                         <td>{{ item.gramos|floatformat:0 }}</td>
                         <td>{{ item.miligramos|floatformat:0 }}</td>
-                        <td class="text-align-left">
-                            {% for curvatura in item.curvaturas %}
-                                <div class="align-items-left">
-                                    <span class="text-align-left">{{ curvatura.cliente.nombre }}: C-{{ curvatura.curvatura }}</span>
-                                    <button class="btn btn-primary btn-sm curvatura-btn" 
-                                            data-curvatura-id="{{ curvatura.id }}">
-                                        Modificar
-                                    </button>
-                                    <br/><br/>
-                                </div>
-                            {% empty %}
-                                <div>No tiene curvaturas asociadas</div>
-                            {% endfor %}
-                        </td>
                         <td>
                             <button class="btn btn-primary action-btn" data-id="{{ item.id }}">Modificar</button>
                         </td>

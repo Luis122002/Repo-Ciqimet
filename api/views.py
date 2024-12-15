@@ -364,10 +364,13 @@ def PI_Module(request):
         resultados_map = {}  # Mapeo de resultados por muestra y elemento
         
         Creación_Batch = ""
-
+        curvaturas = {}
         if id_Batch:
             batch_mode = True  # Activar si se accede con batch
             Contenedor = models.LotesAbsorción.objects.filter(ID_LT=id_Batch)
+
+            lote = models.LotesAbsorción.objects.filter(ID_LT=id_Batch).first()
+            curvaturas= {'curv_1': lote.curv_1 if lote else 0.0,'curv_2': lote.curv_2 if lote else 0.0,'curv_3': lote.curv_3 if lote else 0.0,'curv_4': lote.curv_4 if lote else 0.0}
 
             if Contenedor.exists():
                 id_hdt_final = list(Contenedor.values_list('hoja_trabajo__ID_HDT', flat=True).distinct())
@@ -397,6 +400,25 @@ def PI_Module(request):
             if id_hdt: 
                 id_hdt_set.add(id_hdt)
             id_hdt_final = list(id_hdt_set)
+
+            prefijos_vistos = {}
+
+            for x in list(id_hdt_final): 
+                hojas_trabajo_quimico = models.HojaTrabajoQuimico.objects.filter(ID_HDT=x)
+                hojas_trabajo = models.HojaTrabajo.objects.filter(id__in=[htq.HojaTrabajo.id for htq in hojas_trabajo_quimico])
+                muestras_balanza = models.Muestra.objects.filter(hoja_trabajo__in=hojas_trabajo, indexCurv=1)
+
+                for muestra in muestras_balanza:
+                    prefijo = muestra.muestraMasificada.Prefijo if muestra.muestraMasificada else None
+
+                    if prefijo in prefijos_vistos and prefijos_vistos[prefijo] != x:
+                        messages.add_message(request=request, level=messages.ERROR, message=f"No se puede agregar hojas de trabajo diferentes con la misma muestra: {prefijo}")
+
+                        id_hdt_final.remove(x)
+                        break 
+
+                    if prefijo:
+                        prefijos_vistos[prefijo] = x
         
        
         Doc_Muestra = []
@@ -420,7 +442,7 @@ def PI_Module(request):
                             "Duplicado": muestra.hoja_trabajo.Duplicado if muestra.hoja_trabajo else None,
                             "Cliente": muestra.hoja_trabajo.odt.Cliente.nombre if muestra.hoja_trabajo.odt.Cliente else "Sin Cliente"
                         },
-                        "Elementos": [], 
+                        "Elementos": {e: None for e in elementos_unicos},  # Inicializar diccionario de elementos vacíos
                     }
                     Doc_Muestra.append(existing_muestra)
 
@@ -432,17 +454,17 @@ def PI_Module(request):
                     "leyAnalisis": None,
                 })
 
-                existing_muestra["Elementos"].append({
-                    "nombre": muestra.elemento,
+                # Llenar el elemento en la posición correspondiente
+                existing_muestra["Elementos"][muestra.elemento] = {
                     "resultado_id": resultado_data["resultado_id"],
                     "dilucion": resultado_data["dilucion"],
                     "resultadoAnalisis": resultado_data["resultadoAnalisis"],
                     "leyAnalisis": resultado_data["leyAnalisis"],
-                })
+                }
 
                 if muestra.elemento not in elementos_unicos:
                     elementos_unicos.append(muestra.elemento)
-
+        
         context = {
             'id_hdt': id_hdt_final,
             'Doc_Muestra': Doc_Muestra,
@@ -451,6 +473,7 @@ def PI_Module(request):
             'Batch_ID':id_Batch,
             'Bacth_Creación':Creación_Batch,
             'batch_mode': batch_mode,
+            'curvaturas':curvaturas
         }
         return render(request, 'Puesto-Absorcion.html', context)
     return render(request, 'Puesto-Absorcion.html')
@@ -598,26 +621,50 @@ def delete_lote(request):
 def guardar_valores_absorción(request):
     if request.method == 'POST':
         try:
-            datos = json.loads(request.body).get('datos', [])
-            c = json.loads(request.body).get('contexto', None)  # Nuevo índice para identificar el contexto
+            body = json.loads(request.body)
+            datos = body.get('datos', [])
+            curvaturas = body.get('curvaturas', []) 
+            contexto = body.get('contexto')
 
             for dato in datos:
                 resultado_id = dato.get('resultado_id')
-                valor = dato.get('valor')  # Ahora el valor se usa de forma dinámica según `c`
+                valor = dato.get('valor')
 
                 resultado = models.Resultado.objects.filter(id=resultado_id).first()
                 if resultado:
-                    # Determinar qué valor guardar según el contexto
-                    if c == 1:  # Diluciones
+                    if contexto == 1: 
                         resultado.dilucion = float(valor)
-                    elif c == 2:  # Lecturas
+                    elif contexto == 2:  
                         resultado.resultadoAnalisis = float(valor)
-                    elif c == 3:  # Leyes
+                    elif contexto == 3:
                         resultado.leyAnalisis = float(valor)
                     resultado.save()
 
-            return JsonResponse({'success': True, 'message': 'Valores guardados correctamente.'})
+            lotes_actualizados = set()
+            for dato in datos:
+                resultado = models.Resultado.objects.filter(id=dato['resultado_id']).first()
+                if resultado and resultado.lote_absorcion:
+                    lote = resultado.lote_absorcion
+                    if lote.id not in lotes_actualizados:
+                        for curvatura in curvaturas:
+                            curv_id = curvatura.get('curv_id')
+                            valor = curvatura.get('valor')
+
+                            if curv_id == '1':
+                                lote.curv_1 = float(valor)
+                            elif curv_id == '2':
+                                lote.curv_2 = float(valor)
+                            elif curv_id == '3':
+                                lote.curv_3 = float(valor)
+                            elif curv_id == '4':
+                                lote.curv_4 = float(valor)
+
+                        lote.save()
+                        lotes_actualizados.add(lote.id)
+
+            return JsonResponse({'success': True, 'message': 'Valores y curvaturas guardados correctamente.'})
         except Exception as e:
+            print(e)
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
     else:
         return JsonResponse({'success': False, 'error': 'Método no permitido.'}, status=405)
@@ -898,27 +945,32 @@ def general_form(request, token):
     
             elif action == 'del':
                 try:
-                    models_hoja_trabajo_quimico = models.HojaTrabajoQuimico.objects.filter(ID_HDT=target_ID)
-                    if not models_hoja_trabajo_quimico.exists():
+                    modelos_hoja_trabajo_quimico = models.HojaTrabajoQuimico.objects.filter(ID_HDT=target_ID)
+                    
+                    if not modelos_hoja_trabajo_quimico.exists():
                         messages.add_message(request=request, level=messages.ERROR, message='No se encontró el registro a eliminar')
                         return redirect(reverse('Main_ODT'))
-                    hoja_trabajos = []
-                    for model in models_hoja_trabajo_quimico:
-                        hoja_trabajos.append(model.HojaTrabajo)
-                    models_hoja_trabajo_quimico.delete()
-                    for hoja_trabajo in set(hoja_trabajos):
+
+                    hojas_trabajo_relacionadas = list(set(modelo.HojaTrabajo for modelo in modelos_hoja_trabajo_quimico))
+                    
+                    modelos_hoja_trabajo_quimico.delete()
+
+                    for hoja_trabajo in hojas_trabajo_relacionadas:
                         hoja_trabajo.delete()
+                    
                     models.Novedades.objects.create(
-                            tipo_model='Hoja de trabajo',
-                            accion="Eliminar",
-                            modelt_id=hoja_trabajo_quimico.ID_HDT,  
-                            fecha=timezone.now(),
-                            usuario=request.user
-                        )
+                        tipo_model='Hoja de trabajo',
+                        accion="Eliminar",
+                        modelt_id=target_ID, 
+                        fecha=timezone.now(),
+                        usuario=request.user
+                    )
+
                     messages.add_message(request=request, level=messages.SUCCESS, message='Hojas de trabajo eliminadas con éxito')
                     return redirect(reverse('Main_ODT'))
 
                 except Exception as e:
+                    print(e)
                     messages.add_message(request=request, level=messages.ERROR, message=f'Error al eliminar las hojas de trabajo: {str(e)}')
                     return redirect(reverse('Main_ODT'))
 

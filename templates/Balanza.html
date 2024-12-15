@@ -312,95 +312,109 @@
                     text: 'Las muestras ya se confirmaron anteriormente o no hay datos disponibles.',
                     confirmButtonText: 'OK'
                 });
-                return; // Detener la ejecución de la función si no hay filas
+                return;
             }
         
-            // Recorrer todas las filas de la tabla
-            filas.forEach(function(row) {
-                // Verificar que la fila tenga celdas y que la primera celda (ID de muestra) exista
-                if (row.cells.length === 0) {
-                    SaveFunc = false;
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Advertencia',
-                        text: 'Las muestras ya se confirmaron anteriormente o no hay datos disponibles.',
-                        confirmButtonText: 'OK'
-                    });
-                    return; // Detener la ejecución de la función
-                }
+            // Confirmación antes de procesar los datos
+            Swal.fire({
+                title: '¿Seguro que quieres finalizar los valores?',
+                text: "No podrás revertir esta acción.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, finalizar',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Recorrer todas las filas de la tabla
+                    filas.forEach(function(row) {
+                        if (row.cells.length === 0) {
+                            SaveFunc = false;
+                            return;
+                        }
         
-                // Obtener el Prefijo (ID de muestra) y el peso_m
-                let prefijo = row.cells[1].textContent.trim();
-                let pesoInput = row.querySelector("input[name^='peso_m_']");
+                        let prefijo = row.cells[1].textContent.trim();
+                        let pesoInput = row.querySelector("input[name^='peso_m_']");
         
-                // Verificar si el input de peso_m existe antes de obtener su valor
-                if (pesoInput === null) {
-                    SaveFunc = false;
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Advertencia',
-                        text: 'Las muestras ya se confirmaron anteriormente o no hay datos disponibles.',
-                        confirmButtonText: 'OK'
-                    });
-                    return; // Detener la ejecución de la función
-                }
+                        if (!pesoInput) {
+                            SaveFunc = false;
+                            return;
+                        }
         
-                let peso_m = pesoInput.value.trim();
+                        let peso_m = pesoInput.value.trim();
         
-                // Agregar los datos al array
-                muestrasData.push({
-                    prefijo: prefijo,
-                    peso_m: peso_m
-                });
-            });
+                        // Verificar si el valor es 0.0 o nulo
+                        if (!peso_m || parseFloat(peso_m) === 0.0) {
+                            SaveFunc = false;
+                        }
         
-            // Solo enviar los datos si SaveFunc es verdadero
-            if (SaveFunc) {
-                fetch('/Confirm-M/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value // CSRF token
-                    },
-                    body: JSON.stringify({
-                        muestras: muestrasData,
-                        id: id
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Usar SweetAlert2 para mostrar un mensaje de éxito
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Muestras confirmadas',
-                            text: 'Las muestras fueron confirmadas correctamente.',
-                            confirmButtonText: 'OK'
-                        }).then(() => {
-                            // Redirigir a una página específica después de confirmar
-                            window.location.href = "/Hoja-Trabajo/";
+                        muestrasData.push({
+                            prefijo: prefijo,
+                            peso_m: peso_m
                         });
-                    } else {
-                        // Usar SweetAlert2 para mostrar un mensaje de error
+                    });
+        
+                    // Validación de valores
+                    if (!SaveFunc) {
                         Swal.fire({
                             icon: 'error',
-                            title: 'Error',
-                            text: 'Hubo un error al confirmar las muestras.',
+                            title: 'Valores inválidos',
+                            text: 'No se puede finalizar si existen valores vacíos o en 0.0. Revisa los datos.',
                             confirmButtonText: 'OK'
                         });
+                        return;
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    // Usar SweetAlert2 para manejar errores en la solicitud
+        
+                    // Enviar los datos si SaveFunc es verdadero
+                    fetch('/Confirm-M/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        },
+                        body: JSON.stringify({
+                            muestras: muestrasData,
+                            id: id
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Muestras confirmadas',
+                                text: 'Las muestras fueron confirmadas correctamente.',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.href = "/Hoja-Trabajo/";
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Hubo un error al confirmar las muestras.',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error de comunicación',
+                            text: 'Hubo un problema al intentar enviar los datos.',
+                            confirmButtonText: 'OK'
+                        });
+                    });
+                } else {
                     Swal.fire({
-                        icon: 'error',
-                        title: 'Error de comunicación',
-                        text: 'Hubo un problema al intentar enviar los datos.',
+                        icon: 'info',
+                        title: 'Operación cancelada',
+                        text: 'No se realizaron cambios.',
                         confirmButtonText: 'OK'
                     });
-                });
-            }
+                }
+            });
         }
 
     </script>

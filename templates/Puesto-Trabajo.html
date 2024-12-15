@@ -35,6 +35,19 @@
             flex-shrink: 0;
         }
 
+        @media (min-width: 768px) and (max-width: 990px) {
+            .sidebar {
+                width: 350px;
+            }
+        }
+        
+        /* Estilo para pantallas mayores a 990px */
+        @media (min-width: 991px) {
+            .sidebar {
+                width: 600px;
+            }
+        }
+
         /* Main content */
         .main-content {
             flex-grow: 1;
@@ -234,7 +247,7 @@
                 <button class="btn btn-active" onclick="mostrarTabla('acciones-registros', this)">Acciones generales</button>
                 <button class="btn" onclick="mostrarTabla('procesos-hojas', this)">Procesos por Balanza</button>
             </div>
-            <div id="acciones-registros" class="table-container hidden">
+            <div id="acciones-registros" class="table-container">
                 <h5>Acciones de Registros</h5>
                 <table class="table table-striped">
                     <thead>

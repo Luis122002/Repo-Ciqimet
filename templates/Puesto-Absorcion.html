@@ -1,4 +1,5 @@
 {% load static %}
+{% load custom_filters %}
 <!DOCTYPE html>
 {% include 'header.html'%}
 {% csrf_token %}
@@ -156,18 +157,29 @@
                     <div class="col">
                         <div class="row">
                             <div class="col-3 mb-2">
-                                <input type="text" class="form-control form-control-sm" id="curv-1" placeholder="Curv. 1" oninput="validateDecimal(this)">
+                                <input type="text" class="form-control form-control-sm" id="curv-1" 
+                                       placeholder="Curv. 1" 
+                                       oninput="validateDecimal(this)"
+                                       value="{{ curvaturas.curv_1 }}" data-curvatura-id="1">
                             </div>
                             <div class="col-3 mb-2">
-                                <input type="text" class="form-control form-control-sm" id="curv-2" placeholder="Curv. 2" oninput="validateDecimal(this)">
+                                <input type="text" class="form-control form-control-sm" id="curv-2" 
+                                       placeholder="Curv. 2" 
+                                       oninput="validateDecimal(this)"
+                                       value="{{ curvaturas.curv_2 }}" data-curvatura-id="2">
                             </div>
                             <div class="col-3">
-                                <input type="text" class="form-control form-control-sm" id="curv-3" placeholder="Curv. 3" oninput="validateDecimal(this)">
+                                <input type="text" class="form-control form-control-sm" id="curv-3" 
+                                       placeholder="Curv. 3" 
+                                       oninput="validateDecimal(this)"
+                                       value="{{ curvaturas.curv_3 }}" data-curvatura-id="3">
                             </div>
                             <div class="col-3">
-                                <input type="text" class="form-control form-control-sm" id="curv-4" placeholder="Curv. 4" oninput="validateDecimal(this)">
-                                
-                            </div>
+                                <input type="text" class="form-control form-control-sm" id="curv-4" 
+                                       placeholder="Curv. 4" 
+                                       oninput="validateDecimal(this)"
+                                       value="{{ curvaturas.curv_4 }}" data-curvatura-id="4">
+                            </div>                            
                             <button class="btn btn-primary mt-3" onclick="guardarValoresAbsorcion(contexto)">Guardar Valores</button>
                         </div>
                     </div>
@@ -264,36 +276,36 @@
                             <th scope="col">Tipo</th>
                             <th scope="col">Hoja de trabajo</th>
                             <th scope="col">Cliente</th>
-                            {% for elemento1 in elementos_unicos %}
-                                <th scope="col">Fact. Dil {{ elemento1 }}</th>
+                            {% for elemento in elementos_unicos %}
+                                <th scope="col">Fact. Dil {{ elemento }}</th>
                             {% endfor %}
                         </tr>
                     </thead>
                     <tbody>
                         {% for ht in Doc_Muestra %}
-                            <tr data-ht-id="{{ ht.HojaTrabajo.ID_HDT }}">
+                            <tr>
                                 <td>{{ forloop.counter }}</td>
                                 <td>{{ ht.Prefijo }}</td>
                                 <td>{{ ht.HojaTrabajo.Tipo }}</td>
                                 <td>{{ ht.HojaTrabajo.ID_HDT }}</td>
                                 <td>{{ ht.HojaTrabajo.Cliente }}</td>
-                                {% for elemento1 in elementos_unicos %}
-                                    {% with matched=False %}
-                                    {% for elemento2 in ht.Elementos %}
-                                        {% if elemento1 == elemento2.nombre %}
-                                            <td>
-                                                <input type="text" oninput="validateDecimal(this)" onkeydown="moverFoco(event)"
+                                {% for elemento in elementos_unicos %}
+                                    {% with resultado=ht.Elementos|get_item:elemento %}
+                                        <td>
+                                            {% if resultado %}
+                                                <input type="text"
+                                                       oninput="validateDecimal(this)" 
+                                                       onkeydown="moverFoco(event)"
                                                        class="form-control form-control-sm dilucion-input" 
-                                                       name="dilucion_{{ elemento2.resultado_id }}" 
-                                                       data-resultado-id="{{ elemento2.resultado_id }}" 
+                                                       name="dilucion_{{ resultado.resultado_id }}" 
+                                                       data-resultado-id="{{ resultado.resultado_id }}" 
                                                        data-muestra-id="{{ ht.Prefijo }}" 
                                                        placeholder="Dilución" 
-                                                       value="{{ elemento2.dilucion }}">
-                                            </td>
-                                            {% with matched=True %}
-                                            {% endwith %}
-                                        {% endif %}
-                                    {% endfor %}
+                                                       value="{{ resultado.dilucion }}">
+                                            {% else %}
+                                                <span></span> <!-- Campo vacío -->
+                                            {% endif %}
+                                        </td>
                                     {% endwith %}
                                 {% endfor %}
                             </tr>
@@ -311,6 +323,62 @@
     
     <div id="lecturas" class="tabla hidden">
         {% if batch_mode %}
+        <div class="table-container table-responsive">
+            <table class="table table-bordered">
+                <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
+                    <tr>
+                        <th scope="col">Orden</th>
+                        <th scope="col">Id de muestra</th>
+                        <th scope="col">Tipo</th>
+                        <th scope="col">Hoja de trabajo</th>
+                        <th scope="col">Cliente</th>
+                        {% for elemento in elementos_unicos %}
+                            <th scope="col">Lectura {{ elemento }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ht in Doc_Muestra %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ ht.Prefijo }}</td>
+                            <td>{{ ht.HojaTrabajo.Tipo }}</td>
+                            <td>{{ ht.HojaTrabajo.ID_HDT }}</td>
+                            <td>{{ ht.HojaTrabajo.Cliente }}</td>
+                            {% for elemento in elementos_unicos %}
+                                {% with resultado=ht.Elementos|get_item:elemento %}
+                                    <td>
+                                        {% if resultado %}
+                                            <input type="text" oninput="validateDecimal(this)" onkeydown="moverFoco(event)"
+                                                   class="form-control form-control-sm lectura-input"
+                                                   name="lectura_{{ resultado.resultado_id }}"
+                                                   data-resultado-id="{{ resultado.resultado_id }}"
+                                                   data-muestra-id="{{ ht.Prefijo }}"
+                                                   value="{{ resultado.resultadoAnalisis }}">
+                                        {% else %}
+                                            <span></span>
+                                        {% endif %}
+                                    </td>
+                                {% endwith %}
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        
+        
+        {% else %}
+            <div class="table-container table-responsive">
+                <h3>No hay resultados disponibles para las muestras del lote cargado.</h3>
+            </div>
+        {% endif %}
+    </div>
+
+    
+    <div id="leyes" class="tabla hidden">
+        {% if batch_mode %}
             <div class="table-container table-responsive">
                 <table class="table table-bordered">
                     <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
@@ -320,36 +388,36 @@
                             <th scope="col">Tipo</th>
                             <th scope="col">Hoja de trabajo</th>
                             <th scope="col">Cliente</th>
-                            {% for elemento1 in elementos_unicos %}
-                                <th scope="col">Lectura {{ elemento1 }}</th>
+                            {% for elemento in elementos_unicos %}
+                                <th scope="col">Ley {{ elemento }}</th>
                             {% endfor %}
                         </tr>
                     </thead>
                     <tbody>
                         {% for ht in Doc_Muestra %}
-                            <tr data-ht-id="{{ ht.HojaTrabajo.ID_HDT }}">
+                            <tr>
                                 <td>{{ forloop.counter }}</td>
                                 <td>{{ ht.Prefijo }}</td>
                                 <td>{{ ht.HojaTrabajo.Tipo }}</td>
                                 <td>{{ ht.HojaTrabajo.ID_HDT }}</td>
                                 <td>{{ ht.HojaTrabajo.Cliente }}</td>
-                                {% for elemento1 in elementos_unicos %}
-                                    {% with matched=False %}
-                                    {% for elemento2 in ht.Elementos %}
-                                        {% if elemento1 == elemento2.nombre %}
-                                            <td>
-                                                <input type="text" oninput="validateDecimal(this)" onkeydown="moverFoco(event)"
-                                                       class="form-control form-control-sm lectura-input" 
-                                                       name="lectura_{{ elemento2.resultado_id }}" 
-                                                       data-resultado-id="{{ elemento2.resultado_id }}" 
-                                                       data-muestra-id="{{ ht.Prefijo }}" 
-                                                       placeholder="Lectura" 
-                                                       value="{{ elemento2.resultadoAnalisis }}">
-                                            </td>
-                                            {% with matched=True %}
-                                            {% endwith %}
-                                        {% endif %}
-                                    {% endfor %}
+                                {% for elemento in elementos_unicos %}
+                                    {% with resultado=ht.Elementos|get_item:elemento %}
+                                        <td>
+                                            {% if resultado %}
+                                                <input type="text"
+                                                       oninput="validateDecimal(this)" 
+                                                       onkeydown="moverFoco(event)"
+                                                       class="form-control form-control-sm ley-input" 
+                                                       name="ley_{{ resultado.resultado_id }}" 
+                                                       data-resultado-id="{{ resultado.resultado_id }}" 
+                                                       data-muestra-id="{{ ht.Prefijo }}"
+                                                       placeholder="Ley" 
+                                                       value="{{ resultado.leyAnalisis }}">
+                                            {% else %}
+                                                <span></span> <!-- Campo vacío -->
+                                            {% endif %}
+                                        </td>
                                     {% endwith %}
                                 {% endfor %}
                             </tr>
@@ -363,62 +431,6 @@
             </div>
         {% endif %}
     </div>
-
-    
-    <div id="leyes" class="tabla hidden">
-    {% if batch_mode %}
-        <div class="table-container table-responsive">
-            <table class="table table-bordered">
-                <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
-                    <tr>
-                        <th scope="col">Orden</th>
-                        <th scope="col">Id de muestra</th>
-                        <th scope="col">Tipo</th>
-                        <th scope="col">Hoja de trabajo</th>
-                        <th scope="col">Cliente</th>
-                        {% for elemento1 in elementos_unicos %}
-                            <th scope="col">Ley {{ elemento1 }}</th>
-                        {% endfor %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for ht in Doc_Muestra %}
-                        <tr data-ht-id="{{ ht.HojaTrabajo.ID_HDT }}">
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ ht.Prefijo }}</td>
-                            <td>{{ ht.HojaTrabajo.Tipo }}</td>
-                            <td>{{ ht.HojaTrabajo.ID_HDT }}</td>
-                            <td>{{ ht.HojaTrabajo.Cliente }}</td>
-                            {% for elemento1 in elementos_unicos %}
-                                {% with matched=False %}
-                                {% for elemento2 in ht.Elementos %}
-                                    {% if elemento1 == elemento2.nombre %}
-                                        <td>
-                                            <input type="text" oninput="validateDecimal(this)" onkeydown="moverFoco(event)"
-                                                   class="form-control form-control-sm ley-input" 
-                                                   name="ley_{{ elemento2.resultado_id }}" 
-                                                   data-resultado-id="{{ elemento2.resultado_id }}" 
-                                                   data-muestra-id="{{ ht.Prefijo }}" 
-                                                   placeholder="Ley" 
-                                                   value="{{ elemento2.leyAnalisis }}">
-                                        </td>
-                                        {% with matched=True %}
-                                        {% endwith %}
-                                    {% endif %}
-                                {% endfor %}
-                                {% endwith %}
-                            {% endfor %}
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% else %}
-        <div class="table-container table-responsive">
-            <h3>No hay resultados disponibles para las muestras del lote cargado.</h3>
-        </div>
-    {% endif %}
-</div>
     
     <script>
 
@@ -995,31 +1007,50 @@
 
         function guardarValoresAbsorcion(contexto) {
             let inputClass;
+            let tipoMensaje = ""; // Para determinar el mensaje final según el contexto
+        
             if (contexto === 1) {
                 inputClass = '.dilucion-input';
+                tipoMensaje = "diluciones";
             } else if (contexto === 2) {
                 inputClass = '.lectura-input';
+                tipoMensaje = "lecturas";
             } else if (contexto === 3) {
                 inputClass = '.ley-input';
+                tipoMensaje = "leyes";
             } else {
                 console.error('Contexto no válido');
                 return;
             }
         
+            // Obtener los inputs de acuerdo al contexto
             const inputs = document.querySelectorAll(`${inputClass}:not([disabled])`);
             const datos = Array.from(inputs).map(input => ({
                 resultado_id: input.dataset.resultadoId,
                 muestra_id: input.dataset.muestraId,
-                valor: input.value
+                valor: input.value.replace(',', '.')
             }));
         
+            // Obtener las curvaturas independientemente del contexto
+            const curvaturas = Array.from(document.querySelectorAll('[id^="curv-"]')).map(input => ({
+                curv_id: input.id.split('-')[1],
+                valor: input.value.replace(',', '.')
+            }));
+        
+            const payload = {
+                datos,
+                contexto,
+                curvaturas
+            };
+        
+            // Realizar el fetch
             fetch('/guardar-valores-absorcion/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrfToken
                 },
-                body: JSON.stringify({ datos, contexto })
+                body: JSON.stringify(payload)
             })
             .then(response => {
                 if (!response.ok) throw new Error('Error en la solicitud');
@@ -1028,7 +1059,7 @@
             .then(data => {
                 Swal.fire({
                     title: 'Éxito',
-                    text: data.message || 'Valores guardados correctamente.',
+                    text: `Se han guardado correctamente los valores de ${tipoMensaje} y curvaturas.`,
                     icon: 'success',
                     confirmButtonText: 'Cerrar'
                 });
