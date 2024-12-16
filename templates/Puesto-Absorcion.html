@@ -1037,6 +1037,20 @@
                 valor: input.value.replace(',', '.')
             }));
         
+            // Validar si no hay datos ni curvaturas
+            const hasDatos = datos.length > 0;
+            const hasCurvaturas = curvaturas.some(curv => curv.valor !== '');
+        
+            if (!hasDatos && !hasCurvaturas) {
+                Swal.fire({
+                    title: 'Atención',
+                    text: 'No hay un lote de muestras con campos para guardar.',
+                    icon: 'question',
+                    confirmButtonText: 'Cerrar'
+                });
+                return;
+            }
+        
             const payload = {
                 datos,
                 contexto,

@@ -19,7 +19,7 @@
         }
         /* Ajustes para posicionar el logotipo y centrar el menú */
         .navbar-brand {
-            margin-left: 10rem; /* Espacio adicional a la izquierda del logotipo */
+            margin-left: 2rem; /* Espacio adicional a la izquierda del logotipo */
         }
         .navbar-brand img {
             height: 60px; /* Aumenta el tamaño del logo */
@@ -63,6 +63,50 @@
             border: none;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
         }
+        .user-card {
+            position: fixed;
+            top: -100%; /* Fuera de la pantalla inicialmente */
+            right: 20px; /* Ajustado al margen derecho */
+            width: 300px; /* Ancho del contenedor */
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            padding: 15px;
+            opacity: 0; /* Inicialmente invisible */
+            transform: translateY(-20px); /* Desplazado hacia arriba */
+            transition: all 1.0s ease-in-out; /* Suaviza la transición */
+        }
+        
+        .user-card.visible {
+            top: 20px; /* Se desliza hacia abajo */
+            opacity: 1; /* Se hace visible */
+            transform: translateY(0); /* Desliza a su posición final */
+        }
+        
+        .user-card img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .user-card h5 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .user-card p {
+            margin: 2px 0;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .user-card .btn {
+            font-size: 14px;
+            padding: 5px 10px;
+        }
     </style>
 </head>
 <body>
@@ -80,13 +124,13 @@
                     <!-- Menú de navegación centrado -->
                     <ul class="navbar-nav">
                         <li class="nav-item">
-                            <a class="nav-link" href="#services">Inicio</a>
+                            <a class="nav-link" href="/">Inicio</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#services">Servicios</a>
+                            <a class="nav-link" href="/Servicio">Servicios</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#about">Sobre Nosotros</a>
+                            <a class="nav-link" href="/Sobre-Nosotros/">Sobre Nosotros</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/Recursos/">Recursos</a>
@@ -101,7 +145,7 @@
                     <!-- Menú de perfil y login alineado a la derecha -->
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="#"><span class="bi bi-person-circle"></span> Perfil</a>
+                            <a class="nav-link" onclick="ShowUser()"><span class="bi bi-person-circle"></span> Perfil</a>
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" onclick="window.location.href='/login/'" id="navbarDropdownLogin" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -117,9 +161,123 @@
             </div>
         </nav>
     </header>
-
+    <div class="user-card shadow-lg p-4 rounded" id="userCard">
+        <div class="d-flex align-items-center">
+            <img id="user-image" src="{% static 'rest_framework/img/Logocapture-removebg-preview.png' %}" alt="User Image">
+            <div class="ms-3">
+                <h5 id="card-user-username">Visitante</h5>
+                <p id="card-user-email"></p>
+                <p id="card-user-role"></p>
+            </div>
+        </div>
+        <button class="btn btn-info mt-2" onclick="ShowUser()">Cerrar</button>
+        <button class="btn btn-light mt-2" id="confirmLogoutBtn" onclick="confirmLogout()" style="display: none;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-box-arrow-right" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"/>
+                <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
+            </svg>
+        </button>
+    </div>
     <!-- Scripts de Bootstrap 5 -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+
+        function ShowUser() {
+            var userCard = document.querySelector(".user-card");
+            if (userCard) {
+                if (userCard.classList.contains("visible")) {
+                    userCard.classList.remove("visible");
+                    setTimeout(function() {
+                        userCard.style.display = "none";
+                    }, 1000);
+                } else {
+                    userCard.style.display = "block";
+                    setTimeout(function() {
+                        userCard.classList.add("visible");
+                    }, 10);
+                }
+            } else {
+                console.error("El elemento con id 'user-card' no existe.");
+            }
+        }
+
+        function getUserData() {
+            $.ajax({
+                url: '/api/get-user-data/',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    if (!data || !data.email || !data.full_name) {
+                        // Si no hay datos válidos, ocultar botón de logout y terminar
+                        $('#confirmLogoutBtn').hide(); // Ocultar el botón de logout
+                        console.warn('No se encontró un usuario válido.');
+                        return;
+                    }
+        
+                    // Actualizar datos del usuario
+                    $('#user-email').text(data.email);
+                    $('#user-email').attr('href', `mailto:${data.email}`);
+                    $('#user-username').text(data.full_name);
+                    $('#user-role').text(data.role);
+        
+                    $('#card-user-email').text(data.email);
+                    $('#card-user-username').text(data.full_name);
+                    $('#card-user-role').text(data.role);
+        
+                    let roleImage = ''; 
+                    switch (data.role) {
+                        case 'Supervisor':
+                            roleImage = 'Supervisor_icon.png';
+                            break;
+                        case 'Administrador':
+                            roleImage = 'Admin_icon.png';
+                            break;
+                        case 'Quimico':
+                            roleImage = 'Quimico_icon.png';
+                            break;
+                        default:
+                            console.error('Rol no reconocido:', data.role);
+                            roleImage = 'Logocapture-removebg-preview.png'; // Imagen por defecto
+                    }
+        
+                    const imagePath = `{% static 'rest_framework/img/` + roleImage + `' %}`;
+                    $('#user-image').attr('src', imagePath);
+        
+                    // Mostrar el botón de logout si el usuario es válido
+                    $('#confirmLogoutBtn').show();
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error al obtener los datos del usuario:', error);
+                    $('#confirmLogoutBtn').hide(); // Ocultar botón en caso de error
+                }
+            });
+        }
+
+        function confirmLogout() {
+            swal.fire({
+                title: "¿Estás seguro?",
+                text: "¿Quieres cerrar sesión?",
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            })
+            .then((willLogout) => {
+                if (willLogout) {
+                    window.location.href = LocalPath + "/unlogin/"; 
+                }
+            });
+        }
+
+
+        $(document).ready(function(){
+            getUserData();
+           
+          });
+
+          
+        
+    </script>
 </body>
 </html>
