@@ -25,6 +25,7 @@ from django.db.models.functions import Cast
 import random
 from collections import defaultdict
 import string
+from .decorators import is_administrador_or_quimico, is_administrador_or_supervisor, is_administrador_project, is_supervisor_project, is_quimico_project
 
 
 
@@ -92,6 +93,7 @@ def Main(request):
        
     
 @login_required(login_url='/login')
+@is_administrador_or_supervisor
 def ODT_Module(request):
     search_query = request.GET.get('search', '')
     filter_year = request.GET.get('year', '')
@@ -237,6 +239,7 @@ def Request_HT(request):
 
 
 @login_required(login_url='/login')
+@is_administrador_or_quimico
 def Balanza_Module(request):
     if request.method == 'POST':
         id_hdt = request.POST.get('id')
@@ -270,7 +273,8 @@ def Balanza_Module(request):
 
     return render(request, 'Balanza.html')
     
-
+@login_required(login_url='/login')
+@is_administrador_or_quimico
 def Save_M(request):
     if request.method == 'POST':
         try:
@@ -304,6 +308,9 @@ def Save_M(request):
 
     return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
 
+
+@login_required(login_url='/login')
+@is_administrador_or_quimico
 def Confirm_M(request):
     if request.method == 'POST':
         try:
@@ -351,8 +358,8 @@ def Confirm_M(request):
         
 
 
-
 @login_required(login_url='/login')
+@is_administrador_or_quimico
 def PI_Module(request):
     if request.method == 'POST':
         id_hdt = request.POST.get('id') 
@@ -479,6 +486,7 @@ def PI_Module(request):
     return render(request, 'Puesto-Absorcion.html')
 
 @login_required(login_url='/login')
+@is_administrador_or_quimico
 def obtener_hojas_trabajo(request):
     if request.method == 'GET':
         hojas = models.HojaTrabajoQuimico.objects.filter(confirmar_balanza=True).values_list('ID_HDT', flat=True).distinct()
@@ -486,6 +494,7 @@ def obtener_hojas_trabajo(request):
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 @login_required(login_url='/login')
+@is_administrador_or_quimico
 def Lot_Generator(request):
     if request.method == 'POST':
         try:
@@ -575,6 +584,7 @@ def Lot_Generator(request):
 
 
 @login_required(login_url='/login')
+@is_administrador_or_quimico
 def get_lotes(request):
     if request.method == 'GET':
         lotes = models.LotesAbsorción.objects.values('ID_LT').distinct()
@@ -584,6 +594,7 @@ def get_lotes(request):
 
 
 @login_required(login_url='/login')
+@is_administrador_or_quimico
 def delete_lote(request):
     if request.method == 'POST':
         try:
@@ -618,6 +629,7 @@ def delete_lote(request):
 
 
 @login_required(login_url='/login')
+@is_administrador_or_quimico
 def guardar_valores_absorción(request):
     if request.method == 'POST':
         try:
@@ -691,6 +703,7 @@ def PT_Module(request):
 
 
 @login_required(login_url='/login')
+@is_administrador_or_supervisor
 def ODT_Info(request):
     if request.method == 'POST':
         odt_id = request.POST.get('odt_id')
@@ -711,6 +724,7 @@ def ODT_Info(request):
         return HttpResponse(status=405)
     
 @login_required(login_url='/login')
+@is_administrador_or_supervisor
 def Elements_Section(request):
     elementos = models.Elementos.objects.all()
 
@@ -725,6 +739,7 @@ def Elements_Section(request):
     return render(request, "Elements.html", context)
 
 @login_required(login_url='/login')
+@is_administrador_or_supervisor
 def Analysis_Section(request):
     analisis = models.MetodoAnalisis.objects.all()
     query = request.GET.get('search', '') 
@@ -739,6 +754,7 @@ def Analysis_Section(request):
 
 
 @login_required(login_url='/login')
+@is_administrador_or_supervisor
 def general_form(request, token):
     try:
         decoded_data = base64.urlsafe_b64decode(token.encode()).decode()
@@ -993,6 +1009,7 @@ def general_form(request, token):
 
 
 @login_required(login_url='/login')
+@is_administrador_or_supervisor
 def Master_def(request):
     if request.method != 'POST':
         return HttpResponseForbidden("Método no permitido.")
@@ -1101,6 +1118,7 @@ def modificar_noticia(request, noticia_id):
     return render(request, 'modificar_noticia.html', {'form': form, 'noticia': noticia})
 
 @login_required(login_url='/login')
+@is_administrador_project
 def agregar_noticia(request):
     if not request.user.is_authenticated or request.user.rolname != 'Administrador':
         return HttpResponseForbidden("No tienes permiso para acceder a esta página.")
@@ -1115,7 +1133,8 @@ def agregar_noticia(request):
 
     return render(request, 'agregar_noticia.html', {'form': form})
 
-@user_passes_test(is_admin)
+@login_required(login_url='/login')
+@is_administrador_project
 def eliminar_noticia(request, noticia_id):
     noticia = models.Noticia.objects.get(id=noticia_id)
     if request.method == 'POST':
@@ -1149,7 +1168,8 @@ def contacto(request):
     return render(request, 'contacto.html', {'form': form, 'enviado': enviado})
 
 
-
+@login_required(login_url='/login')
+@is_administrador_or_quimico
 def listen_to_balance(port):
     event_list = []
     try:
@@ -1163,11 +1183,13 @@ def listen_to_balance(port):
         event_list.append(f"Error: {str(e)}")
     return event_list
 
-# View to render the tester page
+@login_required(login_url='/login')
+@is_administrador_or_quimico
 def tester_balanza(request):
     return render(request, 'tester_balanza.html')
 
-# API view to fetch events dynamically
+@login_required(login_url='/login')
+@is_administrador_or_quimico
 def get_events(request):
     port = request.GET.get('port')
     if not port:
@@ -1190,7 +1212,9 @@ def get_events(request):
         return JsonResponse({'status': 'success', 'events': events})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
-    
+
+@login_required(login_url='/login')
+@is_administrador_or_quimico 
 def list_usb_ports(request):
     ports = [p.device for p in list_ports.comports()]
     return JsonResponse({'status': 'success', 'ports': ports})

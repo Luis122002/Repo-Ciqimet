@@ -34,7 +34,7 @@ class Proyecto(models.Model):
     cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE, null=False, blank=False)
     fecha_emision = models.DateField(null=False, blank=False)
     
-    ### <
+    ### >
     def __str__(self):
         return self.nombre
     ### <
@@ -227,7 +227,7 @@ class HojaTrabajo(models.Model):
     MuestraMasificada = models.ForeignKey('MuestraMasificada', on_delete=models.CASCADE, related_name="MuestraMasificada")
     Tipo = models.CharField(max_length=200, default='M')  # 'S' para estandar, 'D' para duplicado, 'B' para blanco
     Duplicado = models.CharField(max_length=200, blank=True, null=True)
-
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
 
 class HojaTrabajoQuimico(models.Model):
     ### >
@@ -262,7 +262,7 @@ class Muestra(models.Model):
     def __str__(self):
         return f"Muestra {self.nombre} de {self.elemento}"
     
-
+ ### >
 class LotesAbsorción(models.Model):
     ID_LT = models.CharField(_("Nro de Lote"), max_length=200, blank=False, null=False, default=0)
     hoja_trabajo = models.ForeignKey(HojaTrabajoQuimico, on_delete=models.CASCADE, null=False, blank=True, default=None, related_name="resultado_hoja")
@@ -277,8 +277,10 @@ class LotesAbsorción(models.Model):
     class Meta:
         verbose_name = _("Lote de Absorción")
         verbose_name_plural = _("Lotes de Absorción")
+### <
 
 
+ ### >
 class Resultado(models.Model):
     elemento = models.ForeignKey(Elementos, on_delete=models.CASCADE, related_name="resultado_elemento")
     muestra = models.ForeignKey(Muestra, on_delete=models.CASCADE, related_name="resultado_muestra")
@@ -294,9 +296,9 @@ class Resultado(models.Model):
     class Meta:
         verbose_name = _("Resultado")
         verbose_name_plural = _("Resultados")
+### <
 
-
-
+### >
 class Novedades(models.Model):
     class Tipo(models.TextChoices):
         ORDEN_DE_TRABAJO = 'Orden_de_trabajo', _('Orden de trabajo')
@@ -325,8 +327,10 @@ class Novedades(models.Model):
     def eliminar_antiguos(cls):
         limite = timezone.now() - timedelta(days=30)
         cls.objects.filter(fecha__lt=limite).delete()
+### <
 
 
+### >
 class Noticia(models.Model):
     titulo = models.CharField(max_length=200)
     descripcion = models.TextField()
@@ -336,3 +340,4 @@ class Noticia(models.Model):
 
     def str(self):
         return self.titulo
+### <
