@@ -9,26 +9,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Absorción</title>
     <style>
-        .actions, .details, .filters {
-            margin: 0; /* Asegura que no haya márgenes adicionales */
-            padding: 10px; /* Mantiene un espaciado interno uniforme */
-            background-color: #f5f7fa; /* Color de fondo */
-            border-radius: 8px; /* Bordes redondeados */
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombras ligeras */
-            height: auto; /* Ajuste automático de altura */
+        body {
+            background-color: #adadad;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #fcc058;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        .absorcion-wrapper {
+            max-width: 95%;
+            margin: 15px auto;
+            padding:0px 20px;
+            background-color: rgb(255, 255, 255);
+            border-radius: 10px;
+            border: 3px solid #fcc058;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .details {
+            margin-left: 10px;
+        }
+        .row {
+            margin: 0;
+            gap: 5px;
+            display: flex;
+            flex-wrap: wrap;
         }
 
-        .filters .btn {
-            width: 100%; /* Hace que el botón ocupe todo el ancho del contenedor */
-            display: block; /* Garantiza que sea un elemento de bloque */
-            margin: 10px auto; /* Centra el botón vertical y horizontalmente */
+        .col-md-3, .col-md-6, .col-md-9 {
+            padding: 4px;
         }
-    
+
+        .col-fixed {
+            flex: 0 0 25%;
+            max-width: 25%;
+        }
+
+        .col-fluid {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .actions, .details, .filters {
+            background-color: rgb(217, 217, 217);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .button-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .button-grid .btn,
+        .filters .btn,
+        .btn {
+            color: white;
+            font-weight: bold;
+            border: none;
+            font-size: 13px;
+            padding: 6px 6px;
+            flex: 1 1 auto;
+        }
+
+
         .button-grid a {
             font-size: 12px;
-            padding: 5px;
+            padding: 4px;
+            color: white;
         }
-    
+
         .data-grid {
             display: flex;
             justify-content: space-between;
@@ -36,7 +94,7 @@
             gap: 5px;
             margin: 5px 0;
         }
-    
+
         .data-grid div {
             padding: 5px;
             background-color: #ffffff;
@@ -46,7 +104,7 @@
             flex: 1 1 calc(30% - 10px);
             font-size: 12px;
         }
-    
+
         .status-box {
             padding: 5px;
             background-color: #000;
@@ -55,184 +113,194 @@
             border-radius: 4px;
             font-size: 12px;
         }
-    
+
         .status-box h6 {
             margin: 0;
             font-size: 12px;
         }
-    
-        .row.align-items-center {
-            align-items: center; /* Asegura alineación vertical uniforme */
-        }
-    
+
         .buttons-row {
             display: flex;
             justify-content: center;
             gap: 5px;
+            margin-top: 10px;
         }
-    
+
         .filters .input-group {
             display: flex;
             gap: 5px;
         }
 
-
-        .row {
-            margin: 0; /* Elimina márgenes adicionales entre filas */
-            gap: 5px; /* Define un espacio uniforme de 5px entre columnas */
-        }
-        
-        .col-md-3, .col-md-6 {
-            padding: 5px; /* Añade un pequeño padding para un espaciado interno */
-        }
-        
-        .btn-active {
-            background-color: #007BFF; /* Color azul destacado */
-            color: white;
-            border-color: #0056b3;
-        }
-
-        .btn-normal {
-            background-color: #cccccc;
-            color: black;
-            border: 1px solid #aaa;
-            padding: 10px 20px;
-            cursor: pointer;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-        .btn:hover {
-            background-color: #ddd;
-        }
         .calibration-box {
-            margin-top: 20px;
-            padding: 10px;
+            margin-top: 10px;
+            padding: 8px;
             border: 1px solid #ddd;
-            background-color: #f9f9f9;
+            background-color: #b7b7b7;
             border-radius: 5px;
         }
-    
+
         .calibration-box h6 {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
-    
+
         .form-control-sm {
             font-size: 12px;
-            padding: 5px;
+            padding: 4px;
+        }
+
+        .custom-title {
+            text-align: center;
+            margin: 0 0 10px;
+            font-size: 2rem;
+            color: #214c67;
+        }
+
+        .btn {
+            font-weight: bold;
+            padding: 8px 16px;
+            white-space: nowrap;
         }
     
+        .btn-primary {
+            background-color: #214c67;
+            border: none;
+            color: white;
+        }
+    
+        .btn-primary:hover {
+            background-color: #163347;
+            color: white;
+        }
+    
+        .btn-info {
+            background-color: #4cb7d8;
+            color: white;
+            border: none;
+        }
+    
+        .btn-info:hover {
+            background-color: #35a1c2;
+            color: white;
+        }
+    
+        .btn-success {
+            background-color: #5cb85c;
+            border: none;
+            color: white;
+        }
+    
+        .btn-success:hover {
+            background-color: #4cae4c;
+            color: white;
+        }
+    
+        .btn-active {
+            background-color: #4cb7d8 !important; /* Color activo, puedes cambiarlo */
+            color: white !important;
+            border: none;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
     </style>
 </head>
 <body>
-    <h1 class="custom-title">Puesto de Absorción</h1>
-
-    <div class="row">
-        <div class="col-md-3 actions">
-            <h5 class="text-center">Acciones</h5>
-            <div class="button-grid">
-                <button class="btn btn-primary btn-sm w-100 mb-2" onclick="gestionarLotes()">Gestionar Lotes</button>
-                <button class="btn btn-primary btn-sm w-100 mb-2" onclick="grabarLotes()">Grabar Lotes</button>
-                <button class="btn btn-primary btn-sm w-100" onclick="exportarLotes()">Exportar</button>
-                <a href="/index" class="btn btn-primary btn-sm w-100 mb-2">Atrás</a>
-            </div>
-        </div>
-    
-        <div class="col-md-6 details">
-            <h5 class="text-center">Detalles</h5>
-            <div class="data-grid">
-                <div>Muestras: <span id="muestras">{{ muestras_count }}</span></div>
-                <div>Blk Lab.: <span id="blk_lab">0</span></div>
-                <div>Blk Prep.: <span id="blk_prep">0</span></div>
-                <div>Dup. Lab.: <span id="dup_lab">0</span></div>
-                <div>Dup. Prep.: <span id="dup_prep">0</span></div>
-                <div>Std. Ref.: <span id="std_ref">0</span></div>
-            </div>
-            <div class="calibration-box">
-                <div class="row align-items-center">
-                    <div class="col-auto">
-                        <p class="mb-0"><strong>Curv. Calibración:</strong></p>
+    <div class="absorcion-wrapper">
+        <h1 style="text-align: center;">Registros de documentos</h1>
+        <div class="row">
+            <div class="col-fixed">
+                <div class="actions">
+                    <h5 class="text-center">Acciones</h5>
+                    <div class="button-grid">
+                        <button class="btn btn btn-info" onclick="gestionarLotes()">Gestionar Lotes</button>
+                        <button class="btn btn btn-info" onclick="grabarLotes()">Grabar Lotes</button>
+                        <button class="btn btn-success" onclick="exportarLotes()">Exportar</button>
+                        <a href="/index" class="btn btn-primary">Atrás</a>
                     </div>
-                    <div class="col">
-                        <div class="row">
-                            <div class="col-3 mb-2">
-                                <input type="text" class="form-control form-control-sm" id="curv-1" 
-                                       placeholder="Curv. 1" 
-                                       oninput="validateDecimal(this)"
-                                       value="{{ curvaturas.curv_1 }}" data-curvatura-id="1">
+                </div>
+                <div class="filters">
+                    <h5 class="text-center">Filtros</h5>
+                    <div class="input-group mb-2">
+                        <button class="btn btn-primary" id="buscarHojasBtn">Buscar hojas</button>
+                    </div>
+                    <div class="status-box text-center">
+                        <h6>Id. de Lote</h6>
+                        <p>
+                            {% if Batch_ID %}
+                                {{ Batch_ID }}
+                            {% else %}
+                                Sin Asig.
+                            {% endif %}
+                        </p>
+                        <p>
+                            Creación:
+                            <span id="fecha_creacion">
+                                {% if Bacth_Creación %}
+                                    {{ Bacth_Creación|date:"d/m/Y" }}
+                                {% else %}
+                                    Sin fecha
+                                {% endif %}
+                            </span>
+                        </p>
+                        <div id="idHdtContainer" style="color: #00FFFF; text-align: center; margin-top: 10px;">
+                            <h6>HDT's:</h6>
+                            <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                                {% for id in id_hdt %}
+                                <div name="id_hdt_value" style="padding: 2px 5px; border: none; background-color: transparent; color: #00FFFF;">
+                                    {{ id }}
+                                </div>
+                                {% endfor %}
                             </div>
-                            <div class="col-3 mb-2">
-                                <input type="text" class="form-control form-control-sm" id="curv-2" 
-                                       placeholder="Curv. 2" 
-                                       oninput="validateDecimal(this)"
-                                       value="{{ curvaturas.curv_2 }}" data-curvatura-id="2">
-                            </div>
-                            <div class="col-3">
-                                <input type="text" class="form-control form-control-sm" id="curv-3" 
-                                       placeholder="Curv. 3" 
-                                       oninput="validateDecimal(this)"
-                                       value="{{ curvaturas.curv_3 }}" data-curvatura-id="3">
-                            </div>
-                            <div class="col-3">
-                                <input type="text" class="form-control form-control-sm" id="curv-4" 
-                                       placeholder="Curv. 4" 
-                                       oninput="validateDecimal(this)"
-                                       value="{{ curvaturas.curv_4 }}" data-curvatura-id="4">
-                            </div>                            
-                            <button class="btn btn-primary mt-3" onclick="guardarValoresAbsorcion(contexto)">Guardar Valores</button>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="buttons-row mt-2 d-flex justify-content-center">
-                <button class="btn btn-active" onclick="mostrarTabla('hojaTrabajo', this, 0)">Hoja de trabajo</button>
-                <button class="btn btn-norma" onclick="mostrarTabla('diluciones', this, 1)">Diluciones</button>
-                <button class="btn btn-norma" onclick="mostrarTabla('lecturas', this, 2)">Lecturas</button>
-                <button class="btn btn-norma" onclick="mostrarTabla('leyes', this, 3)">Leyes</button>
-            </div>
-        </div>
     
-        <!-- Columna de filtros -->
-        <!-- Columna de filtros -->
-        <div class="col-md-3 filters">
-            <h5 class="text-center">Filtros</h5>
-            <div class="input-group mb-2">
-                <button class="btn btn-primary btn-sm" id="buscarHojasBtn">Buscar hojas</button>
-            </div>
-            <div class="status-box text-center">
-                <h6>Id. de Lote</h6>
-                <p>
-                    {% if Batch_ID %}
-                        {{ Batch_ID }}
-                    {% else %}
-                        Sin Asig.
-                    {% endif %}
-                </p>
-                <p>
-                    Creación: 
-                    <span id="fecha_creacion">
-                        {% if Bacth_Creación %}
-                            {{ Bacth_Creación|date:"d/m/Y" }}
-                        {% else %}
-                            Sin fecha
-                        {% endif %}
-                    </span>
-                </p>
-                <div id="idHdtContainer" style="color: #00FFFF; text-align: center; margin-top: 10px;">
-                    <h6>HDT's:</h6> <!-- Título añadido -->
-                    <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-                        {% for id in id_hdt %}
-                        <div name="id_hdt_value" style="padding: 2px 5px; border: none; background-color: transparent; color: #00FFFF;">
-                            {{ id }}
+            <div class="col-fluid">
+                <div class="details">
+                    <h5 class="text-center">Detalles</h5>
+                    <div class="data-grid">
+                        <div>Muestras: <span id="muestras">{{ muestras_count }}</span></div>
+                        <div>Blk Lab.: <span id="blk_lab">0</span></div>
+                        <div>Blk Prep.: <span id="blk_prep">0</span></div>
+                        <div>Dup. Lab.: <span id="dup_lab">0</span></div>
+                        <div>Dup. Prep.: <span id="dup_prep">0</span></div>
+                        <div>Std. Ref.: <span id="std_ref">0</span></div>
+                    </div><hr>
+                    <div class="calibration-box">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <p class="mb-0"><strong>Curv. Calibración:</strong></p>
+                            </div>
+                            <div class="col">
+                                <div class="row">
+                                    <div class="col-3 mb-2">
+                                        <input type="text" class="form-control form-control-sm" id="curv-1" placeholder="Curv. 1" oninput="validateDecimal(this)" value="{{ curvaturas.curv_1 }}" data-curvatura-id="1">
+                                    </div>
+                                    <div class="col-3 mb-2">
+                                        <input type="text" class="form-control form-control-sm" id="curv-2" placeholder="Curv. 2" oninput="validateDecimal(this)" value="{{ curvaturas.curv_2 }}" data-curvatura-id="2">
+                                    </div>
+                                    <div class="col-3">
+                                        <input type="text" class="form-control form-control-sm" id="curv-3" placeholder="Curv. 3" oninput="validateDecimal(this)" value="{{ curvaturas.curv_3 }}" data-curvatura-id="3">
+                                    </div>
+                                    <div class="col-3">
+                                        <input type="text" class="form-control form-control-sm" id="curv-4" placeholder="Curv. 4" oninput="validateDecimal(this)" value="{{ curvaturas.curv_4 }}" data-curvatura-id="4">
+                                    </div>
+                                    <button class="btn btn-success mt-3" onclick="guardarValoresAbsorcion(contexto)">Guardar Valores</button>
+                                </div>
+                            </div>
                         </div>
-                        {% endfor %}
-                    </div>
+                    </div><hr>
+                    <div class="buttons-row mt-2 d-flex justify-content-center">
+                        <button class="btn btn-primary" onclick="mostrarTabla('hojaTrabajo', this, 0)" data-target="hojaTrabajo">Hoja de trabajo</button>
+                        <button class="btn btn-primary" onclick="mostrarTabla('diluciones', this, 1)" data-target="diluciones">Diluciones</button>
+                        <button class="btn btn-primary" onclick="mostrarTabla('lecturas', this, 2)" data-target="lecturas">Lecturas</button>
+                        <button class="btn btn-primary" onclick="mostrarTabla('leyes', this, 3)" data-target="leyes">Leyes</button>
+                    <hr></div>
                 </div>
             </div>
         </div>
     </div>
-
 
     <div id="hojaTrabajo" class="tabla">
         <div class="table-container table-responsive">
@@ -1183,8 +1251,6 @@
             enlace.download = `${nombre}.${formato}`;
             enlace.click();
         }
-    
-        
     </script>
 </body>
 {% include 'Footer.html' %}

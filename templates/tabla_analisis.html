@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-center mb-4">Resumen de Análisis</h1>
+
+<div class="container d-flex justify-content-center flex-wrap gap-4">
+
+    <!-- Tabla de Títulos de Análisis -->
+    <table class="table table-bordered table-striped">
+        <thead class="table-primary text-center">
+            <tr>
+                <th>Título del Análisis</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for titulo in titulos_analisis %}
+            <tr>
+                <td>{{ titulo }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Tabla de Elementos de Análisis -->
+    <table class="table table-bordered table-striped">
+        <thead class="table-info text-center">
+            <tr>
+                <th>Elemento</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for elemento in elementos_analisis %}
+            <tr>
+                <td>{{ elemento }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Tabla con Rango, ID Muestra y Tipo -->
+    <table class="table table-bordered table-striped">
+        <thead class="table-warning text-center">
+            <tr>
+                <th>Rango</th>
+                <th>ID Muestra</th>
+                <th>Tipo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for muestra in muestras %}
+            <tr>
+                <td>{{ muestra.indexCurv }}</td>
+                <td>{{ muestra.ident }}</td>
+                <td>{{ muestra.t }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+{% endblock %}

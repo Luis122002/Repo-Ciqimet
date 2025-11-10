@@ -1,0 +1,415 @@
+{% load static %}
+<!DOCTYPE html>
+{% include 'header.html' %}
+{% csrf_token %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body {
+            background-color: #c5c5c5;
+            color: white;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        .odt-wrapper {
+            max-width: 85%;
+            margin: 20px auto;
+            padding: 15px 20px;
+            background-color: white;
+            border-radius: 10px;
+            border: 3px solid #fcc058;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+    
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #fcc058;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+    
+        .odt-wrapper .btn {
+            font-weight: bold;
+            padding: 8px 16px;
+            white-space: nowrap;
+        }
+    
+        .odt-wrapper .btn-primary {
+            background-color: #214c67;
+            border: none;
+            color: white;
+        }
+    
+        .odt-wrapper .btn-primary:hover {
+            background-color: #163347;
+            color: white;
+        }
+    
+        .odt-wrapper .btn-info {
+            background-color: #4cb7d8;
+            color: white;
+            border: none;
+        }
+    
+        .odt-wrapper .btn-info:hover {
+            background-color: #35a1c2;
+            color: white;
+        }
+    
+        .odt-wrapper .btn-success {
+            background-color: #5cb85c;
+            border: none;
+            color: white;
+        }
+    
+        .odt-wrapper .btn-success:hover {
+            background-color: #4cae4c;
+            color: white;
+        }
+    
+        .button-grid {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="odt-wrapper">
+        <h1 style="font-size: 3rem;">Gestión de Usuarios</h1>
+    
+        <div class="row">
+            <!-- Acciones -->
+            <div class="col actions">
+                <div class="button-grid">
+                    <button class="btn btn-success" onclick="AddUser()">Agregar Usuario</button>
+                    <button class="btn btn-primary" onclick="addCliente()">Agregar Cliente</button>
+                    <button class="btn btn-info" onclick="addProyecto()">Agregar Proyecto</button>
+                    <button class="btn btn-info" onclick="exportarLotes()">Descargar Lista</button>
+                    <button class="btn btn-primary" onclick="window.location.href='/index'">Atras</button>
+                </div>
+            </div>
+    
+            <!-- Filtros -->
+            <div class="col filters">
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3">
+                        <label for="filter-role">Rol:</label>
+                        <select id="filter-role" class="form-control">
+                            <option value="">Todos los roles</option>
+                            {% for role in user_roles %}
+                                <option value="{{ role }}">{{ role }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+    
+                    <div class="col-md-6 mb-3">
+                        <label for="filter-shift">Turno:</label>
+                        <select id="filter-shift" class="form-control">
+                            <option value="">Todos los turnos</option>
+                            <option value="Dia">Día</option>
+                            <option value="Noche">Noche</option>
+                        </select>
+                    </div>
+    
+                    <div class="col-md-6 mb-3">
+                        <label for="search-box">Buscar:</label>
+                        <input id="search-box" type="text" class="form-control" placeholder="Buscar usuario...">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="filter-button">Filtrado:</label>
+                        <div>
+                            <button class="btn btn-primary" onclick="applyFilters()">Filtrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <div class="tabla" id="usuario">
+            <div class="table-container">
+                <table class="table table-striped">
+                    <thead style="background-color: #002d72; color: white;">
+                        <tr>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Apellido</th>
+                            <th scope="col">Correo</th>
+                            <th scope="col">RUT</th>
+                            <th scope="col">Rol</th>
+                            <th scope="col">Turno</th>
+                            <th scope="col">Número</th>
+                            <th scope="col">Proyecto</th>
+                            <th scope="col">Fecha de Ingreso</th>
+                            <th scope="col">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr data-user-id="{{ user.id }}">
+                            <td>{{ user.first_name }}</td>
+                            <td>{{ user.last_name }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.rut }}</td>
+                            <td>{{ user.rolname }}</td>
+                            <td>{{ user.turno }}</td>
+                            <td>{{ user.numero }}</td>
+                            <td>{{ user.proyecto }}</td>
+                            <td>{{ user.datejoined }}</td>
+                            <td>
+                                <button class="btn btn-primary action-btn" data-id="{{ user.id }}">Modificar</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        function exportarTablaSeleccionada(formato, incluirHeader, tablaId) {
+            const tabla = document.getElementById(tablaId);
+            if (!tabla) {
+                Swal.fire('Error', 'No se encontró la tabla seleccionada.', 'error');
+                return;
+            }
+
+            if (formato === 'pdf') {
+                exportarTablaAPDF(tabla, incluirHeader);
+            } else {
+                let contenido = '';
+                const filas = tabla.querySelectorAll('tr');
+
+                filas.forEach((fila, index) => {
+                    const celdas = fila.querySelectorAll('th, td');
+                    const valores = Array.from(celdas).map(celda => {
+                        const input = celda.querySelector('input');
+                        return input ? input.value.trim() : celda.textContent.trim();
+                    });
+
+                    if (index === 0 && !incluirHeader && fila.querySelector('th')) return;
+                    contenido += valores.join(formato === 'csv' ? ';' : ' | ') + '\r\n';
+                });
+
+                descargarArchivo(contenido, document.getElementById('export_name').value, formato);
+            }
+        }
+
+
+        function exportarLotes() {
+            Swal.fire({
+                title: 'Exportar Datos',
+                html: `
+                    <div>
+                        <p>Formato de Exportación:</p>
+                        <input type="radio" id="formato_csv" name="formato" value="csv" checked>
+                        <label for="formato_csv">CSV</label>
+                        <input type="radio" id="formato_txt" name="formato" value="txt">
+                        <label for="formato_txt">TXT</label>
+                        <input type="radio" id="formato_pdf" name="formato" value="pdf">
+                        <label for="formato_pdf">PDF</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="incluir_header" checked>
+                        <label for="incluir_header">Incluir encabezados</label>
+                    </div>
+                    <div>
+                        <label for="export_name">Nombre del archivo:</label>
+                        <input type="text" id="export_name" value="documento_export">
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Exportar',
+                cancelButtonText: 'Cancelar',
+                preConfirm: () => {
+                    const formato = document.querySelector('input[name="formato"]:checked').value;
+                    const incluirHeader = document.getElementById('incluir_header').checked;
+                    return { formato, incluirHeader, tableId: "usuario" };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const { formato, incluirHeader, tableId } = result.value;
+                    exportarTablaSeleccionada(formato, incluirHeader, tableId);
+                }
+            });
+        }
+
+        function descargarArchivo(contenido, nombre, formato) {
+            const blob = new Blob([contenido], { type: formato === 'csv' ? 'text/csv;charset=utf-8;' : 'text/plain;charset=utf-8;' });
+            const enlace = document.createElement('a');
+            enlace.href = URL.createObjectURL(blob);
+            enlace.download = `${nombre}.${formato}`;
+            enlace.click();
+        }
+
+        function exportarTablaAPDF(tabla, incluirHeader) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.text("Reporte de Usuarios", 14, 10);
+
+            const filas = [];
+            const encabezados = [];
+
+            tabla.querySelectorAll("tr").forEach((fila, index) => {
+                const celdas = fila.querySelectorAll("th, td");
+                const valores = Array.from(celdas).map(celda => celda.textContent.trim());
+
+                if (index === 0 && incluirHeader) {
+                    encabezados.push(...valores);
+                } else if (index !== 0 || incluirHeader) {
+                    filas.push(valores);
+                }
+            });
+
+            doc.autoTable({
+                head: [encabezados],
+                body: filas,
+                startY: 20
+            });
+
+            // Obtener el nombre del archivo del input
+            let nombreArchivo = document.getElementById('export_name').value.trim();
+            
+            // Si el usuario no ingresó un nombre, asignar uno por defecto
+            if (!nombreArchivo) {
+                nombreArchivo = "Usuarios";
+            }
+
+            doc.save(`${nombreArchivo}.pdf`);
+        }
+
+        $(document).ready(function() {
+            $('.action-btn').on('click', function() {
+                const elementId = $(this).data('id');
+            const urlDat = '/MasterData/';
+            const Token = csrfToken;
+            const context = 'User';  // Cambiado a "User"
+            const action = 'mod'; 
+            const stade = "acces"; 
+
+            $.ajax({
+                url: urlDat,
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': Token
+                },
+                data: {
+                    'id': elementId,
+                    'context': context,
+                    'action': action,
+                    'stade': stade
+                },
+                success: function(response) {
+                    if (response.redirect_url) {
+                        window.location.href = response.redirect_url; 
+                    } else {
+                        console.log(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Error al enviar datos:', xhr.responseText);
+                }
+            });
+         });
+        });
+        
+        function addCliente() {
+            window.location.href = '/clientes/agregar/';
+        }
+
+        function addProyecto() {
+            window.location.href = '/proyectos/agregar/';
+        }
+
+        function applyFilters() {
+            var role = document.getElementById('filter-role').value;
+            var shift = document.getElementById('filter-shift').value;
+            var search = document.getElementById('search-box').value;
+            
+            var url = new URL(window.location.href);
+            url.searchParams.set('role', role);
+            url.searchParams.set('shift', shift);
+            url.searchParams.set('search', search);
+            
+            window.location.href = url.toString();
+        }
+
+        function AddUser() {
+            const elementId = -1;
+            const urlDat = '/MasterData/';
+            const Token = csrfToken;
+            const context = 'User';  // Cambiado a "User"
+            const action = 'add'; 
+            const stade = "acces"; 
+
+            $.ajax({
+                url: urlDat,
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': Token
+                },
+                data: {
+                    'id': elementId,
+                    'context': context,
+                    'action': action,
+                    'stade': stade
+                },
+                success: function(response) {
+                    if (response.redirect_url) {
+                        window.location.href = response.redirect_url; 
+                    } else {
+                        console.log(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Error al enviar datos:', xhr.responseText);
+                }
+            });
+        }
+        function ModUser(ID) {
+            const elementId = ID;
+            const urlDat = '/MasterData/';
+            const Token = csrfToken;
+            const context = 'User';  // Cambiado a "User"
+            const action = 'mod'; 
+            const stade = "acces"; 
+
+            $.ajax({
+                url: urlDat,
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': Token
+                },
+                data: {
+                    'id': elementId,
+                    'context': context,
+                    'action': action,
+                    'stade': stade
+                },
+                success: function(response) {
+                    if (response.redirect_url) {
+                        window.location.href = response.redirect_url; 
+                    } else {
+                        console.log(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Error al enviar datos:', xhr.responseText);
+                }
+            });
+        }
+    </script>
+</body>
+{% include 'Footer.html' %}
+</html>

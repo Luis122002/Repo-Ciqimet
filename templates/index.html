@@ -8,163 +8,187 @@
     <title>Data Display</title>
     <link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
-        @import url('https://fonts.googleapis.com/css?family=Montserrat&display=swap');
-        * {
+        html, body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif;
-            
+            height: 100%;
         }
 
-        /* Main content */
-        .main-content {
-            flex-grow: 1;
-            padding-bottom: 100px; /* Asegúrate de que no haya padding en la parte superior */
-            margin: 0;  /* Elimina cualquier margen */
-            background-color: #d7d7d7;
-        }
-
-        /* Cards */
-        .container-card {
-            width: 100%;
+        body {
+            background-color: #c5c5c5;
             display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-            margin: auto;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
-        .title-cards {
-            width: 100%;
-            text-align: center;
-            color: #111111;
+        #profile-icon {
+            width: 45px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+            position: relative;
+            top: 1%;
+        }
+
+        #profile-icon:hover {
+            transform: scale(1.05);
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            #profile-icon {
+                width: 40px;
+                height: 40px;
+                top: 3%;
+            }
+        }
+
+        /* === Modern Card Styling === */
+        .main-content {
+            padding: 2rem;
+            background-color: #f0f2f5;
+            flex: 1;
+        }
+
+        .container-card {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            justify-items: center;
         }
 
         .card {
-            width: 100%;
-            max-width: 350px;
-            margin: 10px;
-            border-radius: 3px;
-            overflow: hidden;
             background: #ffffff;
-            box-shadow: 0px 1px 10px rgba(0, 0, 0, 0.619);
-            transition: all 200ms ease-out;
-            cursor: default;
+            border: 2px solid #e0e0e0; /* Borde más definido */
+            border-radius: 1rem;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); /* Sombra más marcada */
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+            max-width: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
+
         .card:hover {
-            box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.806);
-            transform: translateY(-3%);
+            transform: translateY(-8px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
         }
 
         .card img {
             width: 100%;
-            height: 250px;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid #ccc;
         }
 
-        .card .contenido-card {
-            padding: 15px;
-            text-align: center;
+        .contenido-card {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-grow: 1;
         }
 
-        .card .contenido-card h3 {
-            margin-bottom: 15px;
-            color: #111111bc;
+        .contenido-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #1c1c1c;
             font-weight: bold;
         }
 
-        .card .contenido-card p {
-            line-height: 1.8;
-            color: #111111c4;
-            font-size: 17px;
-            margin-bottom: 20px;
+        .contenido-card p {
+            flex-grow: 1;
+            font-size: 1.2rem;
+            color: #4b4b4b;
+            margin-bottom: 1rem;
         }
 
-        .card .contenido-card a {
-            display: inline-block;
-            padding: 10px;
-            margin-top: 10px;
-            text-decoration: none;
-            border-radius: 4px;
-            transition: all 400ms ease;
-            margin-bottom: 5px;
+        .contenido-card .btn {
+            margin: 0.25rem 0;
+            width: 100%;
+            padding: 0.6rem;
+            font-size: 1rem;
         }
 
-        /* Responsive Design */
-        @media only screen and (max-width: 768px) {
-            .content-wrapper {
-                flex-direction: column;
-            }
+        .title-cards {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
 
-            .sidebar {
-                width: 100%;
-                height: auto;
-                margin-bottom: 20px;
-            }
+        .custom-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #1c1c1c;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
+        }
 
-            .main-content {
-                margin-left: 0;
-                width: 100%;
-                padding: 10px;
-            }
-
+        @media (max-width: 1200px) {
             .container-card {
-                flex-direction: column;
-                max-width: 100%;
-                display: grid;
+                grid-template-columns: repeat(2, 1fr);
             }
+        }
 
-            .card {
-                margin: 10px 0;
+        @media (max-width: 768px) {
+            .container-card {
+                grid-template-columns: 1fr;
+                padding: 0 1rem;
             }
         }
     </style>
 </head>
 <body>
-        <!-- Main Content -->
-        <div class="main-content">
-            <div class="title-cards">
-                <br>
-                <h1 class="custom-title">Menú Principal de Trabajo</h1>
+<div class="main-content">
+        <div class="title-cards">
+            <h1 class="custom-title">Menú Principal de Trabajo</h1>
+        </div>
+        <div class="container-card">
+            <div class="card">
+                <img src="{% static 'rest_framework/img/Admin_User.jpg' %}" alt="Orden de Trabajo">
+                <div class="contenido-card">
+                    <h3>Administrador de usuarios</h3>
+                    <p>Gestionamos perfiles y usuarios en el sistema, asegurando un control eficiente y seguro de cada cuenta.</p>
+                    <button class="btn btn-info" onclick="ShowInfo(1)">Leer Más</button>
+                    <button class="btn btn-success" onclick="window.location.href='/users/'">Ingresar</button>
+                </div>
             </div>
-            <div class="container-card">
-                <div class="card">
-                    <figure>
-                        <img src="{% static 'rest_framework/img/ODT_module.png' %}" alt="Orden de Trabajo">
-                    </figure>
-                    <div class="contenido-card">
-                        <h3>Órden de Trabajo</h3>
-                        <p>Gestionamos tus Órdenes de Trabajo desde la solicitud hasta la entrega de resultados, asegurando un proceso eficiente.</p>
-                        <button class="btn btn-info" onclick="ShowInfo(1)">Leer Más</button>
-                        <button class="btn btn-succes" onclick="window.location.href='/ODT/'">Ingresar</button>
-                    </div>
+
+            <div class="card">
+                <img src="{% static 'rest_framework/img/Orden_Trabajo.jpg' %}" alt="Orden de Trabajo">
+                <div class="contenido-card">
+                    <h3>Órden de Trabajo</h3>
+                    <p>Gestionamos tus Órdenes de Trabajo desde la solicitud hasta la entrega de resultados, asegurando un proceso eficiente.</p>
+                    <button class="btn btn-info" onclick="ShowInfo(1)">Leer Más</button>
+                    <button class="btn btn-success" onclick="window.location.href='/ODT/'">Ingresar</button>
                 </div>
-                <div class="card">
-                    <figure>
-                        <img src="{% static 'rest_framework/img/Puesto_trabajo.png' %}" alt="Puesto de Trabajo Normal">
-                    </figure>
-                    <div class="contenido-card">
-                        <h3>Puesto de Trabajo Normal</h3>
-                        <p>Asignamos y procesamos muestras con precisión, optimizando el control de calidad en cada paso con nuestras herramientas.</p>
-                        <button class="btn btn-info" onclick="ShowInfo(2)">Leer Más</button>
-                        <button class="btn btn-succes" onclick="window.location.href='/Puesto-trabajo/'">Ingresar</button>
-                    </div>
+            </div>
+
+            <div class="card">
+                <img src="{% static 'rest_framework/img/Trabajo_Normal.jpg' %}" alt="Puesto de Trabajo Normal">
+                <div class="contenido-card">
+                    <h3>Puesto de Trabajo Normal</h3>
+                    <p>Asignamos y procesamos muestras con precisión, optimizando el control de calidad en cada paso con nuestras herramientas.</p>
+                    <button class="btn btn-info" onclick="ShowInfo(2)">Leer Más</button>
+                    <button class="btn btn-success" onclick="window.location.href='/Puesto-trabajo/'">Ingresar</button>
                 </div>
-                <div class="card">
-                    <figure>
-                        <img src="{% static 'rest_framework/img/Puesto_instrumental.png' %}" alt="Puesto de Trabajo Instrumental">
-                    </figure>
-                    <div class="contenido-card">
-                        <h3>Puesto de Trabajo Instrumental</h3>
-                        <p>Realizamos análisis avanzados con herramientas instrumentales, garantizando resultados confiables y exportables.</p>
-                        <button class="btn btn-info" onclick="ShowInfo(3)">Leer Más</button>
-                        <button class="btn btn-succes" onclick="window.location.href='/Puesto-Absorcion/'">Ingresar</button>
-                    </div>
+            </div>
+
+            <div class="card">
+                <img src="{% static 'rest_framework/img/Trabajo_Instrumental.jpg' %}" alt="Puesto de Trabajo Instrumental">
+                <div class="contenido-card">
+                    <h3>Puesto de Trabajo Instrumental</h3>
+                    <p>Realizamos análisis avanzados con herramientas instrumentales, garantizando resultados confiables y exportables.</p>
+                    <button class="btn btn-info" onclick="ShowInfo(3)">Leer Más</button>
+                    <button class="btn btn-success" onclick="window.location.href='/Puesto-Absorcion/'">Ingresar</button>
                 </div>
             </div>
         </div>
     </div>
-
 </body>
 
 {% include 'Footer.html' %}
@@ -179,16 +203,18 @@ function ShowInfo(value)
     if (value == "1")
     {
         Contex = "Esta sección corresponde a la creación de documentos y registros de orden de trabajo para poder llevar a cabo el inicio de la investigación y análisis de resultados solicitados por los clientes"
-
     }
     if (value == "2")
     {
-
-        Contex = "Esa sección corresponde a la asignación de muestras para realizar el análisis de una orden de trabajo y poder ser procesados por los trabajadores"
+        Contex = "Esta sección corresponde a la asignación de muestras para realizar el análisis de una orden de trabajo y poder ser procesados por los trabajadores"
     }
     if (value == "3")
     {
         Contex = "Esta sección corresponde al entorno de análisis que se busca realizar en las asignadas de las órdenes de trabajo y obtener resultados de acuerdo al uso que se le busca dar"
+    }
+    if (value == "4")
+    {
+        Contex = "Esta corresponde al entorno de análisis que se busca realizar en las asignadas de las órdenes de trabajo y obtener resultados de acuerdo al uso que se le busca dar"
     }
     Swal.fire({
         title: Contex,

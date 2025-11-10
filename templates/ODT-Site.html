@@ -7,90 +7,165 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ODT Display</title>
+    <style>
+        body {
+            background-color: #c5c5c5;
+            color: white;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #fcc058;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .custom-alert {
+            background-color: rgba(149, 149, 149, 0.806) ;
+            width: 150vh !important;  
+            height: 65vh !important; 
+            font-size: 1.5rem;
+            padding: 20px;
+        }
+        /* Encapsulamiento para evitar afectar otros estilos */
+        .odt-wrapper {
+            max-width: 95%;
+            margin: 10px auto 10px auto; /* Antes era 20px */
+            padding: 15px 20px;           /* Antes era 20px */
+            background-color: white;
+            border-radius: 10px;
+            border: 3px solid #fcc058;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .odt-wrapper .filters .mb-3 {
+            margin-bottom: 10px !important; /* Antes 15px por Bootstrap */
+        }
+
+        .odt-wrapper .text-center.mb-3 {
+            margin-bottom: 15px !important; /* Espacio para el botón "Filtrar Órdenes" */
+        }
+
+        .odt-wrapper .custom-title {
+            text-align: center;
+            color: #fcc058;
+            margin-bottom: 15px; /* Antes 25px */
+            font-size: 4rem;
+            font-family: Arial, sans-serif;
+        }
+
+
+        .odt-wrapper .button-grid .btn {
+            background-color: #214c67;
+            border: none;
+            color: white;
+            font-weight: bold;
+            padding: 8px 12px;
+            margin: 4px 0;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        .odt-wrapper .button-grid .btn:hover {
+            background-color: #163347;
+        }
+
+        .odt-wrapper .filters select.form-control,
+        .odt-wrapper .filters input.form-control {
+            border: 1px solid #214c67;
+            border-radius: 5px;
+            padding: 6px;
+        }
+
+        .odt-wrapper .filters .btn-primary {
+            background-color: #fcc058;
+            border: none;
+            color: black;
+            font-weight: bold;
+        }
+
+        .odt-wrapper .filters .btn-primary:hover {
+            background-color: #e0a046;
+        }
+
+        @media (max-width: 992px) {
+            .odt-wrapper .row {
+                flex-direction: column;
+            }
+
+            .odt-wrapper .col {
+                margin-bottom: 15px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div>
-    <h1 class="custom-title">Registros de órdenes de trabajo (ODT)</h1>
 
-    <div class="container">
-        <div class="row">
+<!-- SECCIÓN FUNCIONAL -->
+<div class="odt-wrapper">
+    <h1 style="font-size: 3rem;">Registros de órdenes de trabajo (ODT)</h1>
+
+    <div class="row d-flex flex-wrap gap-3 justify-content-center">
+        <!-- Botones de gestión -->
+        <div class="col-md-3 actions">
+            <div class="button-grid">
+                <a href="/Analysis-Manager" class="btn">Gestionar análisis</a>
+                <a href="/Elements-Manager" class="btn">Gestionar Elementos</a>
+                <button class="btn" onclick="AddHDT()">Crear Hoja de Trabajo</button>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters">
+            <!-- Botón arriba y centrado -->
+            <div class="text-center mb-3">
+                <button class="btn btn-primary px-4 py-2" onclick="applyFilters()">Filtrar Órdenes</button>
+            </div>
         
-            <!-- Columna de acciones (más pequeña) -->
-            <div class="col actions">
-                <!-- Botones de análisis y gestión -->
-                <div class="button-grid">
-                    <!-- Botón -->
-                    <a href="/Analysis-Manager" class="btn btn-primary text-center">
-                        Gestionar análisis
-                    </a>
-                    
-                    <!-- Botón -->
-                    <a href="/Elements-Manager" class="btn btn-primary text-center">
-                        Gestionar Elementos
-                    </a>
-                    <button class="btn btn-primary text-center" onclick="AddHDT()">
-                        Crear Hoja de Trabajo
-                    </a>
+            <!-- Filtros abajo -->
+            <div class="row">
+                <!-- Año -->
+                <div class="col-md-4 mb-3">
+                    <label for="filter-year">Año:</label>
+                    <select id="filter-year" class="form-control">
+                        <option value="">Todos los años</option>
+                        {% for year in available_years %}
+                            <option value="{{ year }}" {% if request.GET.year == year|stringformat:"s" %}selected{% endif %}>{{ year }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
-            </div>
-            <!-- Columna de filtros (más grande y centrada) -->
-            <div class="col filters">
-                <!-- Filtros -->
-                <div class="row mb-3">
-                    <!-- Filtro por año -->
-                    <div class="col-md-6 mb-3">
-                        <label for="filter-year">Año:</label>
-                        <select id="filter-year" class="form-control">
-                            <option value="">Todos los años</option>
-                            {% for year in available_years %}
-                                <option value="{{ year }}" {% if request.GET.year == year|stringformat:"s" %}selected{% endif %}>{{ year }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-            
-                    <!-- Filtro por mes -->
-                    <div class="col-md-6">
-                        <label for="filter-month">Mes:</label>
-                        <select id="filter-month" class="form-control">
-                            <option value="">Todos los meses</option>
-                            {% for month in available_months %}
-                                <option value="{{ month.value }}" {% if request.GET.month == month.value|stringformat:"s" %}selected{% endif %}>{{ month.label }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-            
-                    <!-- Búsqueda por palabra clave -->
-                    <div class="col-md-6 mb-3">
-                        <label for="search-box">Buscar:</label>
-                        <div class="input-group">
-                            <input id="search-box" type="text" class="form-control" placeholder="Buscar órdenes..." value="{{ request.GET.search }}">
-                        </div>
-                    </div>
-            
-                    <div class="col-md-6 mb-3">
-                        <label>&nbsp;</label>
-                        <div class="input-group">
-                            <button class="btn btn-primary" onclick="applyFilters()">Filtrar Órdenes</button>
-                        </div>
-                    </div>
+        
+                <!-- Mes -->
+                <div class="col-md-4 mb-3">
+                    <label for="filter-month">Mes:</label>
+                    <select id="filter-month" class="form-control">
+                        <option value="">Todos los meses</option>
+                        {% for month in available_months %}
+                            <option value="{{ month.value }}" {% if request.GET.month == month.value|stringformat:"s" %}selected{% endif %}>{{ month.label }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
-            </div>
-            <!-- Columna para añadir ODT (sin cambios) -->
-            <div class="col add-odt">
-                <div class="button-grid">
-                    <!-- Botón para añadir ODT -->
-                    <button class="btn btn-primary" onclick="AddODT()">
-                        Añadir ODT
-                    </button>
-                    
-                    <!-- Botón para ir atrás -->
-                    <button class="btn btn-info" onclick="window.location.href = '/index'">
-                        Atrás
-                    </button>
+        
+                <!-- Buscar -->
+                <div class="col-md-4 mb-3">
+                    <label for="search-box">Buscar:</label>
+                    <input id="search-box" type="text" class="form-control" placeholder="Buscar órdenes..." value="{{ request.GET.search }}">
                 </div>
             </div>
         </div>
+        <!-- Botones adicionales -->
+        <div class="col-md-3 add-odt">
+            <div class="button-grid">
+                <button class="btn" onclick="AddODT()">Añadir ODT</button>
+                <!-- CAMBIO POR PONER -->
+                <button class="btn" onclick="window.location.href = '/Ajustar_Muestras/'">Ajustar Muestras</button>
+                <button class="btn btn-info" onclick="window.location.href = '/index'">Atrás</button>
+            </div>
+        </div>
     </div>
+</div>
 
     <div class="table-container">
         <table class="table table table-striped mb-0">
@@ -129,39 +204,267 @@
                     {% endfor %}
                 </tbody>
             </table>
-       
+ 
     </div>
-
     </div>
     </div>
     
     <script>
         
+function buttonFire() {
+    Swal.fire({
+        title: '',
+        html: `
+            <!-- Enlace a Bootstrap CSS -->
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-        // Script para manejar clic en filas de la tabla
+            <!-- Secciones superiores alineadas horizontalmente -->
+            <div class="d-flex justify-content-between mb-3">
+                <section class="p-3 text-center flex-fill border bg-dark text-info mx-1 fw-bold rounded">
+                    OT: 24358349058734
+                </section>
+                <section class="p-3 text-center flex-fill border bg-dark text-info mx-1 fw-bold rounded">
+                    DIVISIÓN DE RAFIMASIFEMASIMER
+                </section>
+                <section class="p-3 text-center flex-fill border bg-dark text-info mx-1 fw-bold rounded">
+                    Envío: 
+                </section>
+            </div>
 
-        var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            <!-- Contenedor principal con tres tablas alineadas y sección de botones a la derecha -->
+            <div class="container d-flex align-items-start gap-3" style="width: 100%; height: 15%; padding-left: 0; margin-left: 0;">
 
-        // Script para manejar clic en filas de la tabla
-        document.addEventListener('DOMContentLoaded', function () {
-            const rows = document.querySelectorAll('tbody tr');
-            rows.forEach(row => {
-                row.addEventListener('click', function () {
-                    const odtId = this.getAttribute('data-odt-id');
-                    if (odtId) {
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = '/ODT-info/';
-                        form.style.display = 'none'; // Para evitar que el formulario se vea
-                        form.innerHTML = `<input type="hidden" name="odt_id" value="${odtId}">
-                                            <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">`;
-                        document.body.appendChild(form);
-                        form.submit();
-                    }
-                });
-            });
-        });
+            <!-- Primera tabla -->
+            <div style="width: 35%; height: 90%;">
+                <div class="w-100 text-center p-2 bg-secondary text-white border border-dark fw-bold rounded-3 custom-title">
+                    Lista de Análisis
+                </div>
+                <div class="table-responsive rounded-3" style="height: 35vh;">
+                    <table class="table text-center align-middle shadow-lg border border-secondary rounded-4 custom-table">
+                        <thead>
+                            <tr>
+                                <th class="p-3 border border-secondary rounded-3">Elemento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="p-3 border border-secondary rounded-3">Elemento 1</td></tr>
+                            <tr><td class="p-3 border border-secondary rounded-3">Elemento 2</td></tr>
+                            <tr><td class="p-3 border border-secondary rounded-3">Elemento 3</td></tr>
+                            <tr><td class="p-3 border border-secondary rounded-3">Elemento 4</td></tr>
+                            <tr><td class="p-3 border border-secondary rounded-3">Elemento 5</td></tr>
+                            <tr><td class="p-3 border border-secondary rounded-3">Elemento 6</td></tr>
+                            <tr><td class="p-3 border border-secondary rounded-3">Elemento 7</td></tr>
+                            <tr><td class="p-3 border border-secondary rounded-3">Elemento 8</td></tr>
+                            <tr><td class="p-3 border border-secondary rounded-3">Elemento 9</td></tr>
+                            <tr><td class="p-3 border border-secondary rounded-3">Elemento 10</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
+            <!-- Segunda tabla -->
+            <div style="width: 35%; height: 90%;">
+                <div class="w-100 text-center p-2 bg-secondary text-white border border-dark fw-bold rounded-3 custom-title">
+                    Total de Elementos
+                </div>
+                <div class="table-responsive rounded-3" style="height: 35vh;">
+                    <table class="table text-center align-middle shadow-lg border border-secondary rounded-4 custom-table">
+                        <thead>
+                            <tr>
+                                <th class="p-3 border border-secondary rounded-3">Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="p-3 border border-secondary rounded-3">1</td></tr>
+                            <tr><td class="p-3 border border-secondary rounded-3">2</td></tr>
+                            <tr><td class="p-3 border border-secondary rounded-3">3</td></tr>
+                            <tr><td class="p-3 border border-secondary rounded-3">4</td></tr>
+                            <tr><td class="p-3 border border-secondary rounded-3">5</td></tr>
+                            <tr><td class="p-3 border border-secondary rounded-3">6</td></tr>
+                            <tr><td class="p-3 border border-secondary rounded-3">7</td></tr>
+                            <tr><td class="p-3 border border-secondary rounded-3">8</td></tr>
+                            <tr><td class="p-3 border border-secondary rounded-3">9</td></tr>
+                            <tr><td class="p-3 border border-secondary rounded-3">10</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tercera tabla -->
+            <div style="width: 65%; height: 90%;">
+                <div class="w-100 text-center p-2 bg-secondary text-white border border-dark fw-bold rounded-3 custom-title">
+                    Lista Previa
+                </div>
+                <div class="table-responsive rounded-3" style="height: 35vh;">
+                    <table class="table table-light text-center align-middle shadow-lg border border-secondary rounded-4 custom-table">
+                        <thead>
+                            <tr>
+                                <th class="p-3 border border-secondary rounded-3">Nro.</th>
+                                <th class="p-3 border border-secondary rounded-3">Id. Muestra</th>
+                                <th class="p-3 border border-secondary rounded-3">Tipo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="p-3 border border-secondary rounded-3">1</td>
+                                <td class="p-3 border border-secondary rounded-3">Muestra A</td>
+                                <td class="p-3 border border-secondary rounded-3">Tipo 1</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border border-secondary rounded-3">2</td>
+                                <td class="p-3 border border-secondary rounded-3">Muestra B</td>
+                                <td class="p-3 border border-secondary rounded-3">Tipo 2</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border border-secondary rounded-3">3</td>
+                                <td class="p-3 border border-secondary rounded-3">Muestra C</td>
+                                <td class="p-3 border border-secondary rounded-3">Tipo 3</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border border-secondary rounded-3">4</td>
+                                <td class="p-3 border border-secondary rounded-3">Muestra D</td>
+                                <td class="p-3 border border-secondary rounded-3">Tipo 4</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border border-secondary rounded-3">5</td>
+                                <td class="p-3 border border-secondary rounded-3">Muestra E</td>
+                                <td class="p-3 border border-secondary rounded-3">Tipo 5</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border border-secondary rounded-3">6</td>
+                                <td class="p-3 border border-secondary rounded-3">Muestra F</td>
+                                <td class="p-3 border border-secondary rounded-3">Tipo 6</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border border-secondary rounded-3">7</td>
+                                <td class="p-3 border border-secondary rounded-3">Muestra G</td>
+                                <td class="p-3 border border-secondary rounded-3">Tipo 7</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border border-secondary rounded-3">8</td>
+                                <td class="p-3 border border-secondary rounded-3">Muestra H</td>
+                                <td class="p-3 border border-secondary rounded-3">Tipo 8</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border border-secondary rounded-3">9</td>
+                                <td class="p-3 border border-secondary rounded-3">Muestra I</td>
+                                <td class="p-3 border border-secondary rounded-3">Tipo 9</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border border-secondary rounded-3">10</td>
+                                <td class="p-3 border border-secondary rounded-3">Muestra J</td>
+                                <td class="p-3 border border-secondary rounded-3">Tipo 10</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+                <div></div>
+                <!-- Sección de botones a la derecha -->
+                <div style="width: 40%; height: 85%;">
+                    <div class="d-flex flex-column align-items-center gap-2 w-100">
+                        <!-- Título: Herramientas de Diseño -->
+                        <div class="w-100 text-center p-2 bg-secondary text-white border border-dark fw-bold rounded-3 custom-title">
+                            Herramientas de Diseño
+                        </div>
+                        <!-- Botones con menú desplegable -->
+                        <div class="d-flex gap-3 w-100">
+                            <div class="dropdown w-50">
+                                <button class="btn btn-light border border-dark w-100 fw-bold custom-btn dropdown-toggle" data-bs-toggle="dropdown">
+                                    Insertar
+                                </button>
+                                <ul class="dropdown-menu w-100 text-center custom-dropdown-menu">
+                                    <li><a class="dropdown-item custom-dropdown-item" href="#">Chq</a></li>
+                                    <li><a class="dropdown-item custom-dropdown-item" href="#">Blk</a></li>
+                                    <li><a class="dropdown-item custom-dropdown-item" href="#">Std</a></li>
+                                    <li><a class="dropdown-item custom-dropdown-item" href="#">Blk-P</a></li>
+                                    <li><a class="dropdown-item custom-dropdown-item" href="#">Duplicado</a></li>
+                                </ul>
+                            </div>
+                            <div class="dropdown w-50">
+                                <button class="btn btn-light border border-dark w-100 fw-bold custom-btn dropdown-toggle" data-bs-toggle="dropdown">
+                                    Agregar
+                                </button>
+                                <ul class="dropdown-menu w-100 text-center custom-dropdown-menu">
+                                    <li><a class="dropdown-item custom-dropdown-item" href="#">Chq</a></li>
+                                    <li><a class="dropdown-item custom-dropdown-item" href="#">Blk</a></li>
+                                    <li><a class="dropdown-item custom-dropdown-item" href="#">Std</a></li>
+                                    <li><a class="dropdown-item custom-dropdown-item" href="#">Blk-P</a></li>
+                                    <li><a class="dropdown-item custom-dropdown-item" href="#">Duplicado</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Título: Seleccionar Muestras -->
+                        <div class="w-100 text-center p-2 bg-secondary text-white border border-dark fw-bold rounded-3 custom-title">
+                            Seleccionar Muestras
+                        </div>
+                        <!-- Botones con menú desplegable -->
+                        <div class="d-flex gap-3 w-100">
+                            <div class="dropdown w-50">
+                                <button class="btn btn-light border border-dark w-100 fw-bold custom-btn dropdown-toggle" data-bs-toggle="dropdown">
+                                    Borrar
+                                </button>
+                                <ul class="dropdown-menu w-100 text-center custom-dropdown-menu">
+                                    <li><a class="dropdown-item custom-dropdown-item" href="#">Elemento 1</a></li>
+                                    <li><a class="dropdown-item custom-dropdown-item" href="#">Elemento 2</a></li>
+                                    <li><a class="dropdown-item custom-dropdown-item" href="#">Elemento 3</a></li>
+                                </ul>
+                            </div>
+                            <div class="dropdown w-50">
+                                <button class="btn btn-light border border-dark w-100 fw-bold custom-btn dropdown-toggle" data-bs-toggle="dropdown">
+                                    Modificar
+                                </button>
+                                <ul class="dropdown-menu w-100 text-center custom-dropdown-menu">
+                                    <li><a class="dropdown-item custom-dropdown-item" href="#">Elemento 1</a></li>
+                                    <li><a class="dropdown-item custom-dropdown-item" href="#">Elemento 2</a></li>
+                                    <li><a class="dropdown-item custom-dropdown-item" href="#">Elemento 3</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            <!-- Estilos personalizados -->
+            <style>
+                .custom-title {
+                    font-size: 1.5rem; /* Tamaño de fuente para los títulos */
+                }
+                .custom-btn {
+                    font-size: 1.25rem; /* Tamaño de fuente para los botones */
+                    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+                }
+                .custom-btn:hover {
+                    background-color: #FF914D;
+                    color: white;
+                }
+                .custom-dropdown-menu {
+                    font-size: 1.25rem; /* Tamaño de fuente para los elementos del menú desplegable */
+                    border: 1px solid black;
+                    border-radius: 5px;
+                }
+                .custom-dropdown-item:hover {
+                    background-color: #4A90E2;
+                    color: white;
+                }
+            </style>
+        `,
+        showDenyButton: true,
+        showCancelButton: true,
+        confirmButtonText: 'Guardar',
+        denyButtonText: "No Guardar",
+        customClass: {
+            popup: 'custom-alert'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire('Guardado Correctamente!', '', 'success');
+        } else if (result.isDenied) {
+            Swal.fire('Se deshizo los cambios ', '', 'info');
+        }
+    });
+}
 
         function AddODT()
         {
@@ -248,6 +551,7 @@
         }
 
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 {% include 'Footer.html' %}

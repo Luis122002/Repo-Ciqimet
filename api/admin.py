@@ -11,7 +11,6 @@ from .forms import (
     MetodoAnalisisForm, ParametrosForm, EstandarForm, HojaTrabajoForm, HojaTrabajoGeneralForm, HojaTrabajoQuimicoForm
 )
 
-
 @admin.register(User)
 class CustomUserAdmin(admin.ModelAdmin):
     form = CustomUserCreationForm
@@ -27,7 +26,7 @@ class ProyectoAdmin(admin.ModelAdmin):
 @admin.register(Cliente)
 class ClienteAdmin(admin.ModelAdmin):
     form = ClienteForm
-    list_display = ('nombre', 'rut', 'direccion', 'telefono', 'email')
+    list_display = ('nombre_empresa', 'rut', 'direccion', 'telefono', 'email')
 
 
 @admin.register(AnalisisCuTFeZn)

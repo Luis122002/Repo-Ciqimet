@@ -201,6 +201,12 @@
                 {% elif action == 'mod' %}
                     Modificar Análisis de Trabajo
                 {% endif %}
+            {% elif contexModel == 'User' %}
+                {% if action == 'add' %}
+                    Añadir Usuario
+                {% elif action == 'mod' %}
+                    Modificar Usuario
+                {% endif %}
             {% endif %}
 
         </h1>
@@ -241,7 +247,8 @@
                     Modificar
                 {% endif %}
             </button>
-            <button type="button" class="btn btn-secondary btn-cancel" onclick="window.location.href='{% if contexModel == 'element' %}/Elements-Manager/{% elif contexModel == 'curv' %}/Elements-Manager/{% elif contexModel == 'ODT' %}/ODT/{% elif contexModel == 'HDT' %}/ODT/{% elif contexModel == 'analytic' %}/Analysis-Manager/{% endif %}'">Cancelar</button>
+            <button type="button" class="btn btn-secondary btn-cancel" onclick="window.location.href='{% if contexModel == 'element' %}/Elements-Manager/{% elif contexModel == 'curv' %}/Elements-Manager/{% elif contexModel == 'ODT' %}/ODT/{% elif contexModel == 'HDT' %}/ODT/{% elif contexModel == 'analytic' %}/Analysis-Manager/{% elif contexModel == 'User' %}/users/{% endif %}'">Cancelar</button>
+
         </form>
     <br/>
     {% if id != "-1" %}

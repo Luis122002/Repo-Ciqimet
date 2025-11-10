@@ -40,10 +40,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'api',
+    'api', 
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
+    'phonenumber_field',
 ]
 
 MIDDLEWARE = [
@@ -181,7 +182,6 @@ STORAGES = {
 
 
 
-AUTH_USER_MODEL='api.User'
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/index/'

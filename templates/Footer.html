@@ -1,8 +1,10 @@
 {% load static %}
 <!DOCTYPE html>
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* Estructura general */
         body, html {
             height: 100%;
             margin: 0;
@@ -10,34 +12,43 @@
             flex-direction: column;
         }
 
-        /* Contenedor principal */
         .main-content {
             flex: 1;
             display: flex;
             flex-direction: column;
         }
 
-        /* Footer */
         footer {
             background-color: #164866;
-            padding: 10px;
+            padding: 20px 15px;
             color: #fff;
             font-family: Arial, sans-serif;
             width: 100%;
             text-align: center;
-            position: relative; 
-            bottom: 0; 
         }
 
-       
-
-        /* Transición y color de los enlaces */
-        a {
-            transition: color 0.3s ease;
+        footer a {
             color: #ffffff;
+            transition: color 0.3s ease;
+            text-decoration: none;
         }
-        a:hover {
+
+        footer a:hover {
             color: #fcc758;
+        }
+
+        .footer-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            gap: 20px;
+            text-align: left;
+        }
+
+        .footer-section {
+            flex: 1;
+            min-width: 240px;
         }
 
         .logos {
@@ -58,121 +69,139 @@
         .contact-icons {
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
+            gap: 10px;
+            margin-top: 10px;
         }
 
-        .contact-icons img {
-            height: 25px;
-            margin-right: 5px;
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
         }
 
-        /* Separador */
+        .contact-item img {
+            height: 22px;
+        }
+
         hr {
             border: 0;
             border-top: 1px solid #fcc758;
             margin: 20px 0;
         }
 
+        .social-links {
+            margin-top: 10px;
+        }
+
         .social-links img {
             height: 25px;
             margin: 0 10px;
+            transition: transform 0.3s ease;
         }
 
-        /* Estilos responsive */
+        .social-links img:hover {
+            transform: scale(1.1);
+        }
+
         @media (max-width: 768px) {
             footer {
-                padding: 15px;
+                text-align: center;
             }
 
-            .logos img {
-                max-width: 100%;
-            }
-
-            footer p, footer a, footer h4 {
-                font-size: 10px;
-            }
-
-            .contact-icons {
+            .footer-container {
+                flex-direction: column;
                 align-items: center;
             }
 
-            .contact-icons div {
-                margin-bottom: 10px;
+            .footer-section {
+                text-align: center;
             }
 
-            div[style*="flex: 1;"] {
-                text-align: center;
+            .contact-item {
+                justify-content: center;
+            }
+
+            footer p, footer a, footer h4 {
+                font-size: 12px;
+            }
+
+            .logos img {
+                max-width: 80%;
             }
         }
     </style>
 </head>
-<footer>
-    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-        <!-- Sección del logo -->
-        <div class="logos" style="flex: 1; min-width: 200px;">
-            <img src="{% static 'rest_framework/img/Logocapture-removebg-preview.png' %}" alt="Logo de la marca" onclick="returnMenu()">
-        </div>
-
-        <!-- Primera columna: Información del Usuario -->
-        <div style="flex: 1; min-width: 200px; text-align: center;">
-            <h4>Usuario del Sistema</h4>
-            <div class="contact-icons">
-                <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                    <img src="{% static 'rest_framework/img/gmail.png' %}" alt="Correo">
-                    <a href="mailto:usuario@ejemplo.com" id="user-email">usuario@ejemplo.com</a>
-                </div>
-                <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                    <img src="{% static 'rest_framework/img/usuario.png' %}" alt="usuario">
-                    <a href="#" id="user-username">Nombre de usuario</a>
-                </div>
-                <div style="display: flex; align-items: center;">
-                    <img src="{% static 'rest_framework/img/gestion.png' %}" alt="rol">
-                    <a href="#" id="user-role">Texto de ejemplo:</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Segunda columna: Información del Supervisor -->
-        <div style="flex: 1; min-width: 200px; text-align: center;">
-            <h4>Contacto del Supervisor</h4>
-            <div class="contact-icons">
-                <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                    <img src="{% static 'rest_framework/img/gmail.png' %}" alt="Correo">
-                    <a href="mailto:supervisor@ejemplo.com" onclick="copyToClipboard('supervisor@ejemplo.com')">supervisor@ejemplo.com</a>
-                </div>
-                <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                    <img src="{% static 'rest_framework/img/llamada-telefonica.png' %}" alt="Teléfono">
-                    <a href="tel:+569909107071" onclick="copyToClipboard('+569909107071')">+569909107071</a>
-                </div>
-                <div style="display: flex; align-items: center;">
-                    <img src="{% static 'rest_framework/img/marcador-de-posicion.png' %}" alt="Mapa">
-                    <a href="https://maps.app.goo.gl/BDDsbdxYRM9z9T8A7" target="_blank">Juan Nicolas Saldivar N° 15 mz E, Calama</a>
-                </div>
-            </div>
-        </div>
+<body>
+    <!-- Tu contenido principal iría aquí -->
+    <div class="main-content">
+        <!-- ... -->
     </div>
 
-    <!-- Línea separadora -->
-    <hr>
+    <footer>
+        <div class="footer-container">
+            <!-- Logo -->
+            <div class="footer-section logos">
+                <img src="{% static 'rest_framework/img/Logocapture-removebg-preview.png' %}" alt="Logo" onclick="returnMenu()">
+            </div>
 
-    <!-- Sección de derechos reservados -->
-    <div style="text-align: center; margin-bottom: 10px;">
+            <!-- Usuario -->
+            <div class="footer-section">
+                <h4>Usuario del Sistema</h4>
+                <div class="contact-icons">
+                    <div class="contact-item">
+                        <img src="{% static 'rest_framework/img/gmail.png' %}" alt="Correo">
+                        <a href="mailto:usuario@ejemplo.com" id="user-email">usuario@ejemplo.com</a>
+                    </div>
+                    <div class="contact-item">
+                        <img src="{% static 'rest_framework/img/usuario.png' %}" alt="Usuario">
+                        <a href="#" id="user-username">Nombre de usuario</a>
+                    </div>
+                    <div class="contact-item">
+                        <img src="{% static 'rest_framework/img/gestion.png' %}" alt="Rol">
+                        <a href="#" id="user-role">Texto de ejemplo:</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Supervisor -->
+            <div class="footer-section">
+                <h4>Contacto del Supervisor</h4>
+                <div class="contact-icons">
+                    <div class="contact-item">
+                        <img src="{% static 'rest_framework/img/gmail.png' %}" alt="Correo">
+                        <a href="mailto:supervisor@ejemplo.com" onclick="copyToClipboard('supervisor@ejemplo.com')">supervisor@ejemplo.com</a>
+                    </div>
+                    <div class="contact-item">
+                        <img src="{% static 'rest_framework/img/llamada-telefonica.png' %}" alt="Teléfono">
+                        <a href="tel:+569909107071" onclick="copyToClipboard('+569909107071')">+569909107071</a>
+                    </div>
+                    <div class="contact-item">
+                        <img src="{% static 'rest_framework/img/marcador-de-posicion.png' %}" alt="Ubicación">
+                        <a href="https://maps.app.goo.gl/BDDsbdxYRM9z9T8A7" target="_blank">Juan Nicolas Saldivar N° 15 mz E, Calama</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- Derechos -->
         <p style="font-size: 14px;">© Todos los Derechos Reservados por CIQUIMET | Sitio realizado por Equipo Siete</p>
-    </div>
 
-    <!-- Sección de redes sociales -->
-    <div class="social-links" style="text-align: center;">
-        <a href="https://m.facebook.com/profile.php?id=100087536900830" target="_blank">
-            <img src="{% static 'rest_framework/img/facebook.png' %}" alt="Facebook">
-        </a>
-        <a href="https://www.instagram.com/ciquimet.cl/" target="_blank">
-            <img src="{% static 'rest_framework/img/instagram.png' %}" alt="Instagram">
-        </a>
-        <a href="https://cl.linkedin.com/in/ciquimet-chile-843b7525b/" target="_blank">
-            <img src="{% static 'rest_framework/img/linkedin.png' %}" alt="LinkedIn">
-        </a>
-    </div>
-</footer>
+        <!-- Redes -->
+        <div class="social-links">
+            <a href="https://m.facebook.com/profile.php?id=100087536900830" target="_blank">
+                <img src="{% static 'rest_framework/img/facebook.png' %}" alt="Facebook">
+            </a>
+            <a href="https://www.instagram.com/ciquimet.cl/" target="_blank">
+                <img src="{% static 'rest_framework/img/instagram.png' %}" alt="Instagram">
+            </a>
+            <a href="https://cl.linkedin.com/in/ciquimet-chile-843b7525b/" target="_blank">
+                <img src="{% static 'rest_framework/img/linkedin.png' %}" alt="LinkedIn">
+            </a>
+        </div>
+    </footer>
 
     <script>
         function copyToClipboard(text) {
@@ -182,6 +211,8 @@
             el.select();
             document.execCommand('copy');
             document.body.removeChild(el);
-            alert('Texto copiado: ' + text); // Mensaje de confirmación
+            alert('Texto copiado: ' + text);
         }
     </script>
+</body>
+</html>

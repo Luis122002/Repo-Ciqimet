@@ -1,0 +1,489 @@
+{% load static %}
+<!DOCTYPE html>
+{% include 'header.html'%}
+{% csrf_token %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ODT Display</title>
+</head>
+<body>
+    <h1 class="custom-title"> Pesaje en Balanza</h1>
+
+    <div class="container">
+        <div class="row">
+            <div class="col add-odt">
+                <div class="button-grid">
+                    {% for muestra in muestras_balanza %}
+                        {% if forloop.first %}
+                            <!-- Muestra de la primera muestra con los valores necesarios -->
+                            <p><strong>ODT: </strong>{{ muestra.muestraMasificada.odt }}</p>
+                            <p><strong>Hoja de Trabajo: </strong>{{ id_hdt }}</p>
+                            <p><strong>Estado de la Hoja de Trabajo: </strong>
+                                {% if stade %}
+                                    Cerrada
+                                {% else %}
+                                    Abierta
+                                {% endif %}
+                            </p>
+                            
+                            
+                        {% endif %}
+                    {% endfor %} 
+                </div>
+            </div>
+            <!-- Columna de filtros (más grande y centrada) -->
+            <div class="col filters">
+                <!-- Filtros -->
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3">
+                        <label for="search-box">Buscar:</label>
+                        <div class="input-group">
+                            <input id="search-box" type="text" class="form-control" placeholder="Buscar Nro Hoja...">
+                        </div>
+                        <div id="mensaje-peso" style="display:none; margin-top:10px;" class="alert alert-success"></div>
+                        <button class="btn btn-warning btn-sm" onclick="leerPeso(this)">Leer peso</button>
+
+                    </div>
+            
+                    <div class="col-md-6 mb-3">
+                        <label>&nbsp;</label>
+                        <div class="input-group">
+                            <button class="btn btn-primary" onclick="Get_Muestra()">Abrir hoja de trabajo</button>
+                        </div>
+                        <form method="POST" action="/muestras/">
+                            {% csrf_token %}
+                            <input type="hidden" name="id" value="{{ id_hdt }}">
+                            <button class="btn btn-danger">Pesaje en Balanza</button>
+                        </form>
+                          
+                    </div>
+                </div>
+            </div>
+            <div class="col add-odt">
+                <div class="button-grid">   
+                    {% for muestra in muestras_balanza %}
+                        {% if forloop.first %}
+                                <button class="btn btn-success" onclick="GuardarMuestras('{{id_hdt}}')">Guardar</button>
+                                <button class="btn btn-dark" onclick="confirmarMuestras('{{id_hdt}}')">Terminar</button>
+                            {% endif %}
+                        {% endfor %} 
+                    <button class="btn btn-info" onclick="window.location.href = '/Puesto-trabajo/'">
+                        Atrás
+                    </button>
+                </div>
+            </div>
+           
+        </div>
+    </div>
+
+    <div class="table-container table-responsive">
+        <table class="table table-bordered">
+            <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
+                <tr>
+                    <th scope="col">Secuencia</th>
+                    <th scope="col">Id muestra</th>
+                    <th scope="col">Proyecto</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Peso de muestra (Gr)</th>
+                    <th scope="col">Volumen de Aforo (M)</th>
+                    <th scope="col">Accion</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for muestra in muestras_balanza %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ muestra.muestraMasificada.Prefijo }}</td>
+                    <td>{{ muestra.proyecto }}</td>
+                    <td>{{ muestra.t }}</td>
+                    <td>
+                        {% if stade %}
+                            <input type="text" value="{{ muestra.peso_m }}" readonly>
+                        {% else %}
+                        <input type="text" name="peso_m_{{ muestra.id }}" value="{{ muestra.peso_m }}" oninput="validateDecimal(this)" onkeydown="moverFoco(event)" value = 0>
+                        {% endif %}
+                    </td>
+                
+                    <td>{{ muestra.v_ml }}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="leerPeso(this)">Leer peso</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% include 'Footer.html' %}
+    
+    <script>
+        
+
+        // Script para manejar clic en filas de la tabla
+
+        var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // Script para manejar clic en filas de la tabla
+        document.addEventListener('DOMContentLoaded', function () {
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                row.addEventListener('click', function () {
+                    const odtId = this.getAttribute('data-odt-id');
+                    if (odtId) {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '/ODT-info/';
+                        form.style.display = 'none'; // Para evitar que el formulario se vea
+                        form.innerHTML = `<input type="hidden" name="odt_id" value="${odtId}">
+                                            <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">`;
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                });
+            });
+        });
+
+
+
+        function Get_Muestra() {
+            event.preventDefault();
+    
+            // Obtén el valor de búsqueda del input
+            var search = document.getElementById('search-box').value;
+    
+            // Crea el formulario de envío
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/Balanza/';
+    
+            // Agrega el token CSRF al formulario
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
+    
+            // Agrega el valor de búsqueda al formulario
+            const idInput = document.createElement('input');
+            idInput.type = 'hidden';
+            idInput.name = 'id';
+            idInput.value = search;  // Usa el valor de búsqueda
+            form.appendChild(idInput);
+    
+            // Agrega el formulario al documento y envíalo
+            document.body.appendChild(form);
+            form.submit(); 
+        }
+
+        function validateDecimal(input) {
+            let value = input.value;
+            let filteredValue = "";
+            let commaCount = 0; 
+        
+            for (let i = 0; i < value.length; i++) {
+                const char = value[i];
+        
+                if ("0123456789".includes(char)) {
+                    filteredValue += char;
+                } else if (char === "," && commaCount === 0) {
+                    filteredValue += char;
+                    commaCount++;
+                }
+            }
+        
+            if (filteredValue.length > 10) {
+                filteredValue = filteredValue.slice(0, 10);
+            }
+            input.value = filteredValue;
+        }
+
+        function GuardarMuestras(id) {
+            let muestrasData = [];
+            console.log(id)
+            var SaveFunc = true;
+            // Obtener todas las filas de la tabla
+            let filas = document.querySelectorAll("table tbody tr");
+        
+            // Verificar si no hay filas en la tabla
+            if (filas.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Advertencia',
+                    text: 'Las muestras ya se guardaron anteriormente o no hay datos disponibles.',
+                    confirmButtonText: 'OK'
+                });
+                return; // Detener la ejecución de la función si no hay filas
+            }
+        
+            // Recorrer todas las filas de la tabla
+            filas.forEach(function(row) {
+                // Verificar que la fila tenga celdas y que la primera celda (ID de muestra) exista
+                if (row.cells.length === 0) {
+                    SaveFunc = false;
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Advertencia',
+                        text: 'Las muestras ya se guardaron anteriormente o no hay datos disponibles.',
+                        confirmButtonText: 'OK'
+                    });
+                    return; // Detener la ejecución de la función
+                }
+        
+                // Obtener el Prefijo (ID de muestra) y el peso_m
+                let prefijo = row.cells[1].textContent.trim();
+                let pesoInput = row.querySelector("input[name^='peso_m_']");
+        
+                // Verificar si el input de peso_m existe antes de obtener su valor
+                if (pesoInput === null) {
+                    SaveFunc = false;
+
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Advertencia',
+                        text: 'Las muestras ya se guardaron anteriormente o no hay datos disponibles.',
+                        confirmButtonText: 'OK'
+                    });
+                    return; // Detener la ejecución de la función
+                }
+        
+                let peso_m = pesoInput.value.trim();
+        
+                // Agregar los datos al array
+                muestrasData.push({
+                    prefijo: prefijo,
+                    peso_m: peso_m
+                });
+            });
+
+
+            if(SaveFunc)
+            {
+                fetch('/Save-M/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value // CSRF token
+                    },
+                    body: JSON.stringify({
+                        muestras: muestrasData,
+                        id: id
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Muestras guardadas',
+                            text: 'Las muestras se guardaron correctamente.',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            // Redirigir a una página específica después de guardar
+                            window.location.href = "/Hoja-Trabajo/";
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Hubo un error al guardar las muestras.',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error de comunicación',
+                        text: 'Hubo un problema al intentar enviar los datos.',
+                        confirmButtonText: 'OK'
+                    });
+                });
+            }
+        }
+    
+        // Función para confirmar las muestras
+        function confirmarMuestras(id) {
+            let muestrasData = [];
+            let SaveFunc = true; // Bandera para verificar si se deben enviar los datos
+            
+            // Obtener todas las filas de la tabla
+            let filas = document.querySelectorAll("table tbody tr");
+        
+            // Verificar si no hay filas en la tabla
+            if (filas.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Advertencia',
+                    text: 'Las muestras ya se confirmaron anteriormente o no hay datos disponibles.',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+        
+            // Confirmación antes de procesar los datos
+            Swal.fire({
+                title: '¿Seguro que quieres finalizar los valores?',
+                text: "No podrás revertir esta acción.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, finalizar',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Recorrer todas las filas de la tabla
+                    filas.forEach(function(row) {
+                        if (row.cells.length === 0) {
+                            SaveFunc = false;
+                            return;
+                        }
+        
+                        let prefijo = row.cells[1].textContent.trim();
+                        let pesoInput = row.querySelector("input[name^='peso_m_']");
+        
+                        if (!pesoInput) {
+                            SaveFunc = false;
+                            return;
+                        }
+        
+                        let peso_m = pesoInput.value.trim();
+        
+                        // Verificar si el valor es 0.0 o nulo
+                        if (!peso_m || parseFloat(peso_m) === 0.0) {
+                            SaveFunc = false;
+                        }
+        
+                        muestrasData.push({
+                            prefijo: prefijo,
+                            peso_m: peso_m
+                        });
+                    });
+        
+                    // Validación de valores
+                    if (!SaveFunc) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Valores inválidos',
+                            text: 'No se puede finalizar si existen valores vacíos o en 0.0. Revisa los datos.',
+                            confirmButtonText: 'OK'
+                        });
+                        return;
+                    }
+        
+                    // Enviar los datos si SaveFunc es verdadero
+                    fetch('/Confirm-M/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        },
+                        body: JSON.stringify({
+                            muestras: muestrasData,
+                            id: id
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Muestras confirmadas',
+                                text: 'Las muestras fueron confirmadas correctamente.',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.href = "/Hoja-Trabajo/";
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Hubo un error al confirmar las muestras.',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error de comunicación',
+                            text: 'Hubo un problema al intentar enviar los datos.',
+                            confirmButtonText: 'OK'
+                        });
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Operación cancelada',
+                        text: 'No se realizaron cambios.',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            });
+        }
+
+
+        // Verifica la conexión de la balanza al cargar la página
+        function verificarConexionBalanza() {
+            fetch('/api/verificar-balanza/')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('estado-balanza').textContent = data.mensaje;
+            })
+            .catch(err => {
+                document.getElementById('estado-balanza').textContent = "❌ Error al verificar balanza";
+            });
+        }
+
+        // Lee el peso desde la balanza y guarda en la base de datos
+        function leerPeso(btn) {
+            const fila = btn.closest('tr');
+            const id = fila.dataset.id;
+
+            fetch('/api/peso-balanza/')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.peso !== null) {
+                        // Mostrar visualmente el peso en la tabla
+                        const celdaPeso = fila.querySelector('.peso');
+                        celdaPeso.textContent = data.peso;
+
+                        // Enviar el peso al backend para guardarlo
+                        fetch('/api/guardar-peso/', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({id: id, peso: data.peso})
+                        })
+                        .then(res => res.json())
+                        .then(resp => {
+                            if (resp.ok) {
+                                mostrarMensaje("✅ Peso guardado correctamente");
+                            } else {
+                                mostrarMensaje("❌ Error al guardar el peso: " + resp.error, true);
+                            }
+                        });
+                    } else {
+                        alert("❌ No se recibió ningún dato de la balanza. Presiona 'Print' en la balanza.");
+                    }
+                });
+            }
+
+        // Muestra un mensaje visual de éxito o error
+        function mostrarMensaje(texto, esError = false) {
+            const mensaje = document.getElementById('mensaje-peso');
+            mensaje.style.display = 'block';
+            mensaje.textContent = texto;
+            mensaje.className = esError ? 'alert alert-danger' : 'alert alert-success';
+
+            setTimeout(() => {
+            mensaje.style.display = 'none';
+            }, 3000);
+        }
+
+        // Ejecutar al cargar la página
+        verificarConexionBalanza();
+    </script>
+</body>
+</html>

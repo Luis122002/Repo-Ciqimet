@@ -10,8 +10,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{% static 'rest_framework/css/bootstrap.min.css' %}">
     <style>
+        #profile-icon {
+            width: 45px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+            position: relative;
+        }
 
-
+        #profile-icon:hover {
+            transform: scale(1.05);
+            cursor: pointer;
+        }
+        /* === GENERAL === */
         body, html {
             margin: 0;
             padding: 0;
@@ -19,68 +33,35 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            overflow-x: hidden; /* Evitar desbordamiento horizontal */
+            overflow-x: hidden;
         }
-        
-        /* Contenedor principal del contenido */
+
+        .container {
+            margin-top: 20px;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .col {
+            margin: 0 10px;
+        }
+
         .main-content {
             flex: 1;
             width: 100%;
             display: flex;
             flex-direction: column;
-            align-items: center; /* Centra horizontalmente el contenido */
-            justify-content: flex-start; /* Ajusta el contenido hacia arriba */
-            padding: 10px; /* Espaciado interno */
-            box-sizing: border-box;
-        }
-        
-        /* Estilo específico para las tarjetas y contenedores */
-        .container, .card {
-            width: 100%; /* Asegura que el contenedor ocupe el ancho completo */
-            max-width: 1200px; /* Opcional: Limita el ancho máximo */
-            margin: 0 auto; /* Centra el contenido */
-            box-sizing: border-box;
+            align-items: center;
+            justify-content: flex-start;
             padding: 10px;
-        }
-        
-        
-    
-        /* Estilos generales del header */
-
-        @media (min-width: 998px) {
-            .header .menu-toggle {
-                display: none;
-
-            }
-
-            .perfil-Button{
-                position: absolute; 
-                bottom: 35%;
-                right: 2.5%;
-                cursor: pointer;   
-            }
-
-        }
-        @media (min-width: 998px) {
-            .extra-card {
-                display: none !important;
-            }
-        }
-        
-        @media (min-width: 990px) and (max-width: 1200px) {
-            .header .nav-links .dropdown {
-                position: relative !important;
-                right: 0% !important;
-            }
-            .header .logo img {
-                height: 80px;
-                transition: all 0.3s;
-                position: relative !important;
-                right: 150% !important; 
-            }
+            box-sizing: border-box;
         }
 
-        
+        /* === HEADER === */
         .header {
             background-color: #214c67;
             padding: 5px 10%;
@@ -106,7 +87,6 @@
             transform: scale(1.1);
         }
 
-        /* Menú de navegación */
         .header .nav {
             display: flex;
             align-items: center;
@@ -169,7 +149,6 @@
             background-color: #103349;
         }
 
-        /* Botón de contacto */
         .header .btn button {
             font-weight: 700;
             color: #1b3039;
@@ -187,17 +166,28 @@
             transform: scale(1.1);
         }
 
-        /* Estilos para el modo responsive */
+        .dropdown-item,
+        .nav-link {
+            cursor: pointer;
+            text-decoration: none; /* Por si algún navegador lo subraya por defecto */
+        }
+
+        .dropdown-item:hover,
+        .nav-link:hover {
+            text-decoration: underline;
+        }
+
+        /* === MENÚ RESPONSIVE === */
         @media (max-width: 1058px) {
             .header .menu-toggle {
-                display: block; /* Mostrar en pantallas pequeñas */
+                display: block;
                 background: none;
                 border: none;
                 cursor: pointer;
                 z-index: 2;
-                position: absolute; /* Posicionar correctamente en móviles */
-                top: 50px; /* Ajusta la posición según tus necesidades */
-                right: 15px; /* Ajusta la posición según tus necesidades */
+                position: absolute;
+                top: 50px;
+                right: 15px;
             }
 
             .header .menu-icon {
@@ -236,84 +226,31 @@
             }
 
             .header .nav {
-                display: none; /* Ocultar el menú por defecto en móviles */
+                display: none;
                 flex-direction: column;
                 background-color: #164766f0;
                 padding: 0;
-                position: absolute; /* Posicionar el menú desplegable */
-                top: 60px; /* Ajusta según la altura del logo y botón */
+                position: absolute;
+                top: 60px;
                 left: 0;
                 width: 100%;
                 z-index: 1;
             }
 
             .header .nav.show {
-                display: flex; /* Mostrar el menú cuando se haga clic en el botón */
+                display: flex;
             }
-
-            .header .nav-links .dropdown-menu {
-                display: none;
-                position: absolute;
-                background-color: #164766f0;
-                list-style: none;
-                padding: 10px;
-                margin: 0;
-                border-radius: 5px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-                z-index: 10;
-                top: 100%;
-                left: 0;
-                border-left: 3px solid #eceff1;
-            }
-            .header .nav-links .dropdown-menu.show {
-                display: block;
-            }
-    
-            .header .nav-links .dropdown-menu li {
-                padding: 10px;
-                border-bottom: 1px solid #eceff1;
-            }
-
-            .perfil-Button{
-                position: absolute; 
-                bottom: 30%;
-                right: 15%;
-                cursor: pointer;   
-            }
-
         }
 
-        .StyleCard-style {
-            background-color: #f5f5f5;
-            color: #164766f0;
-            border-radius: 8px;
-            padding: 15px;
-            font-family: 'Arial', sans-serif;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            overflow-y: auto;
-            flex: 1;
+        @media (max-width: 768px) {
+            #profile-icon {
+                width: 40px;
+                height: 40px;
+                top: 3%;
+            }
         }
 
-        .StyleCard-style h3 {
-            font-size: 1.2em;
-            margin-bottom: 10px;
-        }
-
-        .StyleCard-style p {
-            margin: 0;
-            line-height: 1.5;
-        }
-
-        .sticky-btn {
-            position: absolute; 
-            bottom: 0; 
-            left: 50%;
-            transform: translateX(-50%); 
-            padding: 15px;
-            cursor: pointer;
-        }
-        
-        
+        /* === EXTRA CARD === */
         .extra-card {
             position: fixed;
             top: 0;
@@ -332,17 +269,12 @@
             visibility: hidden;
             transition: transform 0.4s ease, opacity 0.4s ease, visibility 0s ease 0.4s;
         }
-        
+
         .extra-card.show {
             transform: translateX(0);
             opacity: 1;
             visibility: visible;
             transition: transform 0.4s ease, opacity 0.4s ease;
-        }
-        
-        .extra-card:not(.show) {
-            visibility: hidden; 
-            transition: transform 0.4s ease, opacity 0.4s ease, visibility 0s ease 0.4s;
         }
 
         .extra-card .nav-links {
@@ -351,117 +283,20 @@
             margin: 0;
         }
 
-        .extra-card .nav-links .dropdown-menu {
-            position: absolute; 
-            top: 100%;
-            left: 0;
-            width: 90vw; 
-            background-color: #11364d; 
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-            border-radius: 5px; 
-            padding: 10px 0;
-            z-index: 1050;
-            display: none;
-            transform: scale(0.95);
-            opacity: 0;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-        
-        .extra-card .nav-links .dropdown-menu.show {
-            display: block; /* Muestra el menú */
-            transform: scale(1); /* Efecto de escala */
-            opacity: 1; /* Muestra con suavidad */
-        }
-        
-        .extra-card .nav-links .dropdown-menu li {
-            padding: 15px 20px; /* Aumenta el tamaño de cada opción */
-            border-bottom: 1px solid #164866; /* Línea divisoria */
-            color: #eceff1; /* Texto claro */
-        }
-        
-        .extra-card .nav-links .dropdown-menu li:last-child {
-            border-bottom: none; /* Elimina la línea en la última opción */
-        }
-        
-        .extra-card .nav-links .dropdown-menu a {
-            color: #eceff1;
-            font-size: 1.1rem; /* Aumenta el tamaño de la fuente */
-            text-decoration: none;
-            display: block;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        
-        .extra-card .nav-links .dropdown-menu a:hover {
-            background-color: #143f5a; /* Color de hover */
-            color: #fcc758; /* Color de texto al pasar el mouse */
-        }
-        .extra-card .nav-links .nav-item.dropdown a:focus, 
-        .extra-card .nav-links .nav-item.dropdown a:active {
-            color: #b0bec5; 
-            background-color: #164866; 
-            border: 2px solid #ffffff; 
-            outline: none;
-            border-radius: 5px; 
-            transition: all 0.2s ease-in-out;
-        }
-
-        /* Estilo adicional para hover (opcional) */
-        .extra-card .nav-links .nav-item.dropdown a:hover {
-            color: #eceff1; 
-            background-color: #11364d;
-        }
-        
         .extra-card .nav-links .dropdown-toggle {
-            font-size: 1.2rem; /* Aumenta el tamaño del texto base */
-            padding: 15px 20px; /* Espaciado más grande */
+            font-size: 1.2rem;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
         }
-        
+
         .extra-card .dropdown-arrow {
-            border-top: 8px solid #eceff1; /* Tamaño de la flecha */
+            border-top: 8px solid #eceff1;
             border-left: 8px solid transparent;
             border-right: 8px solid transparent;
             margin-left: 10px;
-            transition: transform 0.3s ease;
-        }
-
-        .extra-card .nav-links .dropdown-menu {
-            display: none;
-            background-color: #11364d;
-            padding: 0; /* Ajusta el padding si es necesario */
-            margin: 0;
-            border-radius: 5px;
-        }
-
-        .extra-card .nav-links .dropdown-menu.show {
-            display: block;
-        }
-
-        .extra-card .nav-links .dropdown-menu a {
-            color: #eceff1;
-            text-decoration: none;
-            display: block;
-            width: 100%;
-            padding: 10px;
-            transition: color 0.3s, background-color 0.3s;
-        }
-
-        .extra-card .nav-links .dropdown-menu a:hover {
-            color: #fcc758;
-            background-color: #143f5a; 
-        }
-
-        .extra-card .dropdown-arrow {
-            display: inline-block;
-            width: 0;
-            height: 0;
-            border-left: 5px solid transparent;
-            border-right: 5px solid transparent;
-            border-top: 5px solid #eceff1;
-            margin-left: 5px;
             transition: transform 0.3s ease;
         }
 
@@ -469,34 +304,61 @@
             transform: rotate(180deg);
         }
 
+        .extra-card .nav-links .dropdown-menu {
+            display: none;
+            background-color: #11364d;
+            padding: 0;
+            margin: 0;
+            border-radius: 5px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            border-left: 3px solid #eceff1;
+        }
+
+        .extra-card .nav-links .dropdown-menu.show {
+            display: block;
+        }
+
+        .extra-card .nav-links .dropdown-menu li {
+            padding: 15px 20px;
+            border-bottom: 1px solid #164866;
+            color: #eceff1;
+        }
+
+        .extra-card .nav-links .dropdown-menu li:last-child {
+            border-bottom: none;
+        }
+
+        .extra-card .nav-links .dropdown-menu a {
+            color: #eceff1;
+            font-size: 1.1rem;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            padding: 10px;
+        }
+
+        .extra-card .nav-links .dropdown-menu a:hover {
+            background-color: #143f5a;
+            color: #fcc758;
+        }
+
+        .extra-card .nav-links .nav-item.dropdown a:focus,
+        .extra-card .nav-links .nav-item.dropdown a:active {
+            color: #b0bec5;
+            background-color: #164866;
+            border: 2px solid #ffffff;
+            outline: none;
+            border-radius: 5px;
+            transition: all 0.2s ease-in-out;
+        }
+
         @media (min-width: 768px) {
             .extra-card {
-                width: 45%; /* 1/6 del ancho */
+                width: 45%;
             }
         }
 
-        .header .dropdown-arrow {
-            display: inline-block;
-            width: 0;
-            height: 0;
-            border-left: 5px solid transparent;
-            border-right: 5px solid transparent;
-            border-top: 10px solid #eceff1;
-            margin-left: 5px;
-            transition: transform 0.3s ease;
-        }
-        
-        /* Aplicar rotación a la flecha cuando el dropdown está abierto */
-        .header .dropdown-menu.show + .dropdown-arrow {
-            transform: rotate(180deg);
-        }
-        
-        /* Flecha rotada de forma independiente para cuando se agrega la clase rotate */
-        .header .dropdown-arrow.rotate {
-            transform: rotate(180deg);
-        }
-        
-
+        /* === USER CARD === */
         .user-card {
             width: 300px;
             position: fixed;
@@ -505,229 +367,209 @@
             transition: top 1s ease-in-out;
             z-index: 1000;
             display: none;
-            background: #e5e5e5;
+            background: #dcdcdc;
+            border-radius: 5%;
+            color: #000000;
+            border: 1px solid #000000;
         }
-        
+
         .user-card.visible {
             top: 0px;
-            display: block; /* Aparece cuando se hace visible */
-        }
-
-        .custom-title {
-            text-align: center;
-            font-size: 3rem; /* Tamaño de fuente grande */
-            font-weight: bold;
-            color: #2C3E50; /* Color del texto */
-            text-transform: uppercase; /* Transformar el texto a mayúsculas */
-            letter-spacing: 3px; /* Espaciado entre letras */
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2); /* Sombra para el texto */
-            margin-top: 20px;
-        }
-
-        .custom-title::after {
-            content: "";
             display: block;
-            width: 200px;
-            height: 4px;
-            background-color: #3498DB; /* Línea decorativa debajo del título */
-            margin: 20px auto 0;
         }
 
-        .secondary-title {
-            text-align: center;
-            font-size: 2rem;
-            font-weight: bold;
-            color: #2C3E50; /* Color del texto */
-            text-transform: uppercase; /* Transformar el texto a mayúsculas */
-            letter-spacing: 3px; /* Espaciado entre letras */
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2); /* Sombra para el texto */
-            margin-top: 20px;
-        }
-        
-        .secondary-title::after {
-            content: "";
-            display: block;
-            width: 200px;
-            height: 4px;
-            background-color: #3498DB; /* Línea decorativa debajo del título */
-            margin: 20px auto 0;
+        #user-image {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
         }
 
-        .button-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 20px;
-            width: 100%;
+
+        /* === BOTONES === */
+        .btn-edit, .btn-delete {
+            font-size: 0.8rem;
+            padding: 0.3rem 0.6rem;
         }
 
-        .container {
-            margin-top: 20px;
+        .btn-edit {
+            background-color: #28a745;
+            color: white;
         }
 
-        .row {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center; /* Centra los elementos en la fila */
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
         }
 
-        .col {
-            margin: 0 10px;
+        .btn-edit:hover, .btn-delete:hover {
+            opacity: 0.8;
         }
 
-        .filters,
-        .actions,
-        .add-odt {
-            background-color: #f5f7fa;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        .sticky-btn {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px;
+            cursor: pointer;
         }
 
-        .filters {
-            min-width: 400px; /* Tamaño mínimo mayor */
-            max-width: 600px; /* Tamaño máximo mayor para que pueda extenderse más */
-        }
-
-        .actions {
-            width: 200px; /* Tamaño fijo menor */
-            text-align: center;
-        }
-
-        .add-odt {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 200px; /* Tamaño fijo menor */
-        }
-
+        /* === TABLAS === */
         .table-container {
             padding: 10px;
             background-color: #ffffff;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            width: 98%; /* Aumenta el ancho para ocupar más espacio horizontal */
-            max-width: 100%; /* Limita el ancho máximo al 100% del contenedor */
-            overflow-x: auto; /* Activa desplazamiento horizontal si es necesario */
-            overflow-y: auto; /* Activa desplazamiento vertical si es necesario */
-            max-height: 70vh; /* Altura máxima dinámica según la pantalla */
-            min-height: 450px; /* Tamaño mínimo fijo del contenedor */
-            margin: 10px auto; /* Centra horizontalmente */
+            width: 98%;
+            max-width: 100%;
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 70vh;
+            min-height: 450px;
+            margin: 10px auto;
             display: flex;
             flex-direction: column;
         }
-        
-        /* Encabezados y estilo de tabla */
+
         th {
-            background-color: #164766f0; /* Azul para encabezados */
-            color: white; /* Color de texto blanco para encabezados */
+            background-color: #164766f0;
+            color: white;
         }
-        
+
         tr:nth-child(even) {
-            background-color: #e9ecef; /* Color gris claro para filas pares */
+            background-color: #e9ecef;
         }
-        
+
         tr:hover {
-            background-color: #d1ecf1; /* Color azul claro al pasar el mouse */
+            background-color: #d1ecf1;
         }
-        
+
         td {
-            color: #343a40; /* Color de texto oscuro para datos */
-            text-align: center; /* Centrar contenido de las celdas */
-        }
-
-
-
-
-
-
-        .btn-edit, .btn-delete {
-            font-size: 0.8rem; /* Tamaño de fuente más pequeño */
-            padding: 0.3rem 0.6rem; /* Tamaño del padding reducido */
-        }
-        .btn-edit {
-            background-color: #28a745; /* Color verde para botón de editar */
-            color: white;
-        }
-        .btn-delete {
-            background-color: #dc3545; /* Color rojo para botón de eliminar */
-            color: white;
-        }
-        .btn-edit:hover, .btn-delete:hover {
-            opacity: 0.8; /* Efecto de opacidad al pasar el mouse */
-        }
-
-
-
-
-        /* Estilos generales (para computadoras de escritorio) */
-        .button-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 20px;
-            width: 100%;
-        }
-    
-        .container {
-            margin-top: 20px;
-        }
-    
-        .row {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-    
-        .col {
-            margin: 0 10px;
-        }
-    
-        .filters,
-        .actions,
-        .add-odt {
-            background-color: #f5f7fa;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-    
-        .filters {
-            min-width: 400px;
-            max-width: 600px;
-        }
-    
-        .actions {
-            width: 200px;
+            color: #343a40;
             text-align: center;
         }
-    
-        .add-odt {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 200px;
+
+        .mensaje-table-container {
+            overflow-x: auto;
+            max-height: 300px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            margin: 10px 0;
+            padding: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
         }
-    
-        /* Estilos para dispositivos móviles y tabletas en orientación horizontal */
+
+        .mensaje-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .mensaje-table thead th {
+            background-color: #002d72;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .mensaje-table tbody tr:nth-child(even) {
+            background-color: #f1f1f1;
+        }
+
+        .mensaje-table tbody tr:hover {
+            background-color: #e0e0e0;
+        }
+
+        .mensaje-table th,
+        .mensaje-table td {
+            padding: 8px;
+            white-space: nowrap;
+        }
+
+        .message-table {
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .message-table table {
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .message-table th,
+        .message-table td {
+            text-align: center;
+            word-wrap: break-word;
+            padding: 8px;
+        }
+
+        /* === SWEETALERT === */
+        .big-swal {
+            max-width: 95%;
+            overflow: hidden;
+        }
+
+        .vertical-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* === MEDIA QUERIES === */
+        @media (min-width: 998px) {
+            .header .menu-toggle {
+                display: none;
+            }
+
+            .perfil-Button {
+                position: absolute;
+                bottom: 35%;
+                right: 2.5%;
+                cursor: pointer;
+            }
+        }
+
+        @media (min-width: 998px) {
+            .extra-card {
+                display: none !important;
+            }
+        }
+
+        @media (min-width: 990px) and (max-width: 1200px) {
+            .header .nav-links .dropdown {
+                position: relative !important;
+                right: 0% !important;
+            }
+
+            .header .logo img {
+                height: 80px;
+                transition: all 0.3s;
+                position: relative !important;
+                right: 150% !important;
+            }
+        }
+
         @media (max-width: 1024px) {
-            /* Ajustes en móviles y tabletas */
             .button-grid {
-                grid-template-columns: 1fr; /* Solo una columna en móviles y tabletas */
+                grid-template-columns: 1fr;
                 gap: 10px;
                 width: 100%;
             }
-    
+
             .row {
-                flex-direction: column; /* Cambiar a columna en pantallas pequeñas */
-                align-items: center;    /* Centrar en dispositivos pequeños */
+                flex-direction: column;
+                align-items: center;
             }
-    
+
             .col {
                 flex: 1;
-                min-width: 250px; /* Anchura mínima para adaptarse a móviles */
-                margin: 10px 0; /* Separación vertical */
+                min-width: 250px;
+                margin: 10px 0;
             }
-    
-            /* Ajustes para que el ancho de las tarjetas sea del 100% en móviles */
+
             .filters,
             .actions,
             .add-odt {
@@ -736,81 +578,19 @@
                 min-width: 0;
                 margin: 0 auto;
             }
-    
+
             .filters {
                 text-align: center;
                 padding: 15px;
             }
-        }
 
-        
-        .mensaje-table-container {
-            overflow-x: auto; /* Habilitar desplazamiento horizontal */
-            max-height: 300px; /* Limitar altura máxima */
-            border: 1px solid #ddd; /* Borde sutil */
-            border-radius: 8px; /* Bordes redondeados */
-            background-color: #f9f9f9; /* Fondo claro */
-            margin: 10px 0; /* Separación superior e inferior */
-            padding: 10px; /* Espaciado interno */
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Sombra para destacar */
+            .perfil-Button {
+                position: absolute;
+                bottom: 30%;
+                right: 15%;
+                cursor: pointer;
+            }
         }
-        
-        .mensaje-table {
-            width: 100%; /* Usar todo el ancho disponible */
-            border-collapse: collapse; /* Quitar espacio entre bordes */
-            font-size: 12px; /* Reducir tamaño de fuente */
-            text-align: center; /* Centrar contenido */
-        }
-        
-        .mensaje-table thead th {
-            background-color: #002d72; /* Fondo azul oscuro */
-            color: #fff; /* Texto blanco */
-            padding: 10px; /* Espaciado interno */
-            text-align: center; /* Centrar texto */
-        }
-        
-        .mensaje-table tbody tr:nth-child(even) {
-            background-color: #f1f1f1; /* Fondo para filas pares */
-        }
-        
-        .mensaje-table tbody tr:hover {
-            background-color: #e0e0e0; /* Fondo al pasar el mouse */
-        }
-        
-        .mensaje-table th,
-        .mensaje-table td {
-            padding: 8px; /* Espaciado interno */
-            white-space: nowrap; /* Evitar saltos de línea */
-        }
-        
-        .big-swal {
-            max-width: 95%; /* Ampliar ancho del modal */
-            overflow: hidden; /* Ocultar desbordes */
-        }
-
-
-
-        .message-table {
-            overflow-x: auto; 
-            white-space: nowrap;
-        }
-        .message-table table {
-            width: 100%;
-            table-layout: fixed;
-        }
-        .message-table th, .message-table td {
-            text-align: center; 
-            word-wrap: break-word; 
-            padding: 8px;
-        }
-
-        #user-image {
-            width: 50px;
-            height: 50px;
-            object-fit: cover; /* Ajusta la imagen al contenedor sin deformarla */
-            border-radius: 50%; /* Si quieres que la imagen sea circular */
-        }
-
     </style>
 </head>
 <body>
@@ -827,7 +607,7 @@
                     <!-- Menú desplegable Órdenes de Trabajo -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="ordersDropdown" role="button" aria-expanded="false">
-                            Órdenes de Trabajo
+                            Órden de Trabajo
                             <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="ordersDropdown">
@@ -842,7 +622,7 @@
                     <!-- Menú desplegable Puesto de Trabajo (Balanza de Muestras) -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="balanzaDropdown" role="button" aria-expanded="false">
-                            Puesto de Trabajo (Balanza de Muestras)
+                            Puesto de Muestras de Balanza 
                             <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="balanzaDropdown">
@@ -867,13 +647,12 @@
                 </ul>
             </nav>
             <div class="perfil-Button">
-                <button = class="btn btn-info" onclick="ShowUser()">Perfil</button>
+                <img id="profile-icon" src="{% static 'rest_framework/img/usuario.png' %}" alt="Perfil" onclick="ShowUser()">
             </div>
+            
         </div>
     </header>
     <body>
-
-        <!-- Tarjeta adicional oculta -->
         <div id="extra-card" class="col-md-2 extra-card StyleCard-style">
             <div>
             <nav class="nav">
@@ -897,7 +676,7 @@
                     <!-- Menú desplegable Puesto de Trabajo (Balanza de Muestras) -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="balanzaDropdownMobile" role="button" aria-expanded="false">
-                            Puesto de Trabajo (Balanza de Muestras)
+                            Puesto de Muestras de Balanza
                             <span class="dropdown-arrow"></span> <!-- Flecha hacia abajo -->
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="balanzaDropdownMobile">
@@ -931,22 +710,60 @@
         <div class="user-card shadow-lg p-4 rounded container">
             <div class="d-flex align-items-center">
                 <br/>
-                <img id="user-image" src="{% static 'rest_framework/img/Logocapture-removebg-preview.png' %}" class="rounded-circle me-3" alt="User Image">
                 <div>
                     <h5 class="mb-1" id="card-user-username">John Doe</h5>
                     <p class="mb-0 text-muted" id="card-user-email">johndoe@example.com</p>
                     <p class="mb-0 text-muted" id="card-user-role">Trabajador quimico</p>
                 </div>
             </div>
-            <button class="btn btn-info mt-3" onclick="ShowUser()">Cerrar</button>
-            <button class="btn btn-light mt-3" onclick="confirmLogout()">
+            <button class="btn btn-info mt-3" onclick="confirmLogout()">Cerrar Sesión</button>
+            <button class="btn btn-info mt-3" onclick="window.location.href='/perfil/'">Perfil</button>
+            <button class="btn btn-light mt-3" onclick="ShowUser()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="15" fill="currentColor" class="bi bi-box-arrow-right" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"></path><path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"></path></svg>
             </button>
                 <br/><br/>
         </div>
     </div>
-    
     </body>
+    <script>
+    document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") {
+        let cancelado = false;
+
+        // Cerrar el menú lateral si está abierto
+        const extraCard = document.getElementById("extra-card");
+        if (extraCard && extraCard.classList.contains("show")) {
+            extraCard.classList.remove("show");
+            console.log("Menú lateral cerrado con ESC");
+            cancelado = true;
+        }
+
+        // Cerrar el modal de usuario si está visible
+        const userCard = document.querySelector(".user-card");
+        if (userCard && userCard.classList.contains("visible")) {
+            userCard.classList.remove("visible");
+            setTimeout(() => {
+                userCard.style.display = "none";
+            }, 1000);
+            console.log("User modal cerrado con ESC");
+            cancelado = true;
+        }
+
+        // Cerrar SweetAlert si está activa
+        if (Swal.isVisible()) {
+            Swal.close();
+            console.log("SweetAlert cerrada con ESC");
+            cancelado = true;
+        }
+
+        if (!cancelado) {
+            console.log("ESC presionado pero nada estaba abierto.");
+        }
+    }
+});
+
+    </script>
+
     <!-- Uso de códigos JS de estilos de página web, peticiones y mensajes -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-0q4D8HpohF3oBuKTVBSCgA0AKuqNf4+K5B5XtO/DdqtH5KzvZbKb1dfU+lj7RQc4" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz4fnFO9O2md6zPzEjjr4cO/Y28HhNR83Xf8Dd8YwNY2j1fTZjK5s5T1vB" crossorigin="anonymous"></script>
@@ -954,42 +771,74 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     
+    
     <script>
         var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
+        
+        LocalPath1 = ""
         RedirecPath = ""
         LocalPath = ""
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos del DOM
             const dropdownToggles = document.querySelectorAll('.nav-link.dropdown-toggle');
+            const extraCard = document.getElementById('extra-card');
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navbar = document.querySelector('nav.nav');
         
+            // Función para cerrar todos los dropdowns
+            function closeAllDropdowns() {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    menu.classList.remove('show');
+                    const toggle = menu.previousElementSibling;
+                    if (toggle && toggle.classList.contains('nav-link')) {
+                        const arrow = toggle.querySelector('.dropdown-arrow');
+                        if (arrow) arrow.classList.remove('rotate');
+                    }
+                });
+            }
+        
+            // Manejar clic en los dropdown toggles
             dropdownToggles.forEach(toggle => {
-                toggle.addEventListener('click', function () {
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
                     const dropdownMenu = this.nextElementSibling;
                     const dropdownArrow = this.querySelector('.dropdown-arrow');
                     const isOpen = dropdownMenu.classList.contains('show');
-        
-                    document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                        menu.classList.remove('show');
-                        menu.previousElementSibling.querySelector('.dropdown-arrow').classList.remove('rotate');
-                    });
-        
+                    
+                    // Cerrar todos los demás dropdowns
+                    closeAllDropdowns();
+                    
+                    // Abrir el actual si no estaba abierto
                     if (!isOpen) {
                         dropdownMenu.classList.add('show');
-                        dropdownArrow.classList.add('rotate');
+                        if (dropdownArrow) dropdownArrow.classList.add('rotate');
                     }
                 });
             });
         
+            // Manejar clic en cualquier parte del documento
             document.addEventListener('click', function(event) {
-                var extraCard = document.getElementById('extra-card');
-                var menuToggle = document.querySelector('.menu-toggle');
+                // Cerrar dropdowns si se hace clic fuera del navbar
+                if (!event.target.closest('nav.nav') && !event.target.closest('.dropdown-menu')) {
+                    closeAllDropdowns();
+                }
                 
+                // Lógica original para el extra-card
                 if (extraCard && !extraCard.contains(event.target) && menuToggle && !menuToggle.contains(event.target)) {
                     extraCard.classList.remove('show');
                 }
             });
-    
+        
+            // Prevenir que se cierre al hacer clic dentro del dropdown
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            });
         });
+        
     
         function toggleExtraCard() {
             var extraCard = document.getElementById('extra-card');
@@ -1019,18 +868,23 @@
                 console.error("El elemento con id 'user-card' no existe.");
             }
         }
-    
+  
+
         function returnMenu() {
             Swal.fire({
                 title: 'Ir a menú',
                 text: 'Elige a dónde deseas ir:',
                 icon: 'question',
                 showCancelButton: true,
+                showConfirmButton: true,
                 confirmButtonText: 'Plataforma de Administrador',
                 cancelButtonText: 'Cancelar',
                 footer: `
-                    <button id="intranetButton" class="swal2-confirm btn btn-secondary">Intranet</button>
-                    <button id="publicSiteButton" class="swal2-confirm btn btn-secondary">Sitio Público</button>
+                    <div class="button-container">
+                        <button id="intranetButton" class="swal2-confirm btn btn-primary">Intranet</button>
+                        <button id="publicSiteButton" class="swal2-confirm btn btn-primary">Sitio Público</button>
+                        <button id="cancelButton" class="swal2-cancel btn btn-danger">Cancelar</button>
+                    </div>
                 `,
                 buttonsStyling: false, 
                 customClass: {
@@ -1050,12 +904,20 @@
                     }
                     
                     // Listener para el botón "Sitio Público"
+                    
                     const publicSiteButton = document.getElementById('publicSiteButton');
                     if (publicSiteButton) {
                         publicSiteButton.addEventListener('click', () => {
-                            window.location.href = LocalPath;
+                            window.location.href = LocalPath + "/Inicio/";
                         });
                     }
+
+                    const cancelButton = document.getElementById('cancelButton');
+                    if (cancelButton) {
+                        cancelButton.addEventListener('click', () => {
+                         Swal.close();  // Cierra el modal cuando se hace clic en "Cancelar"
+                    });
+                }
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
@@ -1075,16 +937,25 @@
         
 
         function confirmLogout() {
-            swal.fire({
+            Swal.fire({
                 title: "¿Estás seguro?",
                 text: "¿Quieres cerrar sesión?",
                 icon: "warning",
-                buttons: true,
-                dangerMode: true,
-            })
-            .then((willLogout) => {
-                if (willLogout) {
-                    window.location.href = LocalPath + "/unlogin/"; 
+                showCancelButton: true,
+                confirmButtonText: "Sí, cerrar sesión",
+                cancelButtonText: "Cancelar",
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                reverseButtons: true,
+                customClass: {
+                    actions: 'vertical-buttons',
+                    confirmButton: 'btn btn-primary',
+                    cancelButton: 'btn btn-danger'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = LocalPath + "/unlogin/";
                 }
             });
         }
@@ -1323,7 +1194,10 @@
         
         $(document).ready(function(){
             getUserData();
-            $('[data-bs-toggle="tooltip"]').tooltip();   
+
+
+            
+            $('[data-bs-toggle="tooltip"]').tooltip(); 
           });
 
           function moverFoco(event) {
@@ -1342,6 +1216,7 @@
             }
         }
 
+        
 
     </script>
     {% if messages %}
@@ -1373,5 +1248,8 @@
         {% endfor %}
     </ul>
     {% endif %}
+
+
+    
 </body>
 </html>

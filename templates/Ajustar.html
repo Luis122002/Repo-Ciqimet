@@ -1,0 +1,312 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+{% include 'header.html' %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ODT Display</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #c5c5c5;
+            overflow-x: hidden;
+        }
+  
+        .info-row {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 1rem;
+        }
+  
+        .info-block {
+            background-color: #111;
+            color: #00d9ff;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            text-align: center;
+            flex: 1;
+        }
+  
+        .main-row {
+            display: flex;
+            gap: 1.5rem;
+            padding: 0 1rem 2rem 1rem;
+        }
+  
+        .tool-panel {
+            background-color: white;
+            border: 1px solid #ced4da;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            min-width: 280px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+  
+        .table-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            background-color: #6c757d;
+            color: white;
+            padding: 0.5rem 1rem;
+            text-align: center;
+            border-radius: 0.5rem 0.5rem 0 0;
+            border: 1px solid #444;
+        }
+  
+        .panel-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-align: center;
+            color: #212529;
+        }
+  
+        .table-box {
+            width: 100%;
+            max-height: 60vh;
+        }
+  
+        .table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+  
+        .table thead th {
+            background-color: #e0e0e0;
+            color: #212529;
+            font-weight: 600;
+            text-align: center;
+        }
+  
+        .table td,
+        .table th {
+            text-align: center;
+            padding: 0.75rem;
+            border: 1px solid #c5c5c5;
+        }
+  
+        .table tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+  
+        .table tbody tr:nth-child(odd) {
+            background-color: #ececec;
+        }
+  
+        .table tbody tr.selected {
+            background-color: #a3d3f7 !important;
+        }
+  
+        /* Dropdown personalizado */
+        .custom-btn {
+            font-weight: bold;
+            padding: 0.45rem 0.75rem;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background-color: white;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+  
+        .custom-btn:hover {
+            background-color: #FF914D;
+            color: white;
+        }
+  
+        .custom-dropdown {
+            position: relative;
+            width: 100%;
+        }
+  
+        .custom-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 105%;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border: 1px solid #aaa;
+            border-radius: 8px;
+            z-index: 100;
+            text-align: center;
+        }
+  
+        .custom-dropdown .dropdown-item {
+            display: block;
+            padding: 0.5rem;
+            text-decoration: none;
+            color: #333;
+        }
+  
+        .custom-dropdown .dropdown-item:hover {
+            background-color: #4A90E2;
+            color: white;
+        }
+    
+        input[type="checkbox"] {
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+    
+        .d-flex {
+            display: flex;
+        }
+    
+        .gap-3 {
+            gap: 1rem;
+        }
+    
+        .mb-3 {
+            margin-bottom: 1rem;
+        }
+    
+        .w-50 {
+            width: 50%;
+        }
+    
+        .w-100 {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    {% csrf_token %}
+    
+    <div class="info-row">
+        <div class="info-block">OT: 24358349058734</div>
+        <div class="info-block">DIVISIÓN DE RAFIMASIFEMASIMER</div>
+        <div class="info-block">Envío:</div>
+    </div>
+    <div class="main-row">
+        <!-- Lista de Análisis (sin checkbox) -->
+        <div class="tool-panel">
+            <div class="table-title">Lista de Análisis</div>
+            <div class="table-box table-responsive">
+                <table class="table table-bordered">
+                    <thead><tr><th>Elemento</th></tr></thead>
+                    <tbody>
+                        {% for i in "12345678910"|make_list %}
+                        <tr><td>Elemento {{ i }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Total de Elementos (sin checkbox) -->
+        <div class="tool-panel">
+            <div class="table-title">Total de Elementos</div>
+            <div class="table-box table-responsive">
+                <table class="table table-bordered">
+                    <thead><tr><th>Cantidad</th></tr></thead>
+                    <tbody>
+                        {% for i in "12345678910"|make_list %}
+                        <tr><td>{{ i }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    
+        <!-- Lista Previa (con checkbox + clic en fila) -->
+        <div class="tool-panel">
+            <div class="table-title">Lista Previa</div>
+            <div class="table-box table-responsive">
+                <table class="table table-bordered select-table">
+                    <thead>
+                        <tr><th></th><th>Nro.</th><th>Id. Muestra</th><th>Tipo</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for i in "ABCDEFGHIJ"|make_list %}
+                        <tr>
+                            <td><input type="checkbox" onchange="toggleRow(this)"></td>
+                            <td>{{ forloop.counter }}</td>
+                            <td>Muestra {{ i }}</td>
+                            <td>Tipo {{ forloop.counter }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    
+        <!-- Herramientas -->
+        <div class="tool-panel">
+            <div class="panel-title">Herramientas de Diseño</div>
+            <div class="d-flex gap-3 mb-3">
+                <div class="custom-dropdown w-50">
+                    <button class="custom-btn" onclick="toggleDropdown(this)">Insertar ▾</button>
+                    <div class="custom-dropdown-menu">
+                        <a class="dropdown-item" href="#">Chq</a>
+                        <a class="dropdown-item" href="#">Blk</a>
+                        <a class="dropdown-item" href="#">Std</a>
+                        <a class="dropdown-item" href="#">Blk-P</a>
+                        <a class="dropdown-item" href="#">Duplicado</a>
+                    </div>
+                </div>
+                <div class="custom-dropdown w-50">
+                    <button class="custom-btn" onclick="toggleDropdown(this)">Agregar ▾</button>
+                    <div class="custom-dropdown-menu">
+                        <a class="dropdown-item" href="#">Chq</a>
+                        <a class="dropdown-item" href="#">Blk</a>
+                        <a class="dropdown-item" href="#">Std</a>
+                        <a class="dropdown-item" href="#">Blk-P</a>
+                        <a class="dropdown-item" href="#">Duplicado</a>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-title">Seleccionar Muestras</div>
+            <div class="d-flex gap-3">
+                <button class="custom-btn w-50">Borrar seleccionado</button>
+                <button class="custom-btn w-50">Modificar</button>
+            </div>
+        </div>
+    </div>
+    
+    {% include 'Footer.html' %}
+    
+    <script>
+        function toggleRow(checkbox) {
+            const row = checkbox.closest('tr');
+            row.classList.toggle('selected', checkbox.checked);
+        }
+    
+        function toggleRowFromClick(row) {
+            const checkbox = row.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            toggleRow(checkbox);
+        }
+        
+        function toggleDropdown(button) {
+            document.querySelectorAll(".custom-dropdown-menu").forEach(menu => {
+            if (menu !== button.nextElementSibling) menu.style.display = "none";
+            });
+            const menu = button.nextElementSibling;
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        }
+    
+        document.addEventListener("click", function (e) {
+            if (!e.target.classList.contains("custom-btn")) {
+            document.querySelectorAll(".custom-dropdown-menu").forEach(menu => {
+                menu.style.display = "none";
+            });
+            }
+        });
+        
+        window.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll(".select-table tbody tr").forEach(row => {
+            row.addEventListener("click", function (e) {
+                if (e.target.tagName.toLowerCase() !== 'input') {
+                toggleRowFromClick(this);
+                }
+            });
+            });
+        });
+    </script>
+</body>
+</html>

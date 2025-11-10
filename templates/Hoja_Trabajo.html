@@ -2,48 +2,91 @@
 <!DOCTYPE html>
 {% include 'header.html'%}
 {% csrf_token %}
-<html lang="es">
+<html lang="es"> 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ODT Display</title>
 </head>
-<body>
-    <h1 class="custom-title">Hoja de trabajo</h1>
-    <div class="container">
-        <div class="row">
-            <div class="col filters">
-                <div class="row mb-3">
-                    <div class="col-md-6 mb-3">
-                        <label for="filter-state">Estado:</label>
-                        <p>
-                            <input type="radio" name="estado" value="Pendiente" {% if request.GET.estado == 'Pendiente' %}checked{% endif %}> Pendientes 
-                            <input type="radio" name="estado" value="Cerrado" {% if request.GET.estado == 'Cerrado' %}checked{% endif %}> Cerradas 
-                            <input type="radio" name="estado" value="Todas" {% if request.GET.estado == 'Todas' %}checked{% endif %}> Todas
-                        </p>
+<style>
+    body {
+        background-color: #c5c5c5;
+        font-family: Arial, Helvetica, sans-serif;
+        }
+    h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #fcc058;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+    .odt-wrapper {
+        max-width: 80%;
+        margin: 20px auto;
+        padding: 15px 20px;
+        background-color: white;
+        border-radius: 10px;
+        border: 3px solid #fcc058; /* << ESTE es el borde amarillo */
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .odt-wrapper .btn {
+        background-color: #214c67;
+        border: none;
+        color: white;
+        font-weight: bold;
+        padding: 8px 12px;
+        transition: background-color 0.3s ease;
+    }
+
+    .odt-wrapper .btn:hover {
+        background-color: #163347;
+        color: white; /* Corregido: que siga siendo blanco al hacer hover */
+    }
+
+    .odt-wrapper .btn-primary {
+        background-color: #fcc058;
+        color: black;
+    }
+
+    .odt-wrapper .btn-primary:hover {
+        background-color: #e0a046;
+        color: black; /* Aseguramos que se mantenga visible */
+    }
+</style>
+    <div class="odt-wrapper">
+        <h1 style="font-size: 3rem;">Hoja de Trabajo</h1>
+        <div class="container">
+            <div class="row align-items-end">
+                <!-- Estado -->
+                <div class="col-md-4 mb-3">
+                    <label for="filter-state">Estado:</label>
+                    <div>
+                        <input type="radio" name="estado" value="Pendiente" {% if request.GET.estado == 'Pendiente' %}checked{% endif %}> Pendientes 
+                        <input type="radio" name="estado" value="Cerrado" {% if request.GET.estado == 'Cerrado' %}checked{% endif %}> Cerradas 
+                        <input type="radio" name="estado" value="Todas" {% if request.GET.estado == 'Todas' %}checked{% endif %}> Todas
                     </div>
-            
-                    <div class="col-md-6 mb-3">
-                        <label for="search-box">Buscar:</label>
-                        <div class="input-group">
-                            <input id="search-box" type="text" class="form-control" placeholder="Buscar Nro Hoja..." value="{{ request.GET.search }}">
-                        </div>
-                    </div>
-            
-                    <div class="col-md-6 mb-3">
-                        <label>&nbsp;</label>
-                        <div class="input-group">
-                            <button class="btn btn-primary" onclick="applyFilters()">Filtrar Órdenes</button>
-                            <button class="btn btn-info" onclick="window.location.href = '/Puesto-trabajo/'">
-                                Atrás
-                            </button>
-                        </div>
+                </div>
+
+                <!-- Buscar (70% del ancho) -->
+                <div class="col-md-4 mb-3">
+                    <label for="search-box">Buscar hoja:</label>
+                    <input id="search-box" type="text" class="form-control" style="width: 70%;" placeholder="Buscar Nro Hoja..." value="{{ request.GET.search }}">
+                </div>
+
+                <!-- Botones -->
+                <div class="col-md-4 mb-3">
+                    <label>&nbsp;</label>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary" onclick="applyFilters()">Filtrar Órdenes</button>
+                        <button class="btn" onclick="window.location.href = '/Puesto-trabajo/'">Atrás</button>
                     </div>
                 </div>
             </div>
-           
         </div>
-    </div>
+    </div>      
 
     <div class="table-container table-responsive">
         <table class="table table-bordered">
@@ -234,8 +277,6 @@
             });
         });
 
-
-    
         function applyFilters() {
             var search = document.getElementById('search-box').value;
             var estado = document.querySelector('input[name="estado"]:checked') ? document.querySelector('input[name="estado"]:checked').value : ''; // Obtener el valor del radio seleccionado
@@ -247,7 +288,6 @@
             }
             window.location.href = url.toString();
         }
-
     </script>
 </body>
 </html>

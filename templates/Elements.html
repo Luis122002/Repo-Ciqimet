@@ -8,28 +8,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Elementos</title>
 </head>
-<body>
-    <h1 class="custom-title">Registros de elementos</h1>
-    <div>
-    <div class="container">
-        <div class="row mb-3">
-            <div class="col-md-4">
-                <label for="search-box">Buscar:</label>
-                <input id="search-box" type="text" class="form-control" placeholder="Buscar elementos...">
-            </div>
-            <div class="col-md-4">
-                <br/>
-                <button class="btn btn-success" onclick="addElement()">
-                    Añadir elementos
-                </button>
-                
-                <button class="btn btn-info" onclick="window.location.href = '/ODT'">
-                    Atrás
-                </button>
-                <br/>
+<style>
+
+    body {
+        background-color: #c5c5c5;
+        font-family: Arial, Helvetica, sans-serif;
+        }
+    .odt-wrapper {
+        max-width: 85%;
+        margin: 20px auto;
+        padding: 15px 20px;
+        background-color: white;
+        border-radius: 10px;
+        border: 3px solid #fcc058;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        color: #fcc058;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .odt-wrapper .btn {
+        background-color: #214c67;
+        border: none;
+        color: white;
+        font-weight: bold;
+        padding: 8px 12px;
+        transition: background-color 0.3s ease;
+    }
+
+    .odt-wrapper .btn:hover {
+        background-color: #163347;
+        color: white;
+    }
+
+    .odt-wrapper .btn-primary {
+        background-color: #fcc058;
+        color: black;
+    }
+
+    .odt-wrapper .btn-primary:hover {
+        background-color: #e0a046;
+        color: black;
+    }
+</style>
+
+<div class="odt-wrapper">
+    <h1 style="font-size: 3rem;">Registros de elementos</h1>
+
+    <div class="row mb-3">
+        <!-- Buscar -->
+        <div class="col-md-6">
+            <label for="search-box">Buscar:</label>
+            <input id="search-box" type="text" class="form-control" placeholder="Buscar elementos...">
+        </div>
+
+        <!-- Acciones -->
+        <div class="col-md-6">
+            <label for="acciones">Acciones:</label>
+            <div class="row g-3"> <!-- Espacio horizontal entre botones -->
+                <div class="col-auto">
+                    <button class="btn btn-primary" onclick="addElement()">Añadir elementos</button>
+                </div>
+                <div class="col-auto">
+                    <button class="btn" onclick="window.location.href = '/ODT'">Atrás</button>
+                </div>
             </div>
         </div>
     </div>
+</div>
 
     <div class="table-container">
 

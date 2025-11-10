@@ -1,0 +1,218 @@
+{% load static %}
+<!DOCTYPE html>
+{% include 'header.html' %}
+{% csrf_token %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        body {
+            background-color: #c5c5c5;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+    
+        .container-profile {
+            max-width: 900px;
+            width: 90%;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+            margin: 45px auto 45px auto;
+            color: black;
+            border: 3px solid #fcc058;
+        }
+    
+        .custom-title {
+            text-align: center;
+            color: #fcc058;
+            margin-bottom: 20px;
+        }
+    
+        .form-group {
+            margin-bottom: 15px;
+            flex: 1;
+        }
+    
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+    
+        .form-actions {
+            display: flex;
+            justify-content: center; /* 🔹 Centra los botones horizontalmente */
+            gap: 10px;
+            align-items: center;
+            flex: 1;
+        }
+    
+        .form-control {
+            border: 1px solid #214c67;
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+        }
+    
+        .btn-success {
+            background-color: #fcc058;
+            border-color: #fcc058;
+            color: black;
+        }
+    
+        .btn-success:hover {
+            background-color: #e0a046;
+            border-color: #e0a046;
+        }
+    
+        .btn-danger {
+            background-color: #d9534f;
+            border-color: #d9534f;
+        }
+    
+        @media (max-width: 992px) {
+            .container-profile {
+                max-width: 95%;
+            }
+    
+            .form-row {
+                flex-direction: column; /* 🔹 Los formularios se ordenan de arriba a abajo */
+                gap: 10px;
+            }
+    
+            .form-actions {
+                flex-direction: row; /* 🔹 Mantiene los botones en una fila */
+                justify-content: center;
+            }
+        }
+    
+        @media (max-width: 768px) {
+            .container-profile {
+                max-width: 100%;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-profile">
+        <h1 class="custom-title">Bienvenido {{ user.first_name }}</h1>
+
+        <div class="row">
+            <div class="col-md-12">
+                <h3>Información Personal</h3>
+                <form id="perfil-form">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nombre:</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" value="{{ user.first_name }}">
+                        </div>
+                        <div class="form-group">
+                            <label>RUT:</label>
+                            <input type="text" class="form-control" id="rut" name="rut" oninput="formatearRUT(this)" placeholder="12.345.678-9" value="{{ user.rut }}">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Apellido:</label>
+                            <input type="text" class="form-control" id="apellido" name="apellido" value="{{ user.last_name }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Correo Electrónico:</label>
+                            <input type="email" class="form-control" id="correo" name="correo" value="{{ user.username }}">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Número de Teléfono:</label>
+                            <input type="text" class="form-control" id="numero" name="numero" value="{{ user.numero }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Turno:</label>
+                            <select class="form-control" id="turno" name="turno">
+                                <option value="Dia" {% if user.turno == 'Dia' %}selected{% endif %}>Día</option>
+                                <option value="Noche" {% if user.turno == 'Noche' %}selected{% endif %}>Noche</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Rol:</label>
+                            <input type="text" class="form-control" value="{{ user.rolname }}" disabled>
+                        </div>
+                        <div class="form-actions">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="form-actions1">
+                <button class="btn btn-primary" onclick="redirigirInicio()">Inicio</button>
+                <button type="button" class="btn btn-success" onclick="actualizarPerfil()">Guardar</button>
+                <button class="btn btn-danger" onclick="cerrarSesion()">Cerrar Sesión</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function redirigirInicio() {
+            window.location.href = "{% url 'index' %}";
+        }
+
+        function formatearRUT(input) {
+            let rut = input.value.replace(/[^\dkK]/g, '').toUpperCase();  // Elimina caracteres no válidos y convierte a mayúscula
+            let cuerpo = rut.slice(0, -1);  // Parte numérica
+            let dv = rut.slice(-1);  // Dígito verificador
+        
+            // Aplica el formato de puntos al cuerpo
+            cuerpo = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        
+            // Actualiza el valor con el formato completo
+            input.value = cuerpo + (dv ? '-' + dv : '');
+        }
+        
+        // Formatea el RUT al cargar la página
+        window.onload = function() {
+            var rutInput = document.getElementById("rut");
+            if (rutInput && rutInput.value) {
+                formatearRUT(rutInput);
+            }
+        }
+    
+        function actualizarPerfil() {
+            var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            var formData = new FormData(document.getElementById("perfil-form"));
+    
+            fetch('/perfil/actualizar/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    alert("Perfil actualizado correctamente.");
+                    location.reload();
+                } else {
+                    alert("Error al actualizar perfil: " + data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+{% include 'Footer.html' %}
+</html>

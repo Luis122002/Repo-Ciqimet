@@ -1,5 +1,6 @@
 import base64
 import json
+from django.shortcuts import render
 from django.shortcuts import HttpResponse
 from django.contrib import messages
 from django.conf import settings
@@ -15,7 +16,7 @@ from django.db.models import Q, Min, F, IntegerField
 from decimal import Decimal
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.core.mail import send_mail
 import threading
 import serial
@@ -25,8 +26,25 @@ from django.db.models.functions import Cast
 import random
 from collections import defaultdict
 import string
-from .decorators import is_administrador_or_quimico, is_administrador_or_supervisor, is_administrador_project, is_supervisor_project, is_quimico_project
+from django.shortcuts import render
+from .decorators import (
+    is_administrador,
+    is_supervisor,
+    is_quimico_a,
+    is_quimico_b,
+    is_quimico_c,
+    is_cliente,
+    is_administrador_or_supervisor,
+    is_all_quimicos,
+    is_full_acceso,
+    is_internal_user,
+)
 
+from django.views.decorators.csrf import csrf_exempt
+
+from django.contrib.auth.decorators import login_required
+from .models import User
+from .forms import CustomUserCreationForm
 
 
 @login_required(login_url='/login')
@@ -36,7 +54,6 @@ def requestAcces(request):
 
 def Sitio_Web(request):
     return render(request, "Inicio.html")
-
 
 
 def login_view(request):
@@ -113,7 +130,7 @@ def ODT_Module(request):
         Q(Prioridad__icontains=search_query) |
         Q(TipoMuestra__icontains=search_query) | 
         Q(Referencia__icontains=search_query) |
-        Q(Cliente__nombre__icontains=search_query) |
+        Q(Cliente__nombre_empresa__icontains=search_query) |
         Q(Proyecto__nombre__icontains=search_query) |
         Q(Responsable__icontains=search_query)
     )
@@ -140,6 +157,7 @@ def ODT_Module(request):
 
 
 @login_required(login_url='/login')
+@is_internal_user
 def HT_Module(request):
     search_query = request.GET.get('search', '')
     estado_filter = request.GET.get('estado', '') 
@@ -189,7 +207,7 @@ def HT_Module(request):
 
     return render(request, 'Hoja_Trabajo.html', context)
 
-
+@is_internal_user
 def Request_HT(request):
     if request.method == 'GET':
         id_hdt = request.GET.get('id')
@@ -238,8 +256,7 @@ def Request_HT(request):
 
 
 
-@login_required(login_url='/login')
-@is_administrador_or_quimico
+@is_internal_user  # administrador, supervisor, quimico_A, quimico_B, quimico_C
 def Balanza_Module(request):
     if request.method == 'POST':
         id_hdt = request.POST.get('id')
@@ -274,7 +291,7 @@ def Balanza_Module(request):
     return render(request, 'Balanza.html')
     
 @login_required(login_url='/login')
-@is_administrador_or_quimico
+@is_internal_user
 def Save_M(request):
     if request.method == 'POST':
         try:
@@ -310,7 +327,7 @@ def Save_M(request):
 
 
 @login_required(login_url='/login')
-@is_administrador_or_quimico
+@is_internal_user
 def Confirm_M(request):
     if request.method == 'POST':
         try:
@@ -359,7 +376,7 @@ def Confirm_M(request):
 
 
 @login_required(login_url='/login')
-@is_administrador_or_quimico
+@is_internal_user
 def PI_Module(request):
     if request.method == 'POST':
         id_hdt = request.POST.get('id') 
@@ -447,7 +464,7 @@ def PI_Module(request):
                             "ID_HDT": x,
                             "Tipo": muestra.hoja_trabajo.Tipo if muestra.hoja_trabajo else None,
                             "Duplicado": muestra.hoja_trabajo.Duplicado if muestra.hoja_trabajo else None,
-                            "Cliente": muestra.hoja_trabajo.odt.Cliente.nombre if muestra.hoja_trabajo.odt.Cliente else "Sin Cliente"
+                            "Cliente": muestra.hoja_trabajo.odt.Cliente.nombre_empresa if muestra.hoja_trabajo.odt.Cliente else "Sin Cliente"
                         },
                         "Elementos": {e: None for e in elementos_unicos},  # Inicializar diccionario de elementos vacíos
                     }
@@ -486,7 +503,7 @@ def PI_Module(request):
     return render(request, 'Puesto-Absorcion.html')
 
 @login_required(login_url='/login')
-@is_administrador_or_quimico
+@is_internal_user
 def obtener_hojas_trabajo(request):
     if request.method == 'GET':
         hojas = models.HojaTrabajoQuimico.objects.filter(confirmar_balanza=True).values_list('ID_HDT', flat=True).distinct()
@@ -494,7 +511,7 @@ def obtener_hojas_trabajo(request):
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 @login_required(login_url='/login')
-@is_administrador_or_quimico
+@is_internal_user
 def Lot_Generator(request):
     if request.method == 'POST':
         try:
@@ -584,7 +601,7 @@ def Lot_Generator(request):
 
 
 @login_required(login_url='/login')
-@is_administrador_or_quimico
+@is_internal_user
 def get_lotes(request):
     if request.method == 'GET':
         lotes = models.LotesAbsorción.objects.values('ID_LT').distinct()
@@ -594,7 +611,7 @@ def get_lotes(request):
 
 
 @login_required(login_url='/login')
-@is_administrador_or_quimico
+@is_internal_user
 def delete_lote(request):
     if request.method == 'POST':
         try:
@@ -629,7 +646,7 @@ def delete_lote(request):
 
 
 @login_required(login_url='/login')
-@is_administrador_or_quimico
+@is_internal_user
 def guardar_valores_absorción(request):
     if request.method == 'POST':
         try:
@@ -683,6 +700,7 @@ def guardar_valores_absorción(request):
 
 
 @login_required(login_url='/login')
+@is_internal_user
 def PT_Module(request):
     fecha_actual = timezone.now()
 
@@ -703,7 +721,7 @@ def PT_Module(request):
 
 
 @login_required(login_url='/login')
-@is_administrador_or_supervisor
+@is_internal_user
 def ODT_Info(request):
     if request.method == 'POST':
         odt_id = request.POST.get('odt_id')
@@ -724,7 +742,7 @@ def ODT_Info(request):
         return HttpResponse(status=405)
     
 @login_required(login_url='/login')
-@is_administrador_or_supervisor
+@is_internal_user
 def Elements_Section(request):
     elementos = models.Elementos.objects.all()
 
@@ -739,7 +757,7 @@ def Elements_Section(request):
     return render(request, "Elements.html", context)
 
 @login_required(login_url='/login')
-@is_administrador_or_supervisor
+@is_internal_user
 def Analysis_Section(request):
     analisis = models.MetodoAnalisis.objects.all()
     query = request.GET.get('search', '') 
@@ -754,7 +772,7 @@ def Analysis_Section(request):
 
 
 @login_required(login_url='/login')
-@is_administrador_or_supervisor
+@is_internal_user
 def general_form(request, token):
     try:
         decoded_data = base64.urlsafe_b64decode(token.encode()).decode()
@@ -772,7 +790,7 @@ def general_form(request, token):
         if stade != "acces":
             return HttpResponseForbidden("Acceso no autorizado.")
         # Validar contexto y acción
-        if context not in ['element', 'analytic', 'ODT', 'Read', 'curv', 'HDT']:
+        if context not in ['element', 'analytic', 'ODT', 'Read', 'curv', 'HDT', 'User']:
             return HttpResponseForbidden("Contexto no válido.")
         if action not in ['add', 'mod', 'del']:
             return HttpResponseForbidden("Acción no válida.")
@@ -991,6 +1009,33 @@ def general_form(request, token):
                     return redirect(reverse('Main_ODT'))
 
 
+        if context == 'User':
+            if action == 'add':
+                form = forms.ElementosForm()
+                if request.method == 'POST':
+                    form = forms.ElementosForm(request.POST)
+                    if form.is_valid():
+                        form.save()
+                        return redirect(reverse('user_list'))
+            elif action == 'mod':
+                # Lógica para modificar un elemento
+                model = models.User.objects.get(id=target_ID)
+                form = forms.ElementosForm(instance = model)
+                if request.method == 'POST':
+                    form = forms.ElementosForm(request.POST, instance=model)
+                    if form.is_valid():
+                        form = form.save()
+                        return redirect(reverse('user_list'))
+            elif action == 'del':
+                model = models.User.objects.get(id=target_ID)
+                if request.method == "GET":
+                    model.delete()
+                    messages.add_message(request=request, level=messages.SUCCESS, message='Usuario eliminado con exito')
+                    return redirect(reverse('user_list'))
+
+
+
+
         
         elif context == 'Read':
             # Lógica para 'Read'
@@ -1009,7 +1054,7 @@ def general_form(request, token):
 
 
 @login_required(login_url='/login')
-@is_administrador_or_supervisor
+@is_internal_user
 def Master_def(request):
     if request.method != 'POST':
         return HttpResponseForbidden("Método no permitido.")
@@ -1029,7 +1074,7 @@ def Master_def(request):
         'action': action,
         'stade': stade
     }
-    
+    print((data))
     # Codificar el objeto de datos en base64
     token = base64.urlsafe_b64encode(json.dumps(data).encode()).decode()
 
@@ -1091,6 +1136,8 @@ def recursos(request):
     return render(request, 'recursos.html')
 
 
+
+
 def noticias(request):
     noticias = models.Noticia.objects.all()
     return render(request, 'noticias.html', {'noticias': noticias})
@@ -1098,10 +1145,11 @@ def noticias(request):
 
 
 def is_admin(user):
-    return user.is_authenticated and user.rolname == 'Administrador'
+    return user.is_authenticated and user.rolname == 'administrador'
 
-
-@user_passes_test(is_admin)
+#--------------------------------------------Seccion de funciones de noticias
+#Funcion de modificar noticias creadas
+@is_administrador
 def modificar_noticia(request, noticia_id):
     noticia = models.Noticia.objects.get(id=noticia_id)
     if request.method == 'POST':
@@ -1117,10 +1165,11 @@ def modificar_noticia(request, noticia_id):
 
     return render(request, 'modificar_noticia.html', {'form': form, 'noticia': noticia})
 
+#Funcion de agregar noticias
 @login_required(login_url='/login')
-@is_administrador_project
+@is_administrador
 def agregar_noticia(request):
-    if not request.user.is_authenticated or request.user.rolname != 'Administrador':
+    if not request.user.is_authenticated or request.user.rolname != 'administrador':
         return HttpResponseForbidden("No tienes permiso para acceder a esta página.")
 
     if request.method == 'POST':
@@ -1133,8 +1182,9 @@ def agregar_noticia(request):
 
     return render(request, 'agregar_noticia.html', {'form': form})
 
+#Funcion de eliminar noticias
 @login_required(login_url='/login')
-@is_administrador_project
+@is_administrador
 def eliminar_noticia(request, noticia_id):
     noticia = models.Noticia.objects.get(id=noticia_id)
     if request.method == 'POST':
@@ -1144,7 +1194,7 @@ def eliminar_noticia(request, noticia_id):
     return render(request, 'eliminar_noticia.html', {'noticia': noticia})
 
 
-
+#Funcion para recibir correos de contacto
 def contacto(request):
     enviado = False
     if request.method == 'POST':
@@ -1168,53 +1218,308 @@ def contacto(request):
     return render(request, 'contacto.html', {'form': form, 'enviado': enviado})
 
 
-@login_required(login_url='/login')
-@is_administrador_or_quimico
-def listen_to_balance(port):
-    event_list = []
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------
+# Vista para listar los usuarios con filtros
+@login_required
+@is_administrador_or_supervisor
+def UserListView(request):
+    users = User.objects.all()
+    
+    # Aplicar filtros si existen en la solicitud GET
+    role_filter = request.GET.get('role')
+    shift_filter = request.GET.get('shift')
+    search_query = request.GET.get('search')
+
+    if role_filter:
+        users = users.filter(rolname=role_filter)
+    if shift_filter:
+        users = users.filter(turno=shift_filter)
+    if search_query:
+        users = users.filter(first_name__icontains=search_query)  # Busca por nombre
+
+    user_roles = User.Role.choices  # Obtener roles para el filtro
+
+    context = {
+        'users': users,
+        'user_roles': [role[1] for role in user_roles],  # Extraer solo los nombres de los roles
+    }
+    
+    return render(request, 'Gestion_usuario.html', context)
+
+# Vista para agregar un usuario
+@login_required
+@is_administrador_or_supervisor
+def add_user(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Usuario agregado correctamente.")
+            return redirect('Gestion_usuario')
+    else:
+        form = CustomUserCreationForm()
+
+    return render(request, 'user_form.html', {'form': form, 'title': 'Agregar Usuario'})
+
+# Vista para modificar un usuario existente
+@login_required
+@is_administrador_or_supervisor
+def modify_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Usuario modificado correctamente.")
+            return redirect('Gestion_usuario')
+    else:
+        form = CustomUserCreationForm(instance=user)
+
+    return render(request, 'user_form.html', {'form': form, 'title': 'Modificar Usuario'})
+
+# Vista para eliminar un usuario
+@login_required
+@is_administrador_or_supervisor
+def delete_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    
+    if request.method == 'POST':
+        user.delete()
+        messages.success(request, "Usuario eliminado correctamente.")
+        return redirect('Gestion_usuario')
+
+    return render(request, 'user_confirm_delete.html', {'user': user})
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from .models import User
+
+@login_required
+def perfil(request):
+    """
+    Carga la información del usuario autenticado en la plantilla Perfil.html.
+    """
+    return render(request, "Perfil.html", {"user": request.user})
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_protect
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@csrf_protect  # Mantiene protección CSRF
+@is_full_acceso
+def actualizar_perfil(request):
+    """
+    Permite actualizar la información del perfil del usuario autenticado.
+    """
+    if request.method == "POST":
+        try:
+            if request.content_type == "application/json":
+                data = json.loads(request.body)
+            else:
+                data = request.POST
+
+            user = request.user
+            user.first_name = data.get("nombre", user.first_name)
+            user.last_name = data.get("apellido", user.last_name)
+            user.username = data.get("correo", user.username)  # Si el correo se usa como username
+            user.numero = data.get("numero", user.numero)
+            user.turno = data.get("turno", user.turno)
+            user.rut = data.get("rut", user.rut)
+
+            user.save()
+            return JsonResponse({"status": "success", "message": "Perfil actualizado correctamente."})
+
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+
+    return JsonResponse({"status": "error", "message": "Método no permitido"}, status=405)
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import Cliente, Proyecto
+from .forms import ClienteForm, ProyectoForm
+
+@login_required
+@is_administrador_or_supervisor
+def agregar_cliente(request):
+    if request.method == 'POST':
+        form = ClienteForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Cliente agregado exitosamente.")
+            return redirect('user_list')
+    else:
+        form = ClienteForm()
+    return render(request, 'cliente_form.html', {'form': form, 'title': 'Agregar Cliente'})
+
+@login_required
+@is_administrador_or_supervisor
+def agregar_proyecto(request):
+    if request.method == 'POST':
+        form = ProyectoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Proyecto agregado exitosamente.")
+            return redirect('user_list')
+    else:
+        form = ProyectoForm()
+    return render(request, 'proyecto_form.html', {'form': form, 'title': 'Agregar Proyecto'})
+#----------------------------------------------------------------------------------------------------------------
+# views.py
+
+from django.http import JsonResponse
+from .models import Muestra
+import serial
+import time
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+import json
+from django.http import JsonResponse
+import serial
+
+@is_internal_user
+def leer_peso_balanza(request):
     try:
-        # Configura la conexión serial con el puerto especificado
-        ser = serial.Serial(port=port, baudrate=9600, timeout=1)
-        for _ in range(10):  # Leer solo un número limitado de eventos para la prueba
-            line = ser.readline().decode('utf-8').strip()
-            if line:
-                event_list.append(line)
+        # Abre el puerto de la balanza
+        balanza = serial.Serial('COM3', 9600, timeout=1)
+
+        # Envía el comando para pedir el dato (puede variar por modelo: 'P\r\n', 'SI\r\n', etc.)
+        balanza.write(b'SI\r\n')  # Prueba también con b'P\r\n' si 'SI' no funciona
+
+        tiempo_espera = time.time() + 3  # Esperar hasta 3 segundos
+        while time.time() < tiempo_espera:
+            if balanza.in_waiting > 0:
+                datos = balanza.readline().decode('utf-8', errors='ignore').strip()
+                print("Dato recibido:", datos)
+
+                try:
+                    numero = float(''.join(filter(lambda c: c.isdigit() or c == '.', datos)))
+                    balanza.close()
+                    return JsonResponse({'peso': numero})
+                except:
+                    continue  # Intenta leer otra línea si no es un número válido
+            time.sleep(0.1)
+
+        balanza.close()
+        return JsonResponse({'peso': None, 'mensaje': '⏱ Tiempo de espera agotado'})
+
     except Exception as e:
-        event_list.append(f"Error: {str(e)}")
-    return event_list
+        return JsonResponse({'peso': None, 'error': str(e)})
 
-@login_required(login_url='/login')
-@is_administrador_or_quimico
-def tester_balanza(request):
-    return render(request, 'tester_balanza.html')
 
-@login_required(login_url='/login')
-@is_administrador_or_quimico
-def get_events(request):
-    port = request.GET.get('port')
-    if not port:
-        return JsonResponse({'status': 'error', 'message': 'No se proporcionó un puerto.'})
 
-    # Verificar si el puerto es válido
-    available_ports = [p.device for p in serial.tools.list_ports.comports()]
-    if port not in available_ports:
-        return JsonResponse({'status': 'error', 'message': f'El puerto {port} no es válido. Puertos disponibles: {", ".join(available_ports)}'})
 
-    # Intentar leer datos del puerto
+@csrf_exempt
+
+def guardar_peso(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        muestra_id = data.get('id')
+        peso = data.get('peso')
+        print(f"Guardando peso... Muestra ID: {muestra_id}, Peso: {peso}")  # 💬
+        muestra = get_object_or_404(Muestra, id=muestra_id)
+        muestra.peso_m = peso
+        muestra.save()
+        return JsonResponse({'ok': True, 'peso': muestra.peso_m})
+
+
+
+
+
+def verificar_balanza(request):
     try:
-        ser = serial.Serial(port=port, baudrate=9600, timeout=1)
-        events = []
-        for _ in range(5):  # Leer hasta 5 líneas como prueba
-            line = ser.readline().decode('utf-8').strip()
-            if line:
-                events.append(line)
-        ser.close()
-        return JsonResponse({'status': 'success', 'events': events})
+        balanza = serial.Serial('COM3', 9600, timeout=1)
+        if balanza.is_open:
+            balanza.close()
+            return JsonResponse({'conectado': True, 'mensaje': '✅ Balanza conectada'})
+        else:
+            return JsonResponse({'conectado': False, 'mensaje': '❌ Balanza no es reconocida'})
     except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)})
+            return JsonResponse({'conectado': False, 'mensaje': '❌ Balanza no conectada'})
 
-@login_required(login_url='/login')
-@is_administrador_or_quimico 
-def list_usb_ports(request):
-    ports = [p.device for p in list_ports.comports()]
-    return JsonResponse({'status': 'success', 'ports': ports})
+
+def vista_muestras(request):
+    if request.method == 'POST':
+        id_hdt = request.POST.get('id')
+
+        muestras = Muestra.objects.filter(muestraMasificada__odt__hoja_trabajo_id=id_hdt)
+
+        return render(request, 'Balanza.html', {
+            'muestras': muestras,
+            'id_hdt': id_hdt,
+            'stade': False,  # o tu lógica real para estado de la hoja
+        })
+
+
+def HojaTrabajoNueva(request):
+    return render(request, 'HT_nueva.html')
+
+
+from django.shortcuts import render
+
+def Main(request):
+    return render(request, 'index.html')
+
+
+
+
+from .models import (
+    AnalisisCuTFeZn,
+    AnalisisCuS4FeS4MoS4,
+    AnalisisMulti,
+    AnalisisCuS10FeS10MoS10,
+    AnalisisCuSCuSFe,
+    AnalisisCuTestConsH
+)
+
+
+def vista_analisis(request):
+    contexto = {
+        "analisis_cutfezn": AnalisisCuTFeZn.objects.all(),
+        "analisis_cus4fes4mos4": AnalisisCuS4FeS4MoS4.objects.all(),
+        "analisis_multi": AnalisisMulti.objects.all(),
+        "analisis_cus10fes10mos10": AnalisisCuS10FeS10MoS10.objects.all(),
+        "analisis_cuscusfe": AnalisisCuSCuSFe.objects.all(),
+        "analisis_cutest": AnalisisCuTestConsH.objects.all(),
+    }
+    return render(request, "HT_nueva.html", contexto)
+
+@login_required
+def Ajustar_Muestras(request):
+    return render(request, 'Ajustar-Muestras.html')
+
+
+
+
+from django.http import HttpResponse
+from django.contrib.auth import get_user_model
+
+def crear_admin(request):
+    User = get_user_model()
+
+    if User.objects.filter(username='admin@example.com').exists():
+        return HttpResponse("🟡 El usuario ya existe.")
+
+    User.objects.create_user(
+        firstname='Juan',
+        lastname='Pérez',
+        username='admin@example.com',
+        password='adminsegura123',
+        rut='12.345.678-9',
+        rolname='administrador',
+        turno='Dia',
+        numero='+56912345678',
+        is_staff=True,
+        is_superuser=True
+    )
+    return HttpResponse("✅ Usuario administrador creado correctamente.")

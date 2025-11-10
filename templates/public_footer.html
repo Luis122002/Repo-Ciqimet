@@ -4,15 +4,15 @@
     <div class="container">
         <div class="row">
             <!-- Logo y Derechos -->
-            <div class="col-md-3 text-center text-md-start mb-4">
-                <img src="{% static 'rest_framework/img/Logocapture-removebg-preview.png' %}" alt="Logo de Ciquimet" class="img-fluid mb-2" style="max-width: 250px;">
+            <div class="col-12 col-md-3 text-center text-md-start mb-4">
+                <img src="{% static 'rest_framework/img/Logocapture-removebg-preview.png' %}" alt="Logo de Ciquimet" class="img-fluid logo-footer mb-2">
                 <p class="small">&copy; 2024 CIQUIMET Chile LTDA.<br> Todos los Derechos Reservados.</p>
             </div>
 
             <!-- Menú Rápido -->
-            <div class="col-md-3 mb-4">
+            <div class="col-12 col-md-3 mb-4 text-center text-md-start">
                 <h6 class="text-uppercase text-light">Menú</h6>
-                <hr class="bg-light" style="opacity: 0.2;">
+                <hr class="bg-light mx-auto mx-md-0" style="opacity: 0.2; width: 60%;">
                 <ul class="list-unstyled mt-3">
                     <li><a href="#" class="footer-link">Inicio</a></li>
                     <li><a href="#" class="footer-link">Servicios</a></li>
@@ -24,25 +24,25 @@
             </div>
 
             <!-- Contacto -->
-            <div class="col-md-3 mb-4">
+            <div class="col-12 col-md-3 mb-4 text-center text-md-start">
                 <h6 class="text-uppercase text-light">Contacto</h6>
-                <hr class="bg-light" style="opacity: 0.2;">
+                <hr class="bg-light mx-auto mx-md-0" style="opacity: 0.2; width: 60%;">
                 <ul class="list-unstyled mt-3">
-                    <li class="mb-2 d-flex align-items-center">
+                    <li class="mb-2 d-flex justify-content-center justify-content-md-start align-items-center flex-wrap">
                         <i class="bi bi-envelope-fill me-2"></i>
                         <a href="mailto:fcarmona@ciquimet.cl" class="footer-link">fcarmona@ciquimet.cl</a>
                         <button class="btn btn-link text-light p-0 ms-2" onclick="copyToClipboard('fcarmona@ciquimet.cl')" title="Copiar correo">
                             <i class="bi bi-clipboard"></i>
                         </button>
                     </li>
-                    <li class="mb-2 d-flex align-items-center">
+                    <li class="mb-2 d-flex justify-content-center justify-content-md-start align-items-center flex-wrap">
                         <i class="bi bi-telephone-fill me-2"></i>
                         <a href="tel:+56990107071" class="footer-link">+569 90107071</a>
                         <button class="btn btn-link text-light p-0 ms-2" onclick="copyToClipboard('+56990107071')" title="Copiar teléfono">
                             <i class="bi bi-clipboard"></i>
                         </button>
                     </li>
-                    <li class="d-flex align-items-center">
+                    <li class="d-flex justify-content-center justify-content-md-start align-items-center text-center text-md-start flex-wrap">
                         <i class="bi bi-geo-alt-fill me-2"></i>
                         <a href="https://www.google.com/maps/search/?api=1&query=Juan+Nicolas+Saldivar+N+15+mz+E,+Calama" target="_blank" class="footer-link">Juan Nicolas Saldivar N° 15 mz E, Calama</a>
                     </li>
@@ -50,9 +50,9 @@
             </div>
 
             <!-- Redes Sociales -->
-            <div class="col-md-3 text-center text-md-start mb-4">
+            <div class="col-12 col-md-3 text-center text-md-start mb-4">
                 <h6 class="text-uppercase text-light">Síguenos</h6>
-                <hr class="bg-light" style="opacity: 0.2;">
+                <hr class="bg-light mx-auto mx-md-0" style="opacity: 0.2; width: 60%;">
                 <div class="d-flex justify-content-center justify-content-md-start mt-3">
                     <a href="https://m.facebook.com/profile.php?id=100087536900830" target="_blank" class="social-icon me-2">
                         <i class="bi bi-facebook"></i>
@@ -91,7 +91,7 @@
         transition: color 0.3s;
     }
     .footer-link:hover {
-        color: #ffb347; /* Efecto hover amarillo */
+        color: #ffb347;
     }
     .social-icon {
         width: 40px;
@@ -103,17 +103,21 @@
         justify-content: center;
         border-radius: 50%;
         transition: background-color 0.3s, color 0.3s;
+        font-size: 1.2rem;
     }
     .social-icon:hover {
         background-color: #ffb347;
         color: #ffffff;
     }
     .footer-link:hover .bi-clipboard {
-        color: #ffb347; /* Hover para icono de copiar */
+        color: #ffb347;
+    }
+    .logo-footer {
+        max-width: 250px;
     }
     @media (max-width: 768px) {
         .logo-footer {
-            max-width: 150px; /* Tamaño reducido en pantallas más pequeñas */
+            max-width: 180px;
         }
     }
 </style>

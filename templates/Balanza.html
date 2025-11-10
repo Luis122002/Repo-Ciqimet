@@ -7,10 +7,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ODT Display</title>
+    <style>
+        body {
+            background-color: #c5c5c5;
+        
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        /* Estilo general unificado */
+        .odt-wrapper {
+            max-width: 95%;
+            margin: 10px auto;
+            padding: 15px 20px;
+            background-color: white;
+            border-radius: 10px;
+            border: 3px solid #fcc058;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #fcc058;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .odt-wrapper h5 {
+            text-align: center;
+            font-weight: bold;
+            color: #214c67;
+        }
+
+        .odt-wrapper .btn {
+            background-color: #214c67;
+            border: none;
+            color: white;
+            font-weight: bold;
+            padding: 8px 12px;
+            margin: 4px 0;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        .odt-wrapper .btn:hover {
+            background-color: #163347;
+        }
+
+        .odt-wrapper .btn-primary {
+            background-color: #fcc058;
+            color: black;
+        }
+
+        .odt-wrapper .btn-primary:hover {
+            background-color: #e0a046;
+        }
+
+        /* Responsive en filas */
+        .odt-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .odt-column {
+            flex: 1 1 30%;
+            min-width: 250px;
+        }
+
+        .table-container {
+            max-width: 95%;
+            margin: 0 auto;
+        }
+    </style>
 </head>
 <body>
     <h1 class="custom-title">Balanza</h1>
-
+    <div>
     <div class="container">
         <div class="row">
             <div class="col add-odt">
@@ -49,12 +124,11 @@
                         <div class="input-group">
                             <button class="btn btn-primary" onclick="Get_Muestra()">Abrir hoja de trabajo</button>
                         </div>
-                        <br/>
-                        <label for="usar-maquina-balanza">máquina de balanza</label>
-
-                        <input class="form-check-input" type="checkbox" id="usar-maquina-balanza" name="usar_maquina_balanza">
-                            <label class="form-check-label" for="usar-maquina-balanza">
-                        <br/>
+                        <form method="POST" action="/muestras/">
+                            {% csrf_token %}
+                            <input type="hidden" name="id" value="{{ id_hdt }}">
+                        </form>
+                          
                     </div>
                 </div>
             </div>
@@ -74,35 +148,41 @@
            
         </div>
     </div>
+    <p id="estado-balanza" style="text-align: center;">Verificando conexión con balanza...</p>
 
     <div class="table-container table-responsive">
         <table class="table table-bordered">
             <thead style="background-color: #002d72; color: rgb(255, 255, 255);">
                 <tr>
-                    <th scope="col"> Secuencia</th>
+                    <th scope="col">Secuencia</th>
                     <th scope="col">Id muestra</th>
                     <th scope="col">Proyecto</th>
                     <th scope="col">Tipo</th>
                     <th scope="col">Peso de muestra (Gr)</th>
                     <th scope="col">Volumen de Aforo (M)</th>
+                    <th scope="col">Accion</th>
                 </tr>
             </thead>
             <tbody>
                 {% for muestra in muestras_balanza %}
-                <tr>
+                <tr data-id="{{ muestra.id }}" >
                     <td>{{ forloop.counter }}</td>
                     <td>{{ muestra.muestraMasificada.Prefijo }}</td>
                     <td>{{ muestra.proyecto }}</td>
                     <td>{{ muestra.t }}</td>
-                    <td>
+                    <td class="peso">
                         {% if stade %}
                             <input type="text" value="{{ muestra.peso_m }}" readonly>
                         {% else %}
                         <input type="text" name="peso_m_{{ muestra.id }}" value="{{ muestra.peso_m }}" oninput="validateDecimal(this)" onkeydown="moverFoco(event)" value = 0>
                         {% endif %}
                     </td>
-                
+
+                    
                     <td>{{ muestra.v_ml }}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="leerPeso(this)">Leer peso</button>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -417,6 +497,67 @@
             });
         }
 
+
+
+        // Verifica la conexión de la balanza al cargar la página
+        function verificarConexionBalanza() {
+            fetch('/api/verificar-balanza/')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('estado-balanza').textContent = data.mensaje;
+            })
+            .catch(err => {
+                document.getElementById('estado-balanza').textContent = "❌ Error al verificar balanza";
+            });
+        }
+
+        // Lee el peso desde la balanza y guarda en la base de datos
+        function leerPeso(btn) {
+            const fila = btn.closest('tr');
+            const id = fila.dataset.id;
+
+            fetch('/api/peso-balanza/')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.peso !== null) {
+                        // Mostrar visualmente el peso en la tabla
+                        const celdaPeso = fila.querySelector('.peso');
+                        celdaPeso.textContent = data.peso;
+
+                        // Enviar el peso al backend para guardarlo
+                        fetch('/api/guardar-peso/', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({id: id, peso: data.peso})
+                        })
+                        .then(res => res.json())
+                        .then(resp => {
+                            if (resp.ok) {
+                                mostrarMensaje("✅ Peso guardado correctamente");
+                            } else {
+                                mostrarMensaje("❌ Error al guardar el peso: " + resp.error, true);
+                            }
+                        });
+                    } else {
+                        alert("❌ No se recibió ningún dato de la balanza. Presiona 'Print' en la balanza.");
+                    }
+                });
+            }
+
+        // Muestra un mensaje visual de éxito o error
+        function mostrarMensaje(texto, esError = false) {
+            const mensaje = document.getElementById('mensaje-peso');
+            mensaje.style.display = 'block';
+            mensaje.textContent = texto;
+            mensaje.className = esError ? 'alert alert-danger' : 'alert alert-success';
+
+            setTimeout(() => {
+            mensaje.style.display = 'none';
+            }, 3000);
+        }
+
+        // Ejecutar al cargar la página
+        verificarConexionBalanza();
     </script>
 </body>
 </html>

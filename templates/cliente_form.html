@@ -1,0 +1,123 @@
+{% load static %}
+<!DOCTYPE html>
+{% include 'header.html' %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        body {
+            background-color: #c5c5c5;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container-profile {
+            max-width: 85%;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+            margin: 45px auto;
+            color: black;
+            border: 3px solid #fcc058;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: #fcc058;
+        }
+
+        .form-control, .btn, select, input[type="text"], input[type="email"] {
+            border: 1px solid #214c67 !important;
+            border-radius: 5px !important;
+        }
+
+        .btn-success {
+            background-color: #fcc058 !important;
+            border-color: #fcc058 !important;
+            color: black !important;
+            font-weight: bold;
+        }
+
+        .btn-success:hover {
+            background-color: #e0a046 !important;
+            border-color: #e0a046 !important;
+        }
+
+        .btn-secondary {
+            background-color: #214c67 !important;
+            border-color: #214c67 !important;
+            color: white !important;
+        }
+
+        .btn-secondary:hover {
+            background-color: #18344d !important;
+            border-color: #18344d !important;
+        }
+
+        .form-label {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-start;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-profile">
+        <h1 style="font-size: 3rem;">{{ title }}</h1>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="row">
+                <!-- Nombre empresa -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Nombre de la empresa</label>
+                    {{ form.nombre_empresa }}
+                </div>
+
+                <!-- RUT -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">RUT</label>
+                    {{ form.rut }}
+                </div>
+
+                <!-- Dirección -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Dirección</label>
+                    {{ form.direccion }}
+                </div>
+
+                <!-- Teléfono -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Teléfono</label>
+                    {{ form.telefono }}
+                </div>
+
+                <!-- Email (alineado a la izquierda) -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Email</label>
+                    {{ form.email }}
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">Guardar</button>
+                <a href="{% url 'user_list' %}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</body>
+{% include 'Footer.html' %}
+</html>

@@ -5,38 +5,55 @@ from .models import User, Proyecto, Cliente, Muestra, AnalisisCuTFeZn, AnalisisC
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 import random
+from phonenumber_field.formfields import PhoneNumberField
 
 class CustomUserCreationForm(UserCreationForm):
-   
+    password1 = forms.CharField(
+        label="Contraseña",
+        widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
+        help_text="La contraseña debe cumplir con los requisitos de seguridad.",
+    )
+    password2 = forms.CharField(
+        label="Confirmar contraseña",
+        widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
+        help_text="Ingrese la misma contraseña para confirmar.",
+    )
+    numero = PhoneNumberField(label="Número de Teléfono")
+
     class Meta:
-        model = User 
-        fields = ('first_name', 'last_name', 'rut', 'username', 'rolname','turno')
-     
+        model = User
+        fields = ('first_name', 'last_name', 'rut', 'username', 'rolname', 'turno', 'numero')
+
+
+    def save(self, commit=True):
+        # Obtiene el usuario pero no lo guarda todavía
+        user = super().save(commit=False)
+
+        # Asigna la contraseña encriptada
+        user.set_password(self.cleaned_data["password1"])
+
+        # Si el rol es "administrador", asigna permisos de administrador
+        if user.rolname == User.Role.ADMINISTRADOR:
+            user.is_staff = True
+            user.is_superuser = True
+
+        # Guarda el usuario si commit es True
+        if commit:
+            user.save()
+        return user
+
+
     def clean_username(self):
         username = self.cleaned_data.get('username')
         if User.objects.filter(username=username).exclude(pk=self.instance.pk).exists():
-            raise forms.ValidationError(('Este correo electrónico ya está en uso.'))
+            raise forms.ValidationError("Este correo electrónico ya está en uso.")
         return username
-
-    def clean_password1(self):
-        password1 = self.cleaned_data.get("password1")
-        if password1:
-            try:
-                validate_password(password1, self.instance)
-            except forms.ValidationError as error:
-                raise forms.ValidationError(error)
-            common_validator = CommonPasswordValidator()
-            try:
-                common_validator.validate(password1)
-            except forms.ValidationError:
-                raise forms.ValidationError(("La contraseña es demasiado común."))
-        return password1
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
         password2 = self.cleaned_data.get("password2")
         if password1 and password2 and password1 != password2:
-            raise forms.ValidationError(("Las contraseñas no coinciden."))
+            raise forms.ValidationError("Las contraseñas no coinciden.")
         return password2
 
 class ContactoForm(forms.Form):
@@ -68,16 +85,32 @@ class NoticiaForm(forms.ModelForm):
         model = Noticia
         fields = ['titulo', 'descripcion', 'contenido_completo', 'imagen']
         
-    
-class ProyectoForm(forms.ModelForm):
-    class Meta:
-        model = Proyecto
-        fields = ['nombre', 'cliente', 'fecha_emision']
+from django import forms
+from .models import Cliente, Proyecto
 
 class ClienteForm(forms.ModelForm):
     class Meta:
         model = Cliente
-        fields = ['nombre', 'rut', 'direccion', 'telefono', 'email']
+        fields = ['nombre_empresa', 'rut', 'direccion', 'telefono', 'email']
+        widgets = {
+            'nombre_empresa': forms.TextInput(attrs={'class': 'form-control'}),
+            'rut': forms.TextInput(attrs={'class': 'form-control'}),
+            'direccion': forms.TextInput(attrs={'class': 'form-control'}),
+            'telefono': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+        }
+
+class ProyectoForm(forms.ModelForm):
+    class Meta:
+        model = Proyecto
+        fields = ['nombre', 'cliente', 'fecha_emision']
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
+            'cliente': forms.Select(attrs={'class': 'form-control'}),  # Lista desplegable de clientes
+            'fecha_emision': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        }
+
+
 
 class MuestraForm(forms.ModelForm):
     class Meta:

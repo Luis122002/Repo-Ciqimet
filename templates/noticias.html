@@ -7,19 +7,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Noticias - Ciquimet</title>
-    <!-- Bootstrap CSS -->
+
+    <!-- Bootstrap CSS + Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <style>
-        /* Fondo general de la página */
         body {
             background-color: #f2f2f2;
         }
 
-        /* Estilos del carrusel */
+        /* Carrusel */
         #services-carousel .carousel-item {
             max-height: 300px;
             overflow: hidden;
@@ -29,7 +27,6 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            text-align: center;
             background-color: rgba(33, 76, 103, 0.8);
             padding: 20px;
             border-radius: 8px;
@@ -38,94 +35,116 @@
         #services-carousel .carousel-caption h2 {
             font-size: 3rem;
             font-weight: bold;
-            color: #ffffff;
+            color: #fff;
             margin: 0;
         }
 
-        /* Estilo para las tarjetas de noticias */
-        .news-card {
-            display: flex;
-            background-color: #ffffff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        /* Botón agregar centrado */
+        .btn-agregar {
+            background: linear-gradient(135deg, #28a745, #218838);
+            border: none;
             border-radius: 10px;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+        }
+
+        .btn-agregar:hover {
+            background: linear-gradient(135deg, #218838, #1e7e34);
+        }
+
+        .agregar-wrapper {
+            text-align: center;
             margin-bottom: 2rem;
+        }
+
+        /* Tarjeta moderna con sombra oscura y borde superior */
+        .noticia-card-modern {
+            background-color: #fff;
+            border-radius: 12px;
             overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            height: 300px; /* Ajuste de tamaño estándar */
+            position: relative;
+            transition: transform 0.3s ease;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
         }
 
-        .news-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        .noticia-card-modern::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 6px;
+            width: 100%;
+            background: linear-gradient(to right, #4b6cb7, #182848);
         }
 
-        .news-card img {
-            width: 40%;
-            height: 100%;
+        .noticia-card-modern:hover {
+            transform: translateY(-4px);
+        }
+
+        .noticia-card-modern img {
+            width: 100%;
+            height: 220px;
             object-fit: cover;
-            border-radius: 8px 0 0 8px;
         }
 
-        .news-card-body {
+        .noticia-card-modern .card-body {
             padding: 1.5rem;
-            width: 60%;
         }
 
-        .news-card-body h5 {
-            font-size: 1.2rem;
+        .noticia-card-modern .card-title {
+            font-size: 1.3rem;
             font-weight: bold;
             color: #214c67;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .news-card-body p {
-            font-size: 1rem;
+        .noticia-card-modern .card-text {
             color: #555;
-            line-height: 1.4;
+            font-size: 0.95rem;
+            margin: 0.8rem 0 1.2rem 0;
+
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
             overflow: hidden;
             text-overflow: ellipsis;
+
+            line-height: 1.4rem;
+            min-height: calc(1.4rem * 2);
         }
 
-        .news-card-body a {
-            color: #007bff;
-            font-weight: bold;
-            text-decoration: none;
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
 
-        .news-card-body a:hover {
-            color: #0056b3;
-            text-decoration: underline;
-        }
+        .modal-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 6px;
+}
 
-        /* Estilos para la sección */
-        .section-title {
-            font-size: 2.5rem;
-            color: #007bff;
-            position: relative;
-            text-align: center;
-        }
+/* Este asegura que el texto largo no se desborde */
+.modal-text-content {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+}
 
-        .section-title::after {
-            content: '';
-            width: 50px;
-            height: 3px;
-            background-color: #ff6347;
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .section-subtitle {
-            font-size: 1.2rem;
-            color: #666;
-            text-align: center;
-        }
     </style>
 </head>
 
 <body>
 
-    <!-- Carrusel de ejemplo -->
+    <!-- Carrusel -->
     <div id="services-carousel" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-inner">
             <div class="carousel-item active">
@@ -137,53 +156,57 @@
         </div>
     </div>
 
-    <!-- Título de la página -->
-
-
-    <section class="container mt-4">
-        {% if user.is_authenticated and user.rolname == 'Administrador' %}
-        <a href="{% url 'agregar_noticia' %}" class="btn btn-success mb-4">Agregar Noticia</a>
-        {% endif %}
+    <!-- Botón Agregar Noticia centrado -->
+    {% if user.is_authenticated and user.rolname == 'administrador' %}
+    <section class="container mt-4 agregar-wrapper">
+        <a href="{% url 'agregar_noticia' %}" class="btn btn-agregar">
+            <i class="bi bi-megaphone-fill me-2"></i>Agregar Noticia
+        </a>
     </section>
+    {% endif %}
 
+    <!-- Formulario de carga -->
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
     </form>
 
     <!-- Noticias -->
-    <section class="container mt-4">
+    <section class="container">
         <div class="row">
-            <!-- Tarjetas de noticia -->
             {% for noticia in noticias %}
             <div class="col-md-4 mb-4">
-                <div class="card">
-                    <img src="{{ noticia.imagen.url }}" class="card-img-top" alt="{{ noticia.titulo }}" style="width: 100%; height: 300px; object-fit: cover;">
+                <div class="card noticia-card-modern">
+                    <img src="{{ noticia.imagen.url }}" alt="{{ noticia.titulo }}">
                     <div class="card-body">
-                        <h5 class="card-title">{{ noticia.titulo }}</h5>
+                        <h5 class="card-title">
+                            <i class="bi bi-newspaper"></i> {{ noticia.titulo }}
+                        </h5>
                         <p class="card-text">{{ noticia.descripcion|truncatechars:100 }}</p>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-{{ noticia.id }}">
-                            Ver más
-                        </button>
-                        {% if user.is_authenticated and user.rolname == 'Administrador' %}
-                            <div class="admin-buttons">
-                                <a href="{% url 'modificar_noticia' noticia.id %}" class="btn btn-warning btn-sm">Modificar</a>
-                                <a href="{% url 'eliminar_noticia' noticia.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Está seguro de eliminar esta noticia?')">Eliminar</a>
-                            </div>
-                        {% endif %}
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modal-{{ noticia.id }}">Ver más</button>
+                            {% if user.is_authenticated and user.rolname == 'administrador' %}
+                            <a href="{% url 'modificar_noticia' noticia.id %}" class="btn btn-warning btn-sm">Modificar</a>
+                            <a href="{% url 'eliminar_noticia' noticia.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Está seguro de eliminar esta noticia?')">Eliminar</a>
+                            {% endif %}
+                        </div>
+                        <p class="text-muted mt-3 mb-0" style="font-size: 0.85rem;">
+                            <i class="bi bi-calendar-event me-1"></i> Publicado el {{ noticia.fecha_creacion|date:"d/m/Y H:i" }}
+                        </p>
                     </div>
                 </div>
             </div>
-            <!-- Tarjetas de noticia -->
+
+            <!-- Modal -->
             <div class="modal fade" id="modal-{{ noticia.id }}" tabindex="-1" aria-labelledby="modalLabel-{{ noticia.id }}" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="modalLabel-{{ noticia.id }}">{{ noticia.titulo }}</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                         </div>
                         <div class="modal-body">
-                            <img src="{{ noticia.imagen.url }}" class="img-fluid mb-3" alt="{{ noticia.titulo }}" style="width: 100%; height: 300px; object-fit: cover;">
+                            <img src="{{ noticia.imagen.url }}" class="img-fluid mb-3 modal-img" alt="{{ noticia.titulo }}">
                             <p>{{ noticia.contenido_completo }}</p>
                         </div>
                     </div>
@@ -193,10 +216,7 @@
         </div>
     </section>
 
-    <!-- Pie de página -->
     {% include 'public_footer.html' %}
-
-    <!-- Bootstrap JS y dependencias -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 

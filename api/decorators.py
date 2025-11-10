@@ -3,84 +3,72 @@ from django.http import JsonResponse
 from django.contrib import messages
 from django.shortcuts import redirect
 
-def is_administrador(view_func):
-    @wraps(view_func)
-    def wrapped_view(request, *args, **kwargs):
-        print(request.user)
-        
-    
-        return JsonResponse({'error': 'No tienes permisos de administrador'}, status=403)
-    return wrapped_view
+# Constantes de roles
+ADMIN = 'administrador'
+SUPERVISOR = 'supervisor'
+CLIENTE = 'cliente'
+QUIMICO_A = 'quimico_A'
+QUIMICO_B = 'quimico_B'
+QUIMICO_C = 'quimico_C'
 
-def is_supervisor(view_func):
-    @wraps(view_func)
-    def wrapped_view(request, *args, **kwargs):
-        if request.user.is_authenticated and request.user.is_supervisor:
-            return view_func(request, *args, **kwargs)
-        else:
-            return JsonResponse({'error': 'No tienes permisos de supervisor'}, status=403)
-    return wrapped_view
+QUIMICOS = [QUIMICO_A, QUIMICO_B, QUIMICO_C]
+ADMIN_Y_SUPERVISOR = [ADMIN, SUPERVISOR]
+ADMIN_Y_QUIMICOS = [ADMIN] + QUIMICOS
+TODOS_LOS_QUIMICOS = QUIMICOS
+TODOS = [ADMIN, SUPERVISOR] + QUIMICOS
 
-def is_quimico(view_func):
-    @wraps(view_func)
-    def wrapped_view(request, *args, **kwargs):
-        if request.user.is_authenticated and request.user.is_quimico:
-            return view_func(request, *args, **kwargs)
-        else:
-            return JsonResponse({'error': 'No tienes permisos de quimico'}, status=403)
-    return wrapped_view
-
-def is_cliente(view_func):
-    @wraps(view_func)
-    def wrapped_view(request, *args, **kwargs):
-        if request.user.is_authenticated and request.user.is_cliente:
-            return view_func(request, *args, **kwargs)
-        else:
-            return JsonResponse({'error': 'No tienes permisos de cliente'}, status=403)
-    return wrapped_view
-
-
-
-
-
-
-
-
+# Decorador general para un solo rol
 def role_required(required_role):
     def decorator(view_func):
         @wraps(view_func)
         def wrapped_view(request, *args, **kwargs):
             if request.user.is_authenticated and request.user.rolname == required_role:
                 return view_func(request, *args, **kwargs)
-            else:
-                messages.error(request, f'No tienes permisos de {required_role}')
-                return redirect('/')
+            messages.error(request, f'No tienes permisos de {required_role}')
+            return redirect('/')
         return wrapped_view
     return decorator
 
+# Decorador para múltiples roles
 def roles_required(required_roles):
     def decorator(view_func):
         @wraps(view_func)
         def wrapped_view(request, *args, **kwargs):
             if request.user.is_authenticated and request.user.rolname in required_roles:
                 return view_func(request, *args, **kwargs)
-            else:
-                messages.error(request, 'No tienes los permisos necesarios para acceder a esta página.')
-                return redirect('/index/') 
+            messages.error(request, 'No tienes los permisos necesarios para acceder a esta página.')
+            return redirect('/index/')
         return wrapped_view
     return decorator
 
-def is_administrador_project(view_func):
-    return role_required('Administrador')(view_func)
+# Decoradores individuales
+def is_administrador(view_func):
+    return role_required(ADMIN)(view_func)
 
-def is_quimico_project(view_func):
-    return role_required('Quimico')(view_func)
+def is_supervisor(view_func):
+    return role_required(SUPERVISOR)(view_func)
 
-def is_supervisor_project(view_func):
-    return role_required('Supervisor')(view_func)
+def is_cliente(view_func):
+    return role_required(CLIENTE)(view_func)
 
-def is_administrador_or_quimico(view_func):
-    return roles_required(['Administrador', 'Quimico'])(view_func)
+def is_quimico_a(view_func):
+    return role_required(QUIMICO_A)(view_func)
 
+def is_quimico_b(view_func):
+    return role_required(QUIMICO_B)(view_func)
+
+def is_quimico_c(view_func):
+    return role_required(QUIMICO_C)(view_func)
+
+# Decoradores combinados
 def is_administrador_or_supervisor(view_func):
-    return roles_required(['Administrador', 'Supervisor'])(view_func)
+    return roles_required(ADMIN_Y_SUPERVISOR)(view_func)
+
+def is_all_quimicos(view_func):
+    return roles_required(QUIMICOS)(view_func)
+
+def is_full_acceso(view_func):
+    return roles_required(TODOS)(view_func)
+
+def is_internal_user(view_func):
+    return roles_required([ADMIN, SUPERVISOR] + QUIMICOS)(view_func)

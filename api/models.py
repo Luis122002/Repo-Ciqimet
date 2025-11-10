@@ -6,48 +6,55 @@ from django.core.validators import MinValueValidator
 from django.utils import timezone
 from datetime import timedelta
 
+from phonenumber_field.modelfields import PhoneNumberField
+
 # Modelo para almacenar los usuarios
 class User(AbstractUser):
     class Role(models.TextChoices):
-            SUPERVISOR = 'Supervisor', _('Supervisor')
-            ADMINISTRADOR = 'Administrador', _('Administrador')
-            QUIMICO = 'Quimico', _('Químico')
-    
+        CLIENTE = 'cliente', 'Cliente'
+        ADMINISTRADOR = 'administrador', 'Administrador'
+        SUPERVISOR = 'supervisor', 'Supervisor'
+        QUIMICO_A = 'quimico_A', 'Químico A'
+        QUIMICO_B = 'quimico_B', 'Químico B'
+        QUIMICO_C = 'quimicoC', 'Químico C'
+
     class Turno(models.TextChoices):
-        DIA = 'Dia', _('Dia')
-        NOCHE = 'Noche', _('Noche')
-            
-    username = models.EmailField(_('Correo'), unique=True, null=False, blank=False)
+        DIA = 'Dia', ('Dia')
+        NOCHE = 'Noche', ('Noche')
+
+    username = models.EmailField(('Correo'), unique=True, null=False, blank=False)
     rut = models.CharField(max_length=200, unique=True, null=False, blank=False)
-    token = models.CharField(max_length=200, null=True, blank=True)  # Único campo opcional
+    token = models.CharField(max_length=200, null=True, blank=True)
     rolname = models.CharField(max_length=200, choices=Role.choices)
     turno = models.CharField(max_length=200, choices=Turno.choices)
-    date_joined = models.DateTimeField(_('Fecha de ingreso'), auto_now_add=True)
-    
-    def _str_(self):
-        name = self.first_name + ' ' + self.last_name
-        return name
+    datejoined = models.DateTimeField(('Fecha de ingreso'), auto_now_add=True)
+    firstname = models.CharField(('Nombre'), max_length=150, null=False, blank=False)
+    lastname = models.CharField(('Apellido'), max_length=150, null=False, blank=False)
+    numero = PhoneNumberField(unique=True)
+
+    # La contraseña heredada de AbstractUser sigue siendo funcional
+    def str(self):
+        return f"{self.first_name} {self.last_name}"
     
 # Modelo para almacenar los clientes y proyectos
-class Proyecto(models.Model):
-    nombre = models.CharField(max_length=100, null=False, blank=False)
-    cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE, null=False, blank=False)
-    fecha_emision = models.DateField(null=False, blank=False)
-    
-    ### >
-    def __str__(self):
-        return self.nombre
-    ### <
-
 class Cliente(models.Model):
-    nombre = models.CharField(max_length=100, null=False, blank=False)
-    rut = models.CharField(max_length=100, null=False, blank=False)
+    nombre_empresa= models.CharField(max_length=100, unique=True, null=False, blank=False)
+    rut = models.CharField(max_length=100, unique=True, null=False, blank=False)
     direccion = models.CharField(max_length=100, null=False, blank=False)
     telefono = models.CharField(max_length=100, null=False, blank=False)
-    email = models.EmailField(null=False, blank=False)
-    
+    email = models.EmailField(unique=True, null=False, blank=False)
+
     def __str__(self):
-        return self.nombre
+        return self.nombre_empresa
+
+class Proyecto(models.Model):
+    nombre = models.CharField(max_length=100, unique=True, null=False, blank=False)
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name="proyectos")
+    fecha_emision = models.DateField(null=False, blank=False)
+
+    def __str__(self):
+        return f"{self.nombre} (Cliente: {self.cliente.nombre_empresa})"
+
 
 
 # Modelos específicos para los diferentes tipos de análisis
@@ -341,3 +348,6 @@ class Noticia(models.Model):
     def str(self):
         return self.titulo
 ### <
+
+
+

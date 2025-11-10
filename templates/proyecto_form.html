@@ -1,0 +1,119 @@
+{% load static %}
+<!DOCTYPE html>
+{% include 'header.html' %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        body {
+            background-color: #c5c5c5;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .odt-wrapper {
+            max-width: 1800px;
+            margin: 20px auto;
+            padding: 40px;
+            background-color: white;
+            border-radius: 10px;
+            border: 3px solid #fcc058;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .custom-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: #fcc058;
+        }
+
+        .form-inline-group {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-inline-group p {
+            flex: 1;
+            margin: 0;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 16px;
+            margin-right: 10px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-success {
+            background-color: #214c67;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #163347;
+        }
+
+        .btn-secondary {
+            background-color: #fcc058;
+            color: black;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e0a046;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="odt-wrapper">
+        <h1 class="custom-title">{{ title }}</h1>
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- Campos en una línea horizontal -->
+            <div class="form-inline-group">
+                <p>{{ form.nombre.label_tag }} {{ form.nombre }}</p>
+                <p>{{ form.cliente.label_tag }} {{ form.cliente }}</p>
+                <p>{{ form.fecha.label_tag }} {{ form.fecha }}</p>
+            </div>
+
+            <!-- Resto del formulario -->
+            {% for field in form %}
+                {% if field.name not in "nombre cliente fecha" %}
+                    <p>{{ field.label_tag }} {{ field }}</p>
+                {% endif %}
+            {% endfor %}
+
+            <!-- Botones debajo -->
+            <div style="margin-top: 20px;">
+                <button type="submit" class="btn btn-success">Guardar</button>
+                <a href="{% url 'user_list' %}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</body>
+{% include 'Footer.html' %}
+</html>
