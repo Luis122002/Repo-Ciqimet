@@ -227,6 +227,9 @@ class Estandar(models.Model):
     cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE, related_name="Clientes")
     parametros = models.ManyToManyField('Parametros', related_name="Parametro")
 
+    def __str__(self):
+        return f"{self.Nombre}"
+
 class HojaTrabajo(models.Model):
     odt = models.ForeignKey('ODT', on_delete=models.CASCADE, related_name='hojas_trabajo')
     Estandar = models.ManyToManyField('Estandar', related_name="Estandar")

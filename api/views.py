@@ -118,7 +118,6 @@ def ODT_Module(request):
 
     odts = models.ODT.objects.all()
 
-    # Si el prefijo "WSS" está en la búsqueda, eliminarlo para buscar por el ID
     if search_query.startswith("WSS"):
         search_query = search_query[3:]
 
